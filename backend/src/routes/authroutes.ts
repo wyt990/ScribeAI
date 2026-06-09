@@ -16,7 +16,7 @@ router.post("/signup", async (req, res) => {
 
     // Validate
     if (!name || !email || !password) {
-      return res.status(400).json({ error: "All fields are required" });
+      return res.status(400).json({ error: "所有字段均为必填" });
     }
 
     // Check if existing user
@@ -25,11 +25,15 @@ router.post("/signup", async (req, res) => {
     });
 
     if (existing) {
-      return res.status(400).json({ error: "Email already registered" });
+      return res.status(400).json({ error: "该邮箱已被注册" });
     }
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
+
+    // 检查是否为第一个用户，第一个用户自动设为管理员
+    const userCount = await prisma.user.count();
+    const role = userCount === 0 ? "manager" : "user";
 
     // Create user
     const user = await prisma.user.create({
@@ -37,6 +41,7 @@ router.post("/signup", async (req, res) => {
         name,
         email,
         password: hashedPassword,
+        role,
       },
     });
 
@@ -64,7 +69,7 @@ router.post("/login", async (req, res) => {
 
     // Validate
     if (!email || !password) {
-      return res.status(400).json({ error: "Email and password required" });
+      return res.status(400).json({ error: "邮箱和密码均为必填" });
     }
 
     // Find user
@@ -73,14 +78,14 @@ router.post("/login", async (req, res) => {
     });
 
     if (!user) {
-      return res.status(400).json({ error: "Invalid credentials" });
+      return res.status(400).json({ error: "邮箱或密码错误" });
     }
 
     // Compare password
     const isValidPassword = await bcrypt.compare(password, user.password);
 
     if (!isValidPassword) {
-      return res.status(400).json({ error: "Invalid credentials" });
+      return res.status(400).json({ error: "邮箱或密码错误" });
     }
 
     // Create JWT
@@ -109,20 +114,59 @@ interface JWTPayload {
 
 
 router.get("/me",verifyUser, async (req: AuthenticatedRequest, res) => {
-  
+
   const userId = req.user!.id;
 
   try {
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, name: true, email: true },
+      select: { id: true, name: true, email: true, role: true },
     });
 
-    if (!user) return res.status(401).json({ error: "User not found" });
+    if (!user) return res.status(401).json({ error: "用户不存在" });
 
     return res.json({ user });
   } catch (err) {
     console.error(err);
     return res.status(401).json({ error: "Invalid or expired token" });
+  }
+});
+
+/* ============================================================
+   UPDATE PROFILE ROUTE
+============================================================ */
+router.put("/profile", verifyUser, async (req: AuthenticatedRequest, res) => {
+  try {
+    const userId = req.user!.id;
+    const { name, email } = req.body;
+
+    // 至少需要提供一个字段
+    if (!name && !email) {
+      return res.status(400).json({ error: "请提供要更新的字段" });
+    }
+
+    // 如果更新邮箱，检查是否已被其他用户使用
+    if (email) {
+      const existing = await prisma.user.findUnique({ where: { email } });
+      if (existing && existing.id !== userId) {
+        return res.status(400).json({ error: "该邮箱已被其他账户使用" });
+      }
+    }
+
+    // 构建更新数据
+    const updateData: Record<string, string> = {};
+    if (name) updateData.name = name;
+    if (email) updateData.email = email;
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: updateData,
+      select: { id: true, name: true, email: true, role: true },
+    });
+
+    return res.json({ user: updatedUser });
+  } catch (err) {
+    console.error("Update profile error:", err);
+    return res.status(500).json({ error: "更新资料失败" });
   }
 });

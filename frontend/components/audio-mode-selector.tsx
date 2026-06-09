@@ -5,9 +5,12 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useRecordingStore, AudioMode } from '@/lib/store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { APP_CONFIG } from '@/lib/app-config';
 
 export function AudioModeSelector() {
   const { audioMode, setAudioMode, status } = useRecordingStore();
+
+  if (!APP_CONFIG.showAudioSource) return null;
   const isDisabled = status !== 'idle';
 
   const handleModeChange = (value: string) => {
@@ -17,9 +20,9 @@ export function AudioModeSelector() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Audio Source</CardTitle>
+        <CardTitle>音频源</CardTitle>
         <CardDescription>
-          Choose your recording input source
+          选择录音输入源
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -41,9 +44,9 @@ export function AudioModeSelector() {
             >
               <Mic className="w-6 h-6 mb-3" />
               <div className="text-center">
-                <div className="font-semibold">Microphone</div>
+                <div className="font-semibold">麦克风</div>
                 <div className="text-xs text-muted-foreground mt-1">
-                  Record from mic
+                  录制麦克风音频
                 </div>
               </div>
             </Label>
@@ -61,9 +64,9 @@ export function AudioModeSelector() {
             >
               <Monitor className="w-6 h-6 mb-3" />
               <div className="text-center">
-                <div className="font-semibold">Tab Audio</div>
+                <div className="font-semibold">标签页音频</div>
                 <div className="text-xs text-muted-foreground mt-1">
-                  Record tab audio
+                  录制标签页音频
                 </div>
               </div>
             </Label>

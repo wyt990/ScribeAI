@@ -121,5 +121,31 @@ router.post("/:id/summary", verifyUser, async (req: AuthenticatedRequest, res) =
   }
 });
 
+// Delete transcript (and linked summary if any)
+router.delete("/:id", verifyUser, async (req: AuthenticatedRequest, res) => {
+  const userId = req.user!.id;
+  const { id } = req.params;
+
+  try {
+    const transcript = await prisma.transcript.findUnique({
+      where: { id },
+      select: { id: true, userId: true },
+    });
+
+    if (!transcript || transcript.userId !== userId) {
+      return res.status(404).json({ error: "Transcript not found" });
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.summary.deleteMany({ where: { transcriptId: id } });
+      await tx.transcript.delete({ where: { id } });
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to delete transcript" });
+  }
+});
 
 export default router;

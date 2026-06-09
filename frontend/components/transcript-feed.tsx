@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useRecordingStore } from "@/lib/store";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -21,9 +21,12 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { promoteDraft } from "@/lib/draft-api";
 
 export function TranscriptFeed() {
-  const { transcript, status, setTranscript } = useRecordingStore();
+  const router = useRouter();
+  const { transcript, status, draftId, draftTitle, clearTranscript, clearDraft } =
+    useRecordingStore();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const [saving, setSaving] = useState(false);
@@ -36,52 +39,31 @@ export function TranscriptFeed() {
     }
   }, [transcript]);
 
-  // 🟩 When clicking "Save Transcript", open title dialog
+  const hasContent =
+    (Array.isArray(transcript) ? transcript.join(" ") : transcript || "").trim().length > 0;
+
+  const canPromote =
+    !!draftId && hasContent && (status === "idle" || status === "paused" || status === "completed");
+
   const openSaveDialog = () => {
-    setTitle("");
+    setTitle(draftTitle?.startsWith("草稿") ? "" : draftTitle || "");
     setOpenTitleDialog(true);
   };
 
-  // 🟦 Save transcript API call
-  const handleSave = async () => {
-    if (!transcript || transcript.length === 0) return;
-    if (!title.trim()) return alert("Please enter a title");
+  const handlePromote = async () => {
+    if (!draftId || !hasContent) return;
+    if (!title.trim()) return alert("请输入会话标题");
 
     setSaving(true);
-
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("Not logged in");
-        setSaving(false);
-        return;
-      }
-
-      const res = await fetch("http://localhost:4000/api/transcript/save", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          title,
-          fullText: Array.isArray(transcript)
-            ? transcript.join(" ")
-            : transcript,
-        }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Failed to save transcript");
-      }
-
-      alert("Transcript saved successfully!");
-      setTranscript("");
-      setOpenTitleDialog(false); // close dialog
+      await promoteDraft(draftId, title.trim());
+      setOpenTitleDialog(false);
+      clearTranscript();
+      clearDraft();
+      router.replace("/sessions");
     } catch (err) {
       console.error(err);
-      alert("Error saving transcript");
+      alert(err instanceof Error ? err.message : "保存失败");
     } finally {
       setSaving(false);
     }
@@ -89,36 +71,35 @@ export function TranscriptFeed() {
 
   return (
     <div className="flex flex-col h-full space-y-4">
-      {/* Transcript Panel */}
       <Card className="flex flex-col h-full">
         <CardHeader>
-          <div className="flex items-center justify-between w-full">
-            <div>
-              <CardTitle>Live Transcript</CardTitle>
-              <CardDescription>
-                Real-time transcription of your recording
-              </CardDescription>
+          <div className="flex items-center justify-between w-full gap-2">
+            <div className="min-w-0">
+              <CardTitle>实时转录</CardTitle>
+              {draftId && draftTitle && (
+                <p className="text-xs text-muted-foreground mt-1 truncate">{draftTitle}</p>
+              )}
             </div>
 
             {status === "recording" && (
-              <Badge className="bg-success text-success-foreground flex items-center gap-2">
+              <Badge className="bg-success text-success-foreground flex items-center gap-2 shrink-0">
                 <span className="w-2 h-2 rounded-full bg-success-foreground animate-pulse" />
-                Recording
+                录音中
               </Badge>
             )}
-            {status === "paused" && <Badge>Paused</Badge>}
-            {status === "processing" && <Badge>Processing</Badge>}
+            {status === "paused" && <Badge className="shrink-0">已暂停</Badge>}
+            {status === "processing" && <Badge className="shrink-0">处理中</Badge>}
           </div>
         </CardHeader>
 
         <CardContent className="flex-1 min-h-0">
           <ScrollArea className="h-full pr-4" ref={scrollRef}>
-            {transcript.length === 0 ? (
+            {!hasContent ? (
               <div className="flex items-center justify-center h-full text-muted-foreground">
                 <p className="text-center">
                   {status === "idle"
-                    ? "Start recording to see live transcription"
-                    : "Waiting for transcription..."}
+                    ? "开始录音以查看实时转录"
+                    : "等待转录中..."}
                 </p>
               </div>
             ) : (
@@ -134,36 +115,30 @@ export function TranscriptFeed() {
         </CardContent>
       </Card>
 
-      {/* Save Button */}
       <div className="flex justify-end">
-        <Button
-          onClick={openSaveDialog}
-          disabled={status !== "idle" || transcript.length === 0}
-        >
-          Save Transcript
+        <Button onClick={openSaveDialog} disabled={!canPromote}>
+          保存为正式会话
         </Button>
       </div>
 
-      {/* Title Input Dialog */}
       <Dialog open={openTitleDialog} onOpenChange={setOpenTitleDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Enter Session Title</DialogTitle>
+            <DialogTitle>保存为正式会话</DialogTitle>
           </DialogHeader>
 
           <Input
-            placeholder="Eg: Team Meeting, Lecture on ML, Standup Discussion..."
+            placeholder="例如：团队会议、机器学习讲座、讨论..."
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpenTitleDialog(false)}>
-              Cancel
+              取消
             </Button>
-
-            <Button onClick={handleSave} disabled={saving}>
-              {saving ? "Saving..." : "Save"}
+            <Button onClick={handlePromote} disabled={saving}>
+              {saving ? "保存中..." : "保存"}
             </Button>
           </DialogFooter>
         </DialogContent>

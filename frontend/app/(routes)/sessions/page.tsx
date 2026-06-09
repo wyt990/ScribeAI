@@ -21,25 +21,27 @@ interface Session {
 
 export default function SessionsPage() {
   const [sessions, setSessions] = useState<Session[]>([]);
+  const [loading, setLoading] = useState(true);
   const [currentSession, setCurrentSession] = useState<Session | null>(null);
   const [openTranscript, setOpenTranscript] = useState(false);
   const [openSummary, setOpenSummary] = useState(false);
   const [summary, setSummary] = useState<string | null>(null);
   const [loadingSummary, setLoadingSummary] = useState(false);
 
-  const token = localStorage.getItem("token"); // JWT
-
   // Fetch all sessions
   useEffect(() => {
+    const token = localStorage.getItem("token");
     const fetchSessions = async () => {
       try {
-        const res = await fetch("http://localhost:4000/api/sessions", {
+        const res = await fetch("/api/sessions", {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
         setSessions(data);
       } catch (err) {
         console.error(err);
+      } finally {
+        setLoading(false);
       }
     };
     fetchSessions();
@@ -47,8 +49,9 @@ export default function SessionsPage() {
 
   // Open transcript dialog
   const openSession = async (id: string) => {
+    const token = localStorage.getItem("token");
     try {
-      const res = await fetch(`http://localhost:4000/api/sessions/${id}`, {
+      const res = await fetch(`/api/sessions/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -60,13 +63,38 @@ export default function SessionsPage() {
     }
   };
 
+  const handleDelete = async (id: string, title: string) => {
+    if (!confirm(`确定删除会话「${title}」？此操作不可恢复。`)) return;
+
+    const token = localStorage.getItem("token");
+    try {
+      const res = await fetch(`/api/sessions/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("删除失败");
+
+      setSessions((prev) => prev.filter((s) => s.id !== id));
+      if (currentSession?.id === id) {
+        setCurrentSession(null);
+        setOpenTranscript(false);
+        setOpenSummary(false);
+        setSummary(null);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("删除会话失败");
+    }
+  };
+
   // Fetch/generate summary
   const fetchSummary = async () => {
+    const token = localStorage.getItem("token");
     if (!currentSession) return;
     setLoadingSummary(true);
     try {
       const res = await fetch(
-        `http://localhost:4000/api/sessions/${currentSession.id}/summary`,
+        `/api/sessions/${currentSession.id}/summary`,
         {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },
@@ -84,21 +112,36 @@ export default function SessionsPage() {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {sessions.map((session) => (
-          <Card key={session.id} className="hover:shadow-lg transition-shadow">
-            <CardHeader>
-              <CardTitle>{session.title}</CardTitle>
-              <CardDescription>{new Date(session.createdAt).toLocaleString()}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button className="w-full" onClick={() => openSession(session.id)}>
-                View Transcript
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      {sessions.length === 0 && !loading ? (
+        <div className="flex items-center justify-center h-64 text-muted-foreground">
+          <p className="text-lg">暂无会话记录</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {sessions.map((session) => (
+            <Card key={session.id} className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <CardTitle>{session.title}</CardTitle>
+                <CardDescription>{new Date(session.createdAt).toLocaleString()}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex gap-2">
+                  <Button className="flex-1" onClick={() => openSession(session.id)}>
+                    查看转录
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="shrink-0 text-destructive hover:text-destructive"
+                    onClick={() => handleDelete(session.id, session.title)}
+                  >
+                    删除
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
       {/* Transcript Dialog */}
       {currentSession && (
@@ -117,12 +160,19 @@ export default function SessionsPage() {
               value={currentSession.fullText}
             />
 
-            <div className="mt-4 flex gap-2">
+            <div className="mt-4 flex flex-wrap gap-2">
               <Button onClick={fetchSummary} disabled={loadingSummary}>
-                {loadingSummary ? "Generating..." : "Summary"}
+                {loadingSummary ? "生成中..." : "摘要"}
+              </Button>
+              <Button
+                variant="outline"
+                className="text-destructive hover:text-destructive"
+                onClick={() => handleDelete(currentSession.id, currentSession.title)}
+              >
+                删除
               </Button>
               <Button variant="outline" onClick={() => setOpenTranscript(false)}>
-                Close
+                关闭
               </Button>
             </div>
           </DialogContent>
@@ -133,7 +183,7 @@ export default function SessionsPage() {
       <Dialog open={openSummary} onOpenChange={setOpenSummary}>
         <DialogContent className="p-6 w-[80vw] max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Summary</DialogTitle>
+            <DialogTitle>摘要</DialogTitle>
           </DialogHeader>
 
           <textarea

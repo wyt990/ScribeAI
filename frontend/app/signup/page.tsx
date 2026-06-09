@@ -33,19 +33,19 @@ export default function SignupPage() {
     setError("");
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      setError("两次密码输入不一致");
       return;
     }
 
     if (password.length < 8) {
-      setError("Password must be at least 8 characters");
+      setError("密码长度至少为8个字符");
       return;
     }
 
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:4000/api/auth/signup", {
+      const response = await fetch("/api/auth/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -56,7 +56,7 @@ export default function SignupPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.error || "Signup failed");
+        setError(data.error || "注册失败");
         return;
       }
 
@@ -67,7 +67,7 @@ export default function SignupPage() {
       // Redirect to dashboard
       router.push("/dashboard");
     } catch (err) {
-      setError("Signup failed. Please try again.");
+      setError("注册失败，请重试。");
     } finally {
       setLoading(false);
     }
@@ -87,8 +87,8 @@ export default function SignupPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">Create an account</CardTitle>
-            <CardDescription>Get started with ScribeAI today</CardDescription>
+            <CardTitle className="text-2xl">创建账户</CardTitle>
+            <CardDescription>立即开始使用 ScribeAI</CardDescription>
           </CardHeader>
 
           <CardContent>
@@ -100,11 +100,11 @@ export default function SignupPage() {
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
+                <Label htmlFor="name">姓名</Label>
                 <Input
                   id="name"
                   type="text"
-                  placeholder="John Doe"
+                  placeholder="请输入姓名"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
@@ -112,7 +112,7 @@ export default function SignupPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">邮箱</Label>
                 <Input
                   id="email"
                   type="email"
@@ -124,11 +124,11 @@ export default function SignupPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">密码</Label>
                 <Input
                   id="password"
                   type="password"
-                  placeholder="At least 8 characters"
+                  placeholder="至少8个字符"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -136,11 +136,11 @@ export default function SignupPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <Label htmlFor="confirmPassword">确认密码</Label>
                 <Input
                   id="confirmPassword"
                   type="password"
-                  placeholder="Re-enter your password"
+                  placeholder="请再次输入密码"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
@@ -148,16 +148,16 @@ export default function SignupPage() {
               </div>
 
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "Creating account..." : "Create account"}
+                {loading ? "创建中..." : "创建账户"}
               </Button>
             </form>
           </CardContent>
 
           <CardFooter className="flex justify-center">
             <p className="text-sm text-muted-foreground">
-              Already have an account?{" "}
+              已有账户？{" "}
               <Link href="/login" className="text-primary hover:underline">
-                Sign in
+                登录
               </Link>
             </p>
           </CardFooter>
