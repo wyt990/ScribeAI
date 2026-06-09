@@ -10,10 +10,12 @@ import { promoteDraftAndGenerateSummary } from '@/lib/promote-and-summarize';
 
 type GenerateMeetingSummaryButtonProps = {
   className?: string;
+  templateId?: string;
 };
 
 export function GenerateMeetingSummaryButton({
   className,
+  templateId,
 }: GenerateMeetingSummaryButtonProps) {
   const router = useRouter();
   const { flushDraft } = useDraftSync();
@@ -29,6 +31,7 @@ export function GenerateMeetingSummaryButton({
       await promoteDraftAndGenerateSummary({
         draftId,
         flushDraft,
+        templateId,
         router,
       });
       clearTranscript();

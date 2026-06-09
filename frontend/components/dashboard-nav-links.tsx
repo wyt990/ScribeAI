@@ -17,7 +17,9 @@ export function DashboardNavLinks({ onNavigate }: DashboardNavLinksProps) {
     <nav className="space-y-1">
       {DASHBOARD_NAV_ITEMS.map((item) => {
         const Icon = item.icon;
-        const isActive = pathname === item.href;
+        const isActive =
+          pathname === item.href ||
+          (item.href !== '/dashboard' && pathname?.startsWith(item.href));
 
         return (
           <Link

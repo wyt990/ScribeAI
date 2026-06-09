@@ -4,7 +4,8 @@ export type SummarySharePayload = {
   purpose: "summary_share";
   userId: string;
   sessionId: string;
-  summaryType: string;
+  templateId?: string;
+  summaryType?: string;
 };
 
 export function createSummaryShareToken(
@@ -23,7 +24,10 @@ export function verifySummaryShareToken(token: string): SummarySharePayload {
   if (decoded.purpose !== "summary_share") {
     throw new Error("Invalid share token purpose");
   }
-  if (!decoded.userId || !decoded.sessionId || !decoded.summaryType) {
+  if (!decoded.userId || !decoded.sessionId) {
+    throw new Error("Invalid share token payload");
+  }
+  if (!decoded.templateId && !decoded.summaryType) {
     throw new Error("Invalid share token payload");
   }
   return decoded;

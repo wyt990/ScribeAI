@@ -48,7 +48,7 @@
       "first_read": "2026-06-09T07:39:59.722Z"
     },
     "/apps/ScribeAI/frontend/app/(routes)/layout.tsx": {
-      "count": 2,
+      "count": 3,
       "tokens": 64,
       "first_read": "2026-06-09T07:40:06.595Z"
     },
@@ -58,8 +58,8 @@
       "first_read": "2026-06-09T07:40:12.877Z"
     },
     "/apps/ScribeAI/frontend/app/(routes)/sessions/page.tsx": {
-      "count": 6,
-      "tokens": 3176,
+      "count": 8,
+      "tokens": 3050,
       "first_read": "2026-06-09T07:44:00.052Z"
     },
     "/apps/ScribeAI/frontend/app/(routes)/profile/page.tsx": {
@@ -73,7 +73,7 @@
       "first_read": "2026-06-09T07:44:17.286Z"
     },
     "/apps/ScribeAI/frontend/components/navbar.tsx": {
-      "count": 4,
+      "count": 6,
       "tokens": 1658,
       "first_read": "2026-06-09T07:44:26.981Z"
     },
@@ -113,8 +113,8 @@
       "first_read": "2026-06-09T07:57:23.348Z"
     },
     "/apps/ScribeAI/frontend/components/dashboard-nav-links.tsx": {
-      "count": 2,
-      "tokens": 322,
+      "count": 4,
+      "tokens": 398,
       "first_read": "2026-06-09T07:57:23.377Z"
     },
     "/apps/ScribeAI/frontend/components/sidebar.tsx": {
@@ -143,7 +143,7 @@
       "first_read": "2026-06-09T08:04:52.880Z"
     },
     "/apps/ScribeAI/backend/prisma/schema.prisma": {
-      "count": 2,
+      "count": 4,
       "tokens": 534,
       "first_read": "2026-06-09T08:05:10.091Z"
     },
@@ -238,13 +238,13 @@
       "first_read": "2026-06-09T08:38:19.205Z"
     },
     "/apps/ScribeAI/backend/src/prompts/summary-brief.ts": {
-      "count": 3,
-      "tokens": 91,
+      "count": 4,
+      "tokens": 144,
       "first_read": "2026-06-09T09:46:20.741Z"
     },
     "/apps/ScribeAI/backend/skills/transcript-to-meeting-notes/SKILL.md": {
-      "count": 3,
-      "tokens": 292,
+      "count": 4,
+      "tokens": 301,
       "first_read": "2026-06-09T09:46:29.212Z"
     },
     "/apps/ScribeAI/backend/skills/transcript-to-meeting-notes/SOURCE.md": {
@@ -254,11 +254,11 @@
     },
     "/apps/ScribeAI/backend/src/prompts/summary-meeting-notes.ts": {
       "count": 6,
-      "tokens": 518,
+      "tokens": 531,
       "first_read": "2026-06-09T09:46:34.203Z"
     },
     "/apps/ScribeAI/backend/src/prompts/types.ts": {
-      "count": 1,
+      "count": 2,
       "tokens": 152,
       "first_read": "2026-06-09T09:46:34.251Z"
     },
@@ -268,13 +268,13 @@
       "first_read": "2026-06-09T10:02:20.658Z"
     },
     "/apps/ScribeAI/frontend/app/(routes)/sessions/[id]/summary/page.tsx": {
-      "count": 2,
-      "tokens": 2993,
+      "count": 5,
+      "tokens": 2808,
       "first_read": "2026-06-09T10:16:48.083Z"
     },
     "/apps/ScribeAI/backend/src/routes/sessions.ts": {
-      "count": 4,
-      "tokens": 3102,
+      "count": 6,
+      "tokens": 3156,
       "first_read": "2026-06-09T10:24:50.308Z"
     },
     "/apps/ScribeAI/backend/src/lib/summary-llm.ts": {
@@ -283,7 +283,7 @@
       "first_read": "2026-06-09T10:24:58.368Z"
     },
     "/apps/ScribeAI/backend/src/index.ts": {
-      "count": 1,
+      "count": 3,
       "tokens": 551,
       "first_read": "2026-06-09T10:24:58.416Z"
     },
@@ -293,39 +293,179 @@
       "first_read": "2026-06-09T10:25:16.576Z"
     },
     "/apps/ScribeAI/frontend/lib/session-summary.ts": {
-      "count": 1,
-      "tokens": 0,
+      "count": 3,
+      "tokens": 793,
       "first_read": "2026-06-09T10:25:33.340Z"
     },
     "/apps/ScribeAI/frontend/lib/promote-and-summarize.ts": {
-      "count": 1,
-      "tokens": 0,
+      "count": 3,
+      "tokens": 367,
       "first_read": "2026-06-09T10:25:33.576Z"
     },
     "/apps/ScribeAI/frontend/components/generate-meeting-summary-button.tsx": {
-      "count": 1,
-      "tokens": 0,
+      "count": 2,
+      "tokens": 416,
       "first_read": "2026-06-09T10:25:35.978Z"
     },
     "/apps/ScribeAI/frontend/components/dashboard-draft-actions.tsx": {
-      "count": 3,
-      "tokens": 252,
+      "count": 4,
+      "tokens": 199,
       "first_read": "2026-06-09T10:25:36.123Z"
     },
     "/apps/ScribeAI/frontend/lib/summary-types.ts": {
-      "count": 1,
+      "count": 2,
       "tokens": 128,
       "first_read": "2026-06-09T10:26:45.816Z"
     },
     "/apps/ScribeAI/backend/src/prompts/build-summary-prompt.ts": {
-      "count": 2,
-      "tokens": 269,
+      "count": 4,
+      "tokens": 285,
       "first_read": "2026-06-09T10:45:48.364Z"
     },
     "/apps/ScribeAI/backend/scripts/test-summary-prompt.ts": {
-      "count": 1,
+      "count": 2,
       "tokens": 525,
       "first_read": "2026-06-09T10:46:00.488Z"
+    },
+    "/root/.cursor/plugins/cache/cursor-public/superpowers/b7a8f76985f1e93e75dd2f2a3b424dc731bd9d37/skills/writing-plans/SKILL.md": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T14:38:55.297Z"
+    },
+    "/root/.cursor/plugins/cache/cursor-public/superpowers/b7a8f76985f1e93e75dd2f2a3b424dc731bd9d37/skills/using-git-worktrees/SKILL.md": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T14:38:55.348Z"
+    },
+    "/apps/ScribeAI/backend/src/lib/summary-share-token.ts": {
+      "count": 2,
+      "tokens": 264,
+      "first_read": "2026-06-09T14:39:25.676Z"
+    },
+    "/apps/ScribeAI/frontend/lib/dashboard-nav.ts": {
+      "count": 2,
+      "tokens": 127,
+      "first_read": "2026-06-09T14:39:25.749Z"
+    },
+    "/apps/ScribeAI/docs/superpowers/plans/2026-06-10-summary-templates.md": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T14:40:04.421Z"
+    },
+    "/apps/ScribeAI/backend/prisma/migrations/20260610120000_summary_templates/migration.sql": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T14:40:20.689Z"
+    },
+    "/apps/ScribeAI/backend/src/lib/summary-template-constants.ts": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T14:40:32.577Z"
+    },
+    "/apps/ScribeAI/backend/src/lib/summary-guardrails.ts": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T14:40:32.653Z"
+    },
+    "/apps/ScribeAI/backend/src/lib/summary-prompt-builder.ts": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T14:40:32.691Z"
+    },
+    "/apps/ScribeAI/backend/src/lib/summary-template-seed.ts": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T14:40:32.727Z"
+    },
+    "/apps/ScribeAI/backend/src/lib/summary-template-service.ts": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T14:40:49.335Z"
+    },
+    "/apps/ScribeAI/backend/src/middleware/adminMiddleware.ts": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T14:40:53.614Z"
+    },
+    "/apps/ScribeAI/backend/src/prompts/template-generate-draft.ts": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T14:40:54.778Z"
+    },
+    "/apps/ScribeAI/backend/src/routes/templates.ts": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T14:41:07.672Z"
+    },
+    "/apps/ScribeAI/frontend/lib/summary-export.ts": {
+      "count": 2,
+      "tokens": 405,
+      "first_read": "2026-06-09T14:41:42.538Z"
+    },
+    "/apps/ScribeAI/backend/src/middleware/summaryShareAuth.ts": {
+      "count": 2,
+      "tokens": 367,
+      "first_read": "2026-06-09T14:41:42.600Z"
+    },
+    "/apps/ScribeAI/frontend/lib/summary-templates.ts": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T14:41:53.355Z"
+    },
+    "/apps/ScribeAI/frontend/components/summary-template-select.tsx": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T14:41:58.731Z"
+    },
+    "/apps/ScribeAI/frontend/app/(routes)/settings/summary-templates/page.tsx": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T14:42:11.122Z"
+    },
+    "/apps/ScribeAI/frontend/app/(routes)/settings/summary-templates/new/page.tsx": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T14:42:16.619Z"
+    },
+    "/apps/ScribeAI/frontend/app/(routes)/settings/summary-templates/[id]/page.tsx": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T14:42:24.306Z"
+    },
+    "/apps/ScribeAI/backend/.env": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T15:02:20.480Z"
+    },
+    "/apps/ScribeAI/backend/src/lib/prisma.ts": {
+      "count": 1,
+      "tokens": 40,
+      "first_read": "2026-06-09T15:03:20.005Z"
+    },
+    "/apps/ScribeAI/backend/dist/lib/prisma.js": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T15:03:31.631Z"
+    },
+    "/apps/ScribeAI/backend/package.json": {
+      "count": 2,
+      "tokens": 367,
+      "first_read": "2026-06-09T15:03:47.855Z"
+    },
+    "/apps/ScribeAI/backend/dist/lib/summary-template-service.js": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T15:04:21.757Z"
+    },
+    "/apps/ScribeAI/backend/src/generated/prisma/client.js": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T15:04:21.774Z"
+    },
+    "/apps/ScribeAI/backend/scripts/migrate-summary-templates.sh": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T15:05:18.193Z"
     }
   },
   "files_written": [
@@ -1120,6 +1260,306 @@
       "action": "create",
       "tokens": 596,
       "at": "2026-06-09T10:46:28.431Z"
+    },
+    {
+      "file": "/apps/ScribeAI/docs/superpowers/plans/2026-06-10-summary-templates.md",
+      "action": "create",
+      "tokens": 276,
+      "at": "2026-06-09T14:40:05.096Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/prisma/schema.prisma",
+      "action": "create",
+      "tokens": 596,
+      "at": "2026-06-09T14:40:12.238Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/prisma/schema.prisma",
+      "action": "create",
+      "tokens": 1118,
+      "at": "2026-06-09T14:40:19.304Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/prisma/migrations/20260610120000_summary_templates/migration.sql",
+      "action": "create",
+      "tokens": 1382,
+      "at": "2026-06-09T14:40:21.247Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/lib/summary-template-constants.ts",
+      "action": "create",
+      "tokens": 243,
+      "at": "2026-06-09T14:40:38.099Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/lib/summary-prompt-builder.ts",
+      "action": "create",
+      "tokens": 351,
+      "at": "2026-06-09T14:40:38.130Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/lib/summary-template-seed.ts",
+      "action": "create",
+      "tokens": 749,
+      "at": "2026-06-09T14:40:38.176Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/lib/summary-guardrails.ts",
+      "action": "create",
+      "tokens": 74,
+      "at": "2026-06-09T14:40:38.181Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/lib/summary-template-service.ts",
+      "action": "create",
+      "tokens": 2799,
+      "at": "2026-06-09T14:40:50.003Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/middleware/adminMiddleware.ts",
+      "action": "create",
+      "tokens": 187,
+      "at": "2026-06-09T14:40:54.859Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/prompts/template-generate-draft.ts",
+      "action": "create",
+      "tokens": 188,
+      "at": "2026-06-09T14:40:57.001Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/routes/templates.ts",
+      "action": "create",
+      "tokens": 3614,
+      "at": "2026-06-09T14:41:08.359Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/routes/sessions.ts",
+      "action": "create",
+      "tokens": 3822,
+      "at": "2026-06-09T14:41:27.810Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/lib/summary-share-token.ts",
+      "action": "create",
+      "tokens": 271,
+      "at": "2026-06-09T14:41:29.212Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/prompts/build-summary-prompt.ts",
+      "action": "create",
+      "tokens": 234,
+      "at": "2026-06-09T14:41:29.452Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/index.ts",
+      "action": "create",
+      "tokens": 567,
+      "at": "2026-06-09T14:41:31.516Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/lib/summary-share-token.ts",
+      "action": "create",
+      "tokens": 296,
+      "at": "2026-06-09T14:41:33.148Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/index.ts",
+      "action": "create",
+      "tokens": 611,
+      "at": "2026-06-09T14:41:41.642Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/middleware/summaryShareAuth.ts",
+      "action": "create",
+      "tokens": 375,
+      "at": "2026-06-09T14:41:47.803Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/middleware/summaryShareAuth.ts",
+      "action": "create",
+      "tokens": 386,
+      "at": "2026-06-09T14:41:50.120Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/lib/summary-templates.ts",
+      "action": "create",
+      "tokens": 1474,
+      "at": "2026-06-09T14:41:53.930Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/lib/summary-export.ts",
+      "action": "create",
+      "tokens": 384,
+      "at": "2026-06-09T14:41:59.061Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/lib/session-summary.ts",
+      "action": "create",
+      "tokens": 785,
+      "at": "2026-06-09T14:41:59.069Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/summary-template-select.tsx",
+      "action": "create",
+      "tokens": 621,
+      "at": "2026-06-09T14:42:01.021Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/app/(routes)/settings/summary-templates/page.tsx",
+      "action": "create",
+      "tokens": 1257,
+      "at": "2026-06-09T14:42:11.762Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/app/(routes)/settings/summary-templates/new/page.tsx",
+      "action": "create",
+      "tokens": 1298,
+      "at": "2026-06-09T14:42:18.008Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/app/(routes)/settings/summary-templates/[id]/page.tsx",
+      "action": "create",
+      "tokens": 2488,
+      "at": "2026-06-09T14:42:26.265Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/summary-template-select.tsx",
+      "action": "create",
+      "tokens": 639,
+      "at": "2026-06-09T14:42:48.281Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/lib/dashboard-nav.ts",
+      "action": "create",
+      "tokens": 130,
+      "at": "2026-06-09T14:42:48.571Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/lib/dashboard-nav.ts",
+      "action": "create",
+      "tokens": 151,
+      "at": "2026-06-09T14:42:56.151Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/navbar.tsx",
+      "action": "create",
+      "tokens": 1631,
+      "at": "2026-06-09T14:43:22.693Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/lib/promote-and-summarize.ts",
+      "action": "create",
+      "tokens": 356,
+      "at": "2026-06-09T14:43:22.723Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/dashboard-draft-actions.tsx",
+      "action": "create",
+      "tokens": 412,
+      "at": "2026-06-09T14:43:23.656Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/app/(routes)/sessions/page.tsx",
+      "action": "create",
+      "tokens": 3070,
+      "at": "2026-06-09T14:43:28.933Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/generate-meeting-summary-button.tsx",
+      "action": "create",
+      "tokens": 422,
+      "at": "2026-06-09T14:43:28.965Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/generate-meeting-summary-button.tsx",
+      "action": "create",
+      "tokens": 426,
+      "at": "2026-06-09T14:43:34.434Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/generate-meeting-summary-button.tsx",
+      "action": "create",
+      "tokens": 432,
+      "at": "2026-06-09T14:43:55.326Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/app/(routes)/sessions/[id]/summary/page.tsx",
+      "action": "create",
+      "tokens": 2793,
+      "at": "2026-06-09T14:43:58.049Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/app/(routes)/sessions/[id]/summary/page.tsx",
+      "action": "create",
+      "tokens": 2768,
+      "at": "2026-06-09T14:44:06.509Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/app/(routes)/sessions/[id]/summary/page.tsx",
+      "action": "create",
+      "tokens": 2802,
+      "at": "2026-06-09T14:44:11.369Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/app/(routes)/sessions/[id]/summary/page.tsx",
+      "action": "create",
+      "tokens": 2808,
+      "at": "2026-06-09T14:44:17.266Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/app/(routes)/sessions/[id]/summary/page.tsx",
+      "action": "create",
+      "tokens": 2834,
+      "at": "2026-06-09T14:44:19.764Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/app/(routes)/sessions/[id]/summary/page.tsx",
+      "action": "create",
+      "tokens": 2845,
+      "at": "2026-06-09T14:44:28.908Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/app/(routes)/sessions/[id]/summary/page.tsx",
+      "action": "create",
+      "tokens": 2871,
+      "at": "2026-06-09T14:44:33.500Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/scripts/test-summary-prompt.ts",
+      "action": "create",
+      "tokens": 458,
+      "at": "2026-06-09T14:44:44.078Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/app/(routes)/settings/summary-templates/page.tsx",
+      "action": "create",
+      "tokens": 1664,
+      "at": "2026-06-09T14:54:18.129Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/app/(routes)/settings/summary-templates/[id]/page.tsx",
+      "action": "create",
+      "tokens": 2488,
+      "at": "2026-06-09T14:54:30.871Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/dashboard-nav-links.tsx",
+      "action": "create",
+      "tokens": 423,
+      "at": "2026-06-09T14:54:38.729Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/package.json",
+      "action": "create",
+      "tokens": 374,
+      "at": "2026-06-09T15:05:06.429Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/scripts/migrate-summary-templates.sh",
+      "action": "create",
+      "tokens": 459,
+      "at": "2026-06-09T15:05:23.324Z"
     }
   ],
   "edit_counts": {
@@ -1132,13 +1572,13 @@
     "frontend/app/(routes)/dashboard/page.tsx": 16,
     "frontend/components/transcript-feed.tsx": 15,
     "frontend/components/dashboard-shell.tsx": 9,
-    "frontend/components/navbar.tsx": 1,
+    "frontend/components/navbar.tsx": 2,
     "frontend/app/layout.tsx": 1,
     "frontend/lib/navigation.ts": 7,
     "frontend/lib/app-version.ts": 1,
     "frontend/components/build-stamp.tsx": 2,
     "frontend/next.config.ts": 3,
-    "frontend/components/dashboard-nav-links.tsx": 2,
+    "frontend/components/dashboard-nav-links.tsx": 3,
     "frontend/lib/auth-session.ts": 1,
     "backend/src/routes/authroutes.ts": 2,
     "../../root/.cursor/projects/apps-ScribeAI/assets/c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_12d9ad4864617a6acf9b7a6aff0dc44-18ba5176-b2f7-46b1-8575-dc2ceb9388df.png": 1,
@@ -1155,22 +1595,46 @@
     "../../root/.cursor/projects/apps-ScribeAI/assets/c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-4c02e8b9-cf66-426a-95c2-5901c8acdc09.png": 1,
     "frontend/components/summary-markdown.tsx": 2,
     "../../root/.cursor/projects/apps-ScribeAI/assets/c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-352b296d-98cc-4580-9db2-ae4a319b5216.png": 1,
-    "frontend/app/(routes)/sessions/[id]/summary/page.tsx": 3,
+    "frontend/app/(routes)/sessions/[id]/summary/page.tsx": 10,
     "backend/src/prompts/suggest-session-title.ts": 1,
     "backend/src/routes/drafts.ts": 2,
-    "frontend/lib/session-summary.ts": 1,
+    "frontend/lib/session-summary.ts": 2,
     "frontend/lib/draft-api.ts": 1,
-    "frontend/lib/promote-and-summarize.ts": 1,
-    "frontend/components/dashboard-draft-actions.tsx": 4,
-    "frontend/components/generate-meeting-summary-button.tsx": 1,
-    "frontend/app/(routes)/sessions/page.tsx": 2,
-    "backend/src/prompts/build-summary-prompt.ts": 1,
+    "frontend/lib/promote-and-summarize.ts": 2,
+    "frontend/components/dashboard-draft-actions.tsx": 5,
+    "frontend/components/generate-meeting-summary-button.tsx": 4,
+    "frontend/app/(routes)/sessions/page.tsx": 3,
+    "backend/src/prompts/build-summary-prompt.ts": 2,
     "backend/src/prompts/summary-brief.ts": 1,
-    "backend/src/routes/sessions.ts": 1
+    "backend/src/routes/sessions.ts": 2,
+    "docs/superpowers/plans/2026-06-10-summary-templates.md": 1,
+    "backend/prisma/schema.prisma": 2,
+    "backend/prisma/migrations/20260610120000_summary_templates/migration.sql": 1,
+    "backend/src/lib/summary-template-constants.ts": 1,
+    "backend/src/lib/summary-prompt-builder.ts": 1,
+    "backend/src/lib/summary-template-seed.ts": 1,
+    "backend/src/lib/summary-guardrails.ts": 1,
+    "backend/src/lib/summary-template-service.ts": 1,
+    "backend/src/middleware/adminMiddleware.ts": 1,
+    "backend/src/prompts/template-generate-draft.ts": 1,
+    "backend/src/routes/templates.ts": 1,
+    "backend/src/lib/summary-share-token.ts": 2,
+    "backend/src/index.ts": 2,
+    "backend/src/middleware/summaryShareAuth.ts": 2,
+    "frontend/lib/summary-templates.ts": 1,
+    "frontend/lib/summary-export.ts": 1,
+    "frontend/components/summary-template-select.tsx": 2,
+    "frontend/app/(routes)/settings/summary-templates/page.tsx": 2,
+    "frontend/app/(routes)/settings/summary-templates/new/page.tsx": 1,
+    "frontend/app/(routes)/settings/summary-templates/[id]/page.tsx": 2,
+    "frontend/lib/dashboard-nav.ts": 2,
+    "backend/scripts/test-summary-prompt.ts": 1,
+    "backend/package.json": 1,
+    "backend/scripts/migrate-summary-templates.sh": 1
   },
-  "anatomy_hits": 46,
-  "anatomy_misses": 17,
-  "repeated_reads_warned": 112,
+  "anatomy_hits": 52,
+  "anatomy_misses": 39,
+  "repeated_reads_warned": 146,
   "cerebrum_warnings": 0,
-  "stop_count": 28
+  "stop_count": 33
 }

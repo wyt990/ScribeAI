@@ -7,7 +7,8 @@ export type SummaryAuthRequest = AuthenticatedRequest & {
   summaryShare?: {
     userId: string;
     sessionId: string;
-    summaryType: string;
+    templateId?: string;
+    summaryType?: string;
   };
 };
 
@@ -29,6 +30,7 @@ export async function verifyUserOrShareToken(
       req.summaryShare = {
         userId: payload.userId,
         sessionId: payload.sessionId,
+        templateId: payload.templateId,
         summaryType: payload.summaryType,
       };
       req.user = { id: payload.userId };

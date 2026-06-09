@@ -58,6 +58,7 @@ export function Navbar() {
     if (pathname.startsWith('/dashboard')) return '会议录音';
     if (pathname.startsWith('/drafts')) return '草稿箱';
     if (pathname.startsWith('/sessions')) return '会议记录';
+    if (pathname.startsWith('/settings/summary-templates')) return '纪要模板';
     if (pathname.startsWith('/profile')) return '个人资料';
 
     return '会议录音';

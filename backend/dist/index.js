@@ -12,7 +12,9 @@ const authroutes_1 = __importDefault(require("./routes/authroutes"));
 const transcript_1 = __importDefault(require("./routes/transcript"));
 const sessions_1 = __importDefault(require("./routes/sessions"));
 const drafts_1 = __importDefault(require("./routes/drafts"));
+const templates_1 = __importDefault(require("./routes/templates"));
 const downloads_1 = __importDefault(require("./routes/downloads"));
+const summary_template_seed_1 = require("./lib/summary-template-seed");
 const socket_1 = require("./socket/socket");
 const draft_cleanup_1 = require("./lib/draft-cleanup");
 const summary_llm_1 = require("./lib/summary-llm");
@@ -42,8 +44,12 @@ app.use("/api/auth", authroutes_1.default);
 app.use('/api/transcript', transcript_1.default);
 app.use('/api/sessions', sessions_1.default);
 app.use('/api/drafts', drafts_1.default);
+app.use('/api/templates', templates_1.default);
 app.use('/api/downloads', downloads_1.default);
 const PORT = 4000;
+void (0, summary_template_seed_1.ensureSystemSummaryTemplates)().catch((err) => {
+    console.error('[SummaryTemplates] seed failed:', err);
+});
 server.listen(PORT, () => {
     console.log(`HTTP server running at http://localhost:${PORT}`);
     console.log(`Socket.io running at ws://localhost:${PORT}`);

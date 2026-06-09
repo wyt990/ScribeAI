@@ -24,11 +24,6 @@ import { Input } from '@/components/ui/input';
 import { SummaryMarkdown } from '@/components/summary-markdown';
 import { copyTextToClipboard } from '@/lib/copy-to-clipboard';
 import { useIsLoggedIn } from '@/hooks/use-is-logged-in';
-import {
-  DEFAULT_SUMMARY_TYPE,
-  isSummaryType,
-  type SummaryType,
-} from '@/lib/summary-types';
 import { downloadSummaryExport } from '@/lib/summary-export';
 
 type PreviewData = {
@@ -36,7 +31,9 @@ type PreviewData = {
   title: string;
   createdAt: string;
   summary: string;
-  summaryType: string;
+  templateId: string;
+  templateName: string;
+  summaryType?: string;
   summaryTypeLabel: string;
 };
 
@@ -46,11 +43,8 @@ function SummaryPreviewContent() {
   const searchParams = useSearchParams();
   const sessionId = params.id as string;
   const shareToken = searchParams.get('shareToken');
+  const templateIdParam = searchParams.get('templateId');
   const summaryTypeParam = searchParams.get('summaryType');
-  const summaryType: SummaryType =
-    summaryTypeParam && isSummaryType(summaryTypeParam)
-      ? summaryTypeParam
-      : DEFAULT_SUMMARY_TYPE;
 
   const [data, setData] = useState<PreviewData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -66,7 +60,9 @@ function SummaryPreviewContent() {
     setLoading(true);
     setError(null);
     try {
-      const qs = new URLSearchParams({ summaryType });
+      const qs = new URLSearchParams();
+      if (templateIdParam) qs.set('templateId', templateIdParam);
+      if (summaryTypeParam) qs.set('summaryType', summaryTypeParam);
       if (shareToken) qs.set('shareToken', shareToken);
 
       const headers: Record<string, string> = {};
@@ -91,7 +87,7 @@ function SummaryPreviewContent() {
     } finally {
       setLoading(false);
     }
-  }, [sessionId, shareToken, summaryType, router]);
+  }, [sessionId, shareToken, templateIdParam, summaryTypeParam, router]);
 
   useEffect(() => {
     void loadPreview();
@@ -114,12 +110,15 @@ function SummaryPreviewContent() {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ summaryType }),
+      body: JSON.stringify({
+        templateId: data?.templateId ?? templateIdParam,
+        summaryType: summaryTypeParam,
+      }),
     });
     if (!res.ok) throw new Error('生成分享纪要链接失败');
     const json = await res.json();
     return `${window.location.origin}${json.previewPath}` as string;
-  }, [sessionId, shareToken, summaryType]);
+  }, [sessionId, shareToken, templateIdParam, summaryTypeParam, data?.templateId]);
 
   // 进入页面后预取分享链接，避免点击时先 await fetch 导致移动端失去剪贴板写入权限
   useEffect(() => {
@@ -145,7 +144,9 @@ function SummaryPreviewContent() {
     setExporting(format);
     try {
       const token = localStorage.getItem('token');
-      await downloadSummaryExport(sessionId, format, summaryType, {
+      const tid = data?.templateId ?? templateIdParam;
+      if (!tid) throw new Error('缺少模板 ID');
+      await downloadSummaryExport(sessionId, format, tid, {
         shareToken,
         token,
       });

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,33 +11,24 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  DEFAULT_SUMMARY_TYPE,
-  SUMMARY_TYPE_LABELS,
-  SUMMARY_TYPES,
-  type SummaryType,
-} from '@/lib/summary-types';
-import { runGenerateSummaryFlow } from '@/lib/session-summary';
+import { SummaryTemplateSelect } from '@/components/summary-template-select';
+import { runGenerateSummaryFlow, buildSummaryPreviewPath } from '@/lib/session-summary';
+import type { SummaryTemplateItem } from '@/lib/summary-templates';
 
 interface SessionListItem {
   id: string;
   title: string;
   createdAt: string;
   hasSummary?: boolean;
-  summaryTypes?: string[];
+  summaryTemplateIds?: string[];
+  summaryTemplates?: { id: string; name: string }[];
 }
 
 interface SessionDetail extends SessionListItem {
   fullText?: string;
   summary?: string | null;
-  summaryType?: string | null;
+  templateId?: string | null;
+  templateName?: string | null;
 }
 
 export default function SessionsPage() {
@@ -46,30 +37,31 @@ export default function SessionsPage() {
   const [loading, setLoading] = useState(true);
   const [currentSession, setCurrentSession] = useState<SessionDetail | null>(null);
   const [openTranscript, setOpenTranscript] = useState(false);
-  const [summaryType, setSummaryType] = useState<SummaryType>(DEFAULT_SUMMARY_TYPE);
-  const [activeSummaryType, setActiveSummaryType] = useState<SummaryType | null>(null);
+  const [templateId, setTemplateId] = useState('');
+  const [templateName, setTemplateName] = useState('');
+  const [activeTemplateId, setActiveTemplateId] = useState<string | null>(null);
   const [loadingSummary, setLoadingSummary] = useState(false);
 
-  const hasCachedSummary = (session: SessionListItem, type: SummaryType) =>
-    session.summaryTypes?.includes(type) ?? false;
+  const hasCachedSummary = (session: SessionListItem, tid: string) =>
+    session.summaryTemplateIds?.includes(tid) ?? false;
 
-  const goToSummaryPreview = (sessionId: string, type: SummaryType) => {
-    router.push(`/sessions/${sessionId}/summary?summaryType=${type}`);
+  const goToSummaryPreview = (sessionId: string, tid: string) => {
+    router.push(buildSummaryPreviewPath(sessionId, tid));
   };
 
-  const fetchSessionDetail = async (id: string, type: SummaryType = DEFAULT_SUMMARY_TYPE) => {
-    const token = localStorage.getItem("token");
-    const res = await fetch(`/api/sessions/${id}?summaryType=${type}`, {
+  const fetchSessionDetail = async (id: string, tid: string) => {
+    const token = localStorage.getItem('token');
+    const res = await fetch(`/api/sessions/${id}?templateId=${encodeURIComponent(tid)}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     return res.json() as Promise<SessionDetail>;
   };
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem('token');
     const fetchSessions = async () => {
       try {
-        const res = await fetch("/api/sessions", {
+        const res = await fetch('/api/sessions', {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
@@ -83,22 +75,37 @@ export default function SessionsPage() {
     fetchSessions();
   }, []);
 
+  const handleTemplateChange = useCallback((id: string, t: SummaryTemplateItem) => {
+    setTemplateId(id);
+    setTemplateName(t.name);
+    if (currentSession && hasCachedSummary(currentSession, id)) {
+      setActiveTemplateId(id);
+    } else {
+      setActiveTemplateId(null);
+    }
+  }, [currentSession]);
+
   const openSession = async (id: string) => {
     try {
-      const preferredType = hasCachedSummary(
-        sessions.find((s) => s.id === id) ?? { id, title: '', createdAt: '' },
-        summaryType
-      )
-        ? summaryType
-        : DEFAULT_SUMMARY_TYPE;
-      const data = await fetchSessionDetail(id, preferredType);
+      const session = sessions.find((s) => s.id === id);
+      const preferredId =
+        templateId && session && hasCachedSummary(session, templateId)
+          ? templateId
+          : session?.summaryTemplateIds?.[0] ?? templateId;
+
+      if (!preferredId) {
+        setCurrentSession({ id, title: session?.title ?? '', createdAt: session?.createdAt ?? '' });
+        setOpenTranscript(true);
+        return;
+      }
+
+      const data = await fetchSessionDetail(id, preferredId);
       setCurrentSession(data);
       setOpenTranscript(true);
-      setSummaryType(preferredType);
-      setActiveSummaryType(
-        data.summaryType && SUMMARY_TYPES.includes(data.summaryType as SummaryType)
-          ? (data.summaryType as SummaryType)
-          : null
+      setTemplateId(preferredId);
+      setTemplateName(data.templateName ?? '');
+      setActiveTemplateId(
+        data.summaryTemplateIds?.includes(preferredId) ? preferredId : null
       );
     } catch (err) {
       console.error(err);
@@ -108,13 +115,13 @@ export default function SessionsPage() {
   const handleDelete = async (id: string, title: string) => {
     if (!confirm(`确定删除会议「${title}」？此操作不可恢复。`)) return;
 
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem('token');
     try {
       const res = await fetch(`/api/sessions/${id}`, {
-        method: "DELETE",
+        method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) throw new Error("删除失败");
+      if (!res.ok) throw new Error('删除失败');
 
       setSessions((prev) => prev.filter((s) => s.id !== id));
       if (currentSession?.id === id) {
@@ -123,41 +130,47 @@ export default function SessionsPage() {
       }
     } catch (err) {
       console.error(err);
-      alert("删除会议失败");
+      alert('删除会议失败');
     }
   };
 
   const openSummaryFromCard = (session: SessionListItem) => {
-    const type = session.summaryTypes?.includes(DEFAULT_SUMMARY_TYPE)
-      ? DEFAULT_SUMMARY_TYPE
-      : (session.summaryTypes?.[0] as SummaryType) ?? DEFAULT_SUMMARY_TYPE;
-    goToSummaryPreview(session.id, type);
+    const tid = session.summaryTemplateIds?.[0];
+    if (!tid) return;
+    goToSummaryPreview(session.id, tid);
   };
 
   const fetchSummary = async (regenerate = false) => {
-    if (!currentSession) return;
+    if (!currentSession || !templateId) return;
+
+    if (regenerate) {
+      const ok = await confirm(`确定重新生成「${templateName}」？将覆盖当前已保存的纪要。`);
+      if (!ok) return;
+    }
 
     setLoadingSummary(true);
     try {
       const data = await runGenerateSummaryFlow({
         sessionId: currentSession.id,
-        summaryType,
+        templateId,
         regenerate,
+        confirmRegenerate: false,
         navigateToPreview: true,
         router,
       });
       if (!data) return;
 
-      setActiveSummaryType(summaryType);
+      setActiveTemplateId(templateId);
       setCurrentSession((prev) =>
         prev
           ? {
               ...prev,
               summary: data.summary,
-              summaryType: data.summaryType,
+              templateId: data.templateId,
+              templateName: data.templateName,
               hasSummary: true,
-              summaryTypes: Array.from(
-                new Set([...(prev.summaryTypes ?? []), data.summaryType])
+              summaryTemplateIds: Array.from(
+                new Set([...(prev.summaryTemplateIds ?? []), data.templateId])
               ),
             }
           : prev
@@ -168,8 +181,8 @@ export default function SessionsPage() {
             ? {
                 ...s,
                 hasSummary: true,
-                summaryTypes: Array.from(
-                  new Set([...(s.summaryTypes ?? []), data.summaryType])
+                summaryTemplateIds: Array.from(
+                  new Set([...(s.summaryTemplateIds ?? []), data.templateId])
                 ),
               }
             : s
@@ -177,26 +190,17 @@ export default function SessionsPage() {
       );
     } catch (err) {
       console.error(err);
-      alert(err instanceof Error ? err.message : "生成纪要失败");
+      alert(err instanceof Error ? err.message : '生成纪要失败');
     } finally {
       setLoadingSummary(false);
     }
   };
 
-  const switchCachedSummaryType = async (type: SummaryType) => {
-    if (!currentSession) return;
-    setSummaryType(type);
-    if (!hasCachedSummary(currentSession, type)) {
-      setActiveSummaryType(null);
-      return;
-    }
-    setActiveSummaryType(type);
-  };
-
-  const hasSummaryForCurrentType =
+  const hasSummaryForCurrentTemplate =
     !!currentSession &&
-    activeSummaryType === summaryType &&
-    hasCachedSummary(currentSession, summaryType);
+    !!templateId &&
+    activeTemplateId === templateId &&
+    hasCachedSummary(currentSession, templateId);
 
   return (
     <div className="p-6 space-y-6">
@@ -236,7 +240,7 @@ export default function SessionsPage() {
                   >
                     查看纪要
                   </Button>
-                  <Button className="flex-1" onClick={() => openSession(session.id)}>
+                  <Button className="flex-1" onClick={() => void openSession(session.id)}>
                     查看转录
                   </Button>
                 </div>
@@ -264,45 +268,38 @@ export default function SessionsPage() {
 
             <div className="mt-4 space-y-3">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="text-sm text-muted-foreground shrink-0">纪要模式</span>
-                <Select
-                  value={summaryType}
-                  onValueChange={(v) => void switchCachedSummaryType(v as SummaryType)}
-                >
-                  <SelectTrigger className="w-[220px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {SUMMARY_TYPES.map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {SUMMARY_TYPE_LABELS[type]}
-                        {hasCachedSummary(currentSession, type) ? " ✓" : ""}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <span className="text-sm text-muted-foreground shrink-0">纪要模板</span>
+                <SummaryTemplateSelect
+                  value={templateId}
+                  onValueChange={handleTemplateChange}
+                  className="w-[240px]"
+                  generatedTemplateIds={currentSession.summaryTemplateIds ?? []}
+                />
               </div>
 
               <div className="flex flex-wrap gap-2">
-                {hasSummaryForCurrentType ? (
+                {hasSummaryForCurrentTemplate ? (
                   <>
                     <Button
                       variant="outline"
                       onClick={() => void fetchSummary(true)}
                       disabled={loadingSummary}
                     >
-                      {loadingSummary ? "生成中（约 1–3 分钟）..." : "重新生成纪要"}
+                      {loadingSummary ? '生成中（约 1–3 分钟）...' : '重新生成纪要'}
                     </Button>
                     <Button
-                      onClick={() => goToSummaryPreview(currentSession.id, summaryType)}
+                      onClick={() => goToSummaryPreview(currentSession.id, templateId)}
                       disabled={loadingSummary}
                     >
                       查看纪要
                     </Button>
                   </>
                 ) : (
-                  <Button onClick={() => void fetchSummary()} disabled={loadingSummary}>
-                    {loadingSummary ? "生成中（约 1–3 分钟）..." : "生成纪要"}
+                  <Button
+                    onClick={() => void fetchSummary()}
+                    disabled={loadingSummary || !templateId}
+                  >
+                    {loadingSummary ? '生成中（约 1–3 分钟）...' : '生成纪要'}
                   </Button>
                 )}
                 <Button

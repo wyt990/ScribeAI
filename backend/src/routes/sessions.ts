@@ -10,12 +10,14 @@ import { createSummaryShareToken } from '../lib/summary-share-token';
 import { markdownToDocxBuffer } from '../lib/summary-export-docx';
 import { markdownToPdfBuffer } from '../lib/summary-export-pdf';
 import {
-  buildSummaryPrompt,
-  parseSummaryType,
-  DEFAULT_SUMMARY_TYPE,
-  SUMMARY_TYPE_LABELS,
-  type SummaryType,
-} from '../prompts/build-summary-prompt';
+  buildPromptForTemplate,
+  formatSummaryResponse,
+  getTemplateForUser,
+  resolveTemplateForUser,
+  templateLegacyType,
+  type TemplateWithSkill,
+} from '../lib/summary-template-service';
+import { parseSummaryType, DEFAULT_SUMMARY_TYPE } from '../prompts/build-summary-prompt';
 
 const router = express.Router();
 
@@ -23,11 +25,28 @@ function safeFilename(title: string): string {
   return title.replace(/[<>:"/\\|?*]/g, '_').slice(0, 80) || 'summary';
 }
 
+type SummaryLookup = {
+  templateId?: string | null;
+  summaryType?: string | null;
+};
+
+async function resolveTemplateFromRequest(
+  userId: string,
+  input: SummaryLookup
+): Promise<TemplateWithSkill> {
+  return resolveTemplateForUser(userId, {
+    templateId: input.templateId,
+    summaryType: input.summaryType ?? undefined,
+  });
+}
+
 async function loadSummaryForSession(
   sessionId: string,
   userId: string,
-  summaryType: SummaryType
+  lookup: SummaryLookup
 ) {
+  const template = await resolveTemplateFromRequest(userId, lookup);
+
   const transcript = await prisma.transcript.findUnique({
     where: { id: sessionId },
     select: {
@@ -35,7 +54,7 @@ async function loadSummaryForSession(
       title: true,
       createdAt: true,
       userId: true,
-      summaries: { where: { summaryType } },
+      summaries: { where: { templateId: template.id } },
     },
   });
 
@@ -43,15 +62,20 @@ async function loadSummaryForSession(
   const summary = transcript.summaries[0];
   if (!summary?.text?.trim()) return null;
 
-  return { transcript, summary };
+  return { transcript, summary, template };
 }
 
-function formatSummaryPayload(summary: { text: string; summaryType: string }) {
+function summaryLookupFromQuery(query: Record<string, unknown>): SummaryLookup {
   return {
-    summary: summary.text,
-    summaryType: summary.summaryType,
-    summaryTypeLabel:
-      SUMMARY_TYPE_LABELS[summary.summaryType as SummaryType] ?? summary.summaryType,
+    templateId: query.templateId ? String(query.templateId) : null,
+    summaryType: query.summaryType ? String(query.summaryType) : null,
+  };
+}
+
+function summaryLookupFromBody(body: Record<string, unknown> | undefined): SummaryLookup {
+  return {
+    templateId: body?.templateId ? String(body.templateId) : null,
+    summaryType: body?.summaryType ? String(body.summaryType) : null,
   };
 }
 
@@ -66,14 +90,28 @@ router.get("/", verifyUser, async (req: AuthenticatedRequest, res) => {
         id: true,
         title: true,
         createdAt: true,
-        summaries: { select: { summaryType: true } },
+        summaries: {
+          select: {
+            summaryType: true,
+            templateId: true,
+            template: { select: { name: true, legacySummaryType: true } },
+          },
+        },
       },
     });
     res.json(
       transcripts.map(({ summaries, ...rest }) => ({
         ...rest,
         hasSummary: summaries.length > 0,
-        summaryTypes: summaries.map((s) => s.summaryType),
+        summaryTypes: summaries.map(
+          (s) => s.template.legacySummaryType ?? s.summaryType
+        ),
+        summaryTemplateIds: summaries.map((s) => s.templateId),
+        summaryTemplates: summaries.map((s) => ({
+          id: s.templateId,
+          name: s.template.name,
+          legacySummaryType: s.template.legacySummaryType,
+        })),
       }))
     );
   } catch (err) {
@@ -86,11 +124,11 @@ router.get("/", verifyUser, async (req: AuthenticatedRequest, res) => {
 router.get("/:id", verifyUser, async (req: AuthenticatedRequest, res) => {
   const userId = req.user!.id;
   const { id } = req.params;
-  const requestedType = req.query.summaryType
-    ? parseSummaryType(String(req.query.summaryType))
-    : DEFAULT_SUMMARY_TYPE;
+  const lookup = summaryLookupFromQuery(req.query as Record<string, unknown>);
 
   try {
+    const template = await resolveTemplateFromRequest(userId, lookup);
+
     const transcript = await prisma.transcript.findUnique({
       where: { id },
       select: {
@@ -98,7 +136,14 @@ router.get("/:id", verifyUser, async (req: AuthenticatedRequest, res) => {
         title: true,
         fullText: true,
         createdAt: true,
-        summaries: { select: { text: true, summaryType: true } },
+        summaries: {
+          select: {
+            text: true,
+            summaryType: true,
+            templateId: true,
+            template: { select: { name: true, legacySummaryType: true } },
+          },
+        },
         userId: true,
       },
     });
@@ -108,7 +153,7 @@ router.get("/:id", verifyUser, async (req: AuthenticatedRequest, res) => {
     }
 
     const matched =
-      transcript.summaries.find((s) => s.summaryType === requestedType) ??
+      transcript.summaries.find((s) => s.templateId === template.id) ??
       transcript.summaries[0] ??
       null;
 
@@ -118,8 +163,20 @@ router.get("/:id", verifyUser, async (req: AuthenticatedRequest, res) => {
       fullText: transcript.fullText,
       createdAt: transcript.createdAt,
       summary: matched?.text ?? null,
-      summaryType: matched?.summaryType ?? null,
-      summaryTypes: transcript.summaries.map((s) => s.summaryType),
+      summaryType: matched
+        ? matched.template.legacySummaryType ?? matched.summaryType
+        : null,
+      templateId: matched?.templateId ?? template.id,
+      templateName: matched?.template.name ?? template.name,
+      summaryTypes: transcript.summaries.map(
+        (s) => s.template.legacySummaryType ?? s.summaryType
+      ),
+      summaryTemplateIds: transcript.summaries.map((s) => s.templateId),
+      summaryTemplates: transcript.summaries.map((s) => ({
+        id: s.templateId,
+        name: s.template.name,
+        legacySummaryType: s.template.legacySummaryType,
+      })),
     });
   } catch (err) {
     console.error(err);
@@ -135,13 +192,16 @@ router.get(
   verifyUserOrShareToken,
   async (req: SummaryAuthRequest, res) => {
     const { id } = req.params;
-    const summaryType = req.summaryShare
-      ? parseSummaryType(req.summaryShare.summaryType)
-      : parseSummaryType(String(req.query.summaryType || DEFAULT_SUMMARY_TYPE));
     const userId = req.user!.id;
+    const lookup: SummaryLookup = req.summaryShare
+      ? {
+          templateId: req.summaryShare.templateId ?? null,
+          summaryType: req.summaryShare.summaryType ?? null,
+        }
+      : summaryLookupFromQuery(req.query as Record<string, unknown>);
 
     try {
-      const data = await loadSummaryForSession(id, userId, summaryType);
+      const data = await loadSummaryForSession(id, userId, lookup);
       if (!data) {
         return res.status(404).json({ error: "Summary not found" });
       }
@@ -151,10 +211,10 @@ router.get(
         title: data.transcript.title,
         createdAt: data.transcript.createdAt,
         summary: data.summary.text,
-        summaryType: data.summary.summaryType,
-        summaryTypeLabel:
-          SUMMARY_TYPE_LABELS[data.summary.summaryType as SummaryType] ??
-          data.summary.summaryType,
+        templateId: data.template.id,
+        templateName: data.template.name,
+        summaryType: templateLegacyType(data.template),
+        summaryTypeLabel: data.template.name,
       });
     } catch (err) {
       console.error(err);
@@ -170,17 +230,20 @@ router.get(
   async (req: SummaryAuthRequest, res) => {
     const { id } = req.params;
     const format = String(req.query.format || "docx").toLowerCase();
-    const summaryType = req.summaryShare
-      ? parseSummaryType(req.summaryShare.summaryType)
-      : parseSummaryType(String(req.query.summaryType || DEFAULT_SUMMARY_TYPE));
     const userId = req.user!.id;
+    const lookup: SummaryLookup = req.summaryShare
+      ? {
+          templateId: req.summaryShare.templateId ?? null,
+          summaryType: req.summaryShare.summaryType ?? null,
+        }
+      : summaryLookupFromQuery(req.query as Record<string, unknown>);
 
     if (format !== "docx" && format !== "pdf") {
       return res.status(400).json({ error: 'format must be "docx" or "pdf"' });
     }
 
     try {
-      const data = await loadSummaryForSession(id, userId, summaryType);
+      const data = await loadSummaryForSession(id, userId, lookup);
       if (!data) {
         return res.status(404).json({ error: "Summary not found" });
       }
@@ -224,10 +287,10 @@ router.post(
   async (req: AuthenticatedRequest, res) => {
     const userId = req.user!.id;
     const { id } = req.params;
-    const summaryType = parseSummaryType(req.body?.summaryType);
+    const lookup = summaryLookupFromBody(req.body);
 
     try {
-      const data = await loadSummaryForSession(id, userId, summaryType);
+      const data = await loadSummaryForSession(id, userId, lookup);
       if (!data) {
         return res.status(404).json({ error: "Summary not found" });
       }
@@ -235,13 +298,16 @@ router.post(
       const shareToken = createSummaryShareToken({
         userId,
         sessionId: id,
-        summaryType,
+        templateId: data.template.id,
+        summaryType: templateLegacyType(data.template),
       });
 
       const qs = new URLSearchParams({
-        summaryType,
+        templateId: data.template.id,
         shareToken,
       });
+      const legacyType = data.template.legacySummaryType;
+      if (legacyType) qs.set('summaryType', legacyType);
 
       res.json({
         shareToken,
@@ -261,7 +327,7 @@ router.post(
 router.post("/:id/summary", verifyUser, async (req: AuthenticatedRequest, res) => {
   const userId = req.user!.id;
   const { id } = req.params;
-  const summaryType = parseSummaryType(req.body?.summaryType);
+  const lookup = summaryLookupFromBody(req.body);
   const regenerate = req.body?.regenerate === true;
 
   req.setTimeout(SUMMARY_ROUTE_TIMEOUT_MS);
@@ -269,16 +335,21 @@ router.post("/:id/summary", verifyUser, async (req: AuthenticatedRequest, res) =
   req.socket?.setTimeout(SUMMARY_ROUTE_TIMEOUT_MS);
 
   try {
-    const [transcript, user] = await Promise.all([
-      prisma.transcript.findUnique({
-        where: { id },
-        include: {
-          summaries: { where: { summaryType } },
-        },
-      }),
+    const template = await resolveTemplateFromRequest(userId, lookup);
+
+    const [transcript, user, existing] = await Promise.all([
+      prisma.transcript.findUnique({ where: { id } }),
       prisma.user.findUnique({
         where: { id: userId },
         select: { name: true },
+      }),
+      prisma.summary.findUnique({
+        where: {
+          transcriptId_templateId: {
+            transcriptId: id,
+            templateId: template.id,
+          },
+        },
       }),
     ]);
 
@@ -290,12 +361,11 @@ router.post("/:id/summary", verifyUser, async (req: AuthenticatedRequest, res) =
       return res.status(400).json({ error: "Transcript is empty" });
     }
 
-    const existing = transcript.summaries[0];
     if (existing && !regenerate) {
-      return res.json(formatSummaryPayload(existing));
+      return res.json(formatSummaryResponse(existing, template));
     }
 
-    const { prompt } = buildSummaryPrompt(summaryType, transcript.fullText, {
+    const prompt = buildPromptForTemplate(template, transcript.fullText, {
       title: transcript.title,
       createdAt: transcript.createdAt,
       recorderName: user?.name,
@@ -307,21 +377,29 @@ router.post("/:id/summary", verifyUser, async (req: AuthenticatedRequest, res) =
       return res.status(500).json({ error: "Summary generation failed" });
     }
 
+    const legacyType = template.legacySummaryType ?? parseSummaryType(lookup.summaryType ?? DEFAULT_SUMMARY_TYPE);
+
     const savedSummary = existing
       ? await prisma.summary.update({
           where: { id: existing.id },
-          data: { text: generatedSummary },
+          data: {
+            text: generatedSummary,
+            templateVersion: template.skill.version,
+            summaryType: legacyType,
+          },
         })
       : await prisma.summary.create({
           data: {
             userId,
             transcriptId: transcript.id,
-            summaryType,
+            templateId: template.id,
+            templateVersion: template.skill.version,
+            summaryType: legacyType,
             text: generatedSummary,
           },
         });
 
-    return res.json(formatSummaryPayload(savedSummary));
+    return res.json(formatSummaryResponse(savedSummary, template));
   } catch (err) {
     console.error(`[SummaryLLM:${getSummaryProviderLabel()}]`, err);
     return res.status(500).json({ error: "Failed to generate/fetch summary" });

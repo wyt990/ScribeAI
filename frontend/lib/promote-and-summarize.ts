@@ -1,17 +1,12 @@
 import { suggestDraftTitle, promoteDraft } from '@/lib/draft-api';
-import {
-  DEFAULT_SUMMARY_TYPE,
-  type SummaryType,
-} from '@/lib/summary-types';
+import { fetchSummaryTemplates } from '@/lib/summary-templates';
 import { runGenerateSummaryFlow } from '@/lib/session-summary';
 
 export type PromoteAndSummarizeOptions = {
   draftId: string;
-  /** 保存最新转录到草稿后再转正 */
   flushDraft?: () => Promise<void>;
-  summaryType?: SummaryType;
+  templateId?: string;
   router: { push: (url: string) => void; replace?: (url: string) => void };
-  /** 使用 AI 建议标题；若提供则跳过 suggest API */
   title?: string;
 };
 
@@ -20,14 +15,10 @@ export type PromoteAndSummarizeResult = {
   title: string;
 };
 
-/**
- * 录音页一键流程：刷盘 → AI 标题 → 转正 → 生成纪要 → 跳转预览
- */
 export async function promoteDraftAndGenerateSummary(
   options: PromoteAndSummarizeOptions
 ): Promise<PromoteAndSummarizeResult> {
   const { draftId, flushDraft, router } = options;
-  const summaryType = options.summaryType ?? DEFAULT_SUMMARY_TYPE;
 
   if (flushDraft) {
     await flushDraft();
@@ -39,9 +30,15 @@ export async function promoteDraftAndGenerateSummary(
 
   const { transcript } = await promoteDraft(draftId, title);
 
+  let templateId = options.templateId;
+  if (!templateId) {
+    const { defaultTemplateId } = await fetchSummaryTemplates();
+    templateId = defaultTemplateId;
+  }
+
   await runGenerateSummaryFlow({
     sessionId: transcript.id,
-    summaryType,
+    templateId,
     regenerate: false,
     navigateToPreview: true,
     router,

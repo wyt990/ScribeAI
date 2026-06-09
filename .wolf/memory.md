@@ -985,3 +985,58 @@
 | 18:46 | Created backend/src/prompts/summary-meeting-notes.ts | — | ~596 |
 | 18:46 | Created backend/src/routes/sessions.ts | — | ~3054 |
 | 18:47 | Session end: 132 writes across 40 files (build.gradle.kts, page.tsx, AuthSessionStore.kt, MainActivity.kt, README.md) | 65 reads | ~190806 tok |
+| 22:16 | Session end: 132 writes across 40 files (build.gradle.kts, page.tsx, AuthSessionStore.kt, MainActivity.kt, README.md) | 65 reads | ~190831 tok |
+| 22:40 | Created docs/superpowers/plans/2026-06-10-summary-templates.md | — | ~258 |
+| 22:40 | Created backend/prisma/schema.prisma | — | ~557 |
+| 22:40 | Created backend/prisma/schema.prisma | — | ~1043 |
+| 22:40 | Created backend/prisma/migrations/20260610120000_summary_templates/migration.sql | — | ~1290 |
+| 22:40 | Created backend/src/lib/summary-template-constants.ts | — | ~243 |
+| 22:40 | Created backend/src/lib/summary-prompt-builder.ts | — | ~351 |
+| 22:40 | Created backend/src/lib/summary-template-seed.ts | — | ~749 |
+| 22:40 | Created backend/src/lib/summary-guardrails.ts | — | ~74 |
+| 22:40 | Created backend/src/lib/summary-template-service.ts | — | ~2799 |
+| 22:40 | Created backend/src/middleware/adminMiddleware.ts | — | ~187 |
+| 22:40 | Created backend/src/prompts/template-generate-draft.ts | — | ~188 |
+| 22:41 | Created backend/src/routes/templates.ts | — | ~3614 |
+| 22:41 | Created backend/src/routes/sessions.ts | — | ~3822 |
+| 22:41 | Created backend/src/lib/summary-share-token.ts | — | ~271 |
+| 22:41 | Created backend/src/prompts/build-summary-prompt.ts | — | ~234 |
+| 22:41 | Created backend/src/index.ts | — | ~567 |
+| 22:41 | Created backend/src/lib/summary-share-token.ts | — | ~296 |
+| 22:41 | Created backend/src/index.ts | — | ~611 |
+| 22:41 | Created backend/src/middleware/summaryShareAuth.ts | — | ~375 |
+| 22:41 | Created backend/src/middleware/summaryShareAuth.ts | — | ~386 |
+| 22:41 | Created frontend/lib/summary-templates.ts | — | ~1474 |
+| 22:41 | Created frontend/lib/summary-export.ts | — | ~384 |
+| 22:41 | Created frontend/lib/session-summary.ts | — | ~785 |
+| 22:42 | Created frontend/components/summary-template-select.tsx | — | ~621 |
+| 22:42 | Created frontend/app/(routes)/settings/summary-templates/page.tsx | — | ~1257 |
+| 22:42 | Created frontend/app/(routes)/settings/summary-templates/new/page.tsx | — | ~1298 |
+| 22:42 | Created frontend/app/(routes)/settings/summary-templates/[id]/page.tsx | — | ~2488 |
+| 22:42 | Created frontend/components/summary-template-select.tsx | — | ~639 |
+| 22:42 | Created frontend/lib/dashboard-nav.ts | — | ~130 |
+| 22:42 | Created frontend/lib/dashboard-nav.ts | — | ~151 |
+| 22:43 | Created frontend/components/navbar.tsx | — | ~1631 |
+| 22:43 | Created frontend/lib/promote-and-summarize.ts | — | ~356 |
+| 22:43 | Created frontend/components/dashboard-draft-actions.tsx | — | ~412 |
+| 22:43 | Created frontend/app/(routes)/sessions/page.tsx | — | ~3070 |
+| 22:43 | Created frontend/components/generate-meeting-summary-button.tsx | — | ~422 |
+| 22:43 | Created frontend/components/generate-meeting-summary-button.tsx | — | ~426 |
+| 22:43 | Created frontend/components/generate-meeting-summary-button.tsx | — | ~432 |
+| 22:43 | Created frontend/app/(routes)/sessions/[id]/summary/page.tsx | — | ~2793 |
+| 22:44 | Created frontend/app/(routes)/sessions/[id]/summary/page.tsx | — | ~2768 |
+| 22:44 | Created frontend/app/(routes)/sessions/[id]/summary/page.tsx | — | ~2802 |
+| 22:44 | Created frontend/app/(routes)/sessions/[id]/summary/page.tsx | — | ~2808 |
+| 22:44 | Created frontend/app/(routes)/sessions/[id]/summary/page.tsx | — | ~2834 |
+| 22:44 | Created frontend/app/(routes)/sessions/[id]/summary/page.tsx | — | ~2845 |
+| 22:44 | Created frontend/app/(routes)/sessions/[id]/summary/page.tsx | — | ~2871 |
+| 22:44 | Created backend/scripts/test-summary-prompt.ts | — | ~458 |
+| 22:46 | Session end: 177 writes across 59 files (build.gradle.kts, page.tsx, AuthSessionStore.kt, MainActivity.kt, README.md) | 86 reads | ~247620 tok |
+| 22:54 | Created frontend/app/(routes)/settings/summary-templates/page.tsx | — | ~1664 |
+| 22:54 | Created frontend/app/(routes)/settings/summary-templates/[id]/page.tsx | — | ~2488 |
+| 22:54 | Created frontend/components/dashboard-nav-links.tsx | — | ~423 |
+| 22:55 | Session end: 180 writes across 59 files (build.gradle.kts, page.tsx, AuthSessionStore.kt, MainActivity.kt, README.md) | 86 reads | ~252271 tok |
+| 23:05 | Created backend/package.json | — | ~374 |
+| 23:05 | Created backend/scripts/migrate-summary-templates.sh | — | ~428 |
+| 23:06 | Session end: 182 writes across 60 files (build.gradle.kts, page.tsx, AuthSessionStore.kt, MainActivity.kt, README.md) | 93 reads | ~253511 tok |
+| 23:10 | Session end: 182 writes across 60 files (build.gradle.kts, page.tsx, AuthSessionStore.kt, MainActivity.kt, README.md) | 93 reads | ~253511 tok |

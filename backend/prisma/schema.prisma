@@ -19,9 +19,11 @@ model User {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  transcripts Transcript[]
-  summaries   Summary[]
-  drafts      Draft[]
+  transcripts      Transcript[]
+  summaries        Summary[]
+  drafts           Draft[]
+  summarySkills    SummarySkill[]
+  summaryTemplates SummaryTemplate[]
 }
 
 model Draft {
@@ -55,18 +57,68 @@ model Transcript {
   summaries  Summary[]
 }
 
-model Summary {
+model SummarySkill {
   id           String   @id @default(uuid())
-  userId       String
-  transcriptId String
-  summaryType  String   @default("meeting-notes") // meeting-notes | brief
-  text         String   @db.Text
+  userId       String?
+  slug         String
+  name         String
+  rulesMd      String   @db.Text
+  stepsMd      String?  @db.Text
+  outputMd     String   @db.Text
+  meta         Json?
+  parentId     String?
+  version      Int      @default(1)
+  isPublic     Boolean  @default(false)
+  reviewStatus String   @default("approved") // pending | approved | rejected
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  transcript Transcript @relation(fields: [transcriptId], references: [id], onDelete: Cascade)
-  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User?             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent    SummarySkill?     @relation("SkillFork", fields: [parentId], references: [id], onDelete: SetNull)
+  forks     SummarySkill[]    @relation("SkillFork")
+  templates SummaryTemplate[]
 
-  @@unique([transcriptId, summaryType])
+  @@index([userId])
+  @@index([slug])
+}
+
+model SummaryTemplate {
+  id                String   @id @default(uuid())
+  userId            String?
+  skillId           String
+  name              String
+  description       String?  @db.Text
+  isDefault         Boolean  @default(false)
+  isPublic          Boolean  @default(false)
+  reviewStatus      String   @default("approved") // pending | approved | rejected
+  legacySummaryType String? // meeting-notes | brief — 系统模板兼容旧 API
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  skill      SummarySkill @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  user       User?        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  summaries  Summary[]
+
+  @@index([userId])
+  @@index([legacySummaryType])
+}
+
+model Summary {
+  id              String   @id @default(uuid())
+  userId          String
+  transcriptId    String
+  summaryType     String   @default("meeting-notes") // legacy 冗余字段
+  templateId      String
+  templateVersion Int      @default(1)
+  text            String   @db.Text
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  transcript Transcript      @relation(fields: [transcriptId], references: [id], onDelete: Cascade)
+  user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  template   SummaryTemplate @relation(fields: [templateId], references: [id], onDelete: Restrict)
+
+  @@unique([transcriptId, templateId])
   @@index([transcriptId])
+  @@index([templateId])
 }

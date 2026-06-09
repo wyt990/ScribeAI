@@ -1,14 +1,12 @@
-import type { SummaryType } from '@/lib/summary-types';
-
 export function buildExportUrl(
   sessionId: string,
   format: 'docx' | 'pdf',
-  summaryType: SummaryType,
+  templateId: string,
   shareToken?: string | null
 ) {
   const params = new URLSearchParams({
     format,
-    summaryType,
+    templateId,
   });
   if (shareToken) params.set('shareToken', shareToken);
   return `/api/sessions/${sessionId}/summary/export?${params.toString()}`;
@@ -17,10 +15,10 @@ export function buildExportUrl(
 export async function downloadSummaryExport(
   sessionId: string,
   format: 'docx' | 'pdf',
-  summaryType: SummaryType,
+  templateId: string,
   opts?: { shareToken?: string | null; token?: string | null }
 ) {
-  const url = buildExportUrl(sessionId, format, summaryType, opts?.shareToken);
+  const url = buildExportUrl(sessionId, format, templateId, opts?.shareToken);
   const headers: Record<string, string> = {};
   if (!opts?.shareToken && opts?.token) {
     headers.Authorization = `Bearer ${opts.token}`;

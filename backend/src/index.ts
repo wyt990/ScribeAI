@@ -8,7 +8,9 @@ import authRoutes from "./routes/authroutes";
 import transcript from "./routes/transcript"
 import sessions from "./routes/sessions"
 import drafts from "./routes/drafts"
+import templates from "./routes/templates"
 import downloads from "./routes/downloads"
+import { ensureSystemSummaryTemplates } from "./lib/summary-template-seed";
 import { createSocketServer, startStaleSessionCleanup } from "./socket/socket";
 import { startDraftCleanup } from "./lib/draft-cleanup";
 import {
@@ -48,9 +50,15 @@ app.use("/api/auth", authRoutes);
 app.use('/api/transcript', transcript);
 app.use('/api/sessions', sessions);
 app.use('/api/drafts', drafts);
+app.use('/api/templates', templates);
 app.use('/api/downloads', downloads);
 
 const PORT = 4000;
+
+void ensureSystemSummaryTemplates().catch((err) => {
+  console.error('[SummaryTemplates] seed failed:', err);
+});
+
 server.listen(PORT, () => {
   console.log(`HTTP server running at http://localhost:${PORT}`);
   console.log(`Socket.io running at ws://localhost:${PORT}`);
