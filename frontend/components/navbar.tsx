@@ -55,12 +55,12 @@ export function Navbar() {
   const pageTitle = (() => {
     if (!pathname) return '';
 
-    if (pathname.startsWith('/dashboard')) return '仪表板';
+    if (pathname.startsWith('/dashboard')) return '会议录音';
     if (pathname.startsWith('/drafts')) return '草稿箱';
-    if (pathname.startsWith('/sessions')) return '会话记录';
+    if (pathname.startsWith('/sessions')) return '会议记录';
     if (pathname.startsWith('/profile')) return '个人资料';
 
-    return '仪表板';
+    return '会议录音';
   })();
 
   return (

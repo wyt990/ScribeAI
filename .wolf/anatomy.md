@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-06-09T02:41:16.435Z
-> Files: 152 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-06-09T03:21:05.371Z
+> Files: 163 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../root/.claude/plans/
 
@@ -27,10 +27,14 @@
 - `d4dbccee-6f82-422e-af30-1c9736653053.txt` — Declares serve (~10424 tok)
 - `e7420b87-3e70-4bd3-a26c-72867a19fa36.txt` — Declares registry (~7697 tok)
 
+## ../../root/.cursor/projects/apps-ScribeAI/assets/
+
+- `c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-76e820c6-7462-46fd-b194-183bc411cfdd.png` (~11832 tok)
+
 ## ./
 
 - `CLAUDE.md` — CLAUDE.md (~1052 tok)
-- `README.md` — Project documentation (~1591 tok)
+- `README.md` — Project documentation (~1822 tok)
 
 ## .claude/
 
@@ -106,11 +110,15 @@
 - `openai-api-url.ts` — Join OpenAI-compatible API paths without duplicating slashes. (~239 tok)
 - `prisma.ts` — Declares prisma (~40 tok)
 - `storage-config.ts` — Exports STORAGE_CONFIG (~91 tok)
+- `summary-export-docx.ts` — Exports markdownToDocxBuffer (~53 tok)
+- `summary-export-pdf.ts` — Exports markdownToPdfBuffer (~1040 tok)
 - `summary-llm.ts` — Exports SummaryProvider, validateSummaryConfig, getResolvedChatCompletionsUrl, generateSummary, getS (~884 tok)
+- `summary-share-token.ts` — Exports SummarySharePayload, createSummaryShareToken, verifySummaryShareToken (~264 tok)
 
 ## backend/src/middleware/
 
 - `authMiddleware.ts` — Exports AuthenticatedRequest, verifyUser (~364 tok)
+- `summaryShareAuth.ts` — Bearer JWT 或 ?shareToken= 分享令牌 (~367 tok)
 
 ## backend/src/prompts/
 
@@ -123,7 +131,7 @@
 
 - `authroutes.ts` — routes/auth.js (~1308 tok)
 - `drafts.ts` — 列表：用户所有未转正的草稿 (~1821 tok)
-- `sessions.ts` — API routes: GET, POST, DELETE (4 endpoints) (~1654 tok)
+- `sessions.ts` — API routes: GET, POST, DELETE (7 endpoints) (~3102 tok)
 - `transcript.ts` — API routes: POST (1 endpoints) (~260 tok)
 
 ## backend/src/socket/
@@ -154,13 +162,13 @@
 
 ## frontend/app/
 
-- `globals.css` — Styles: 6 rules, 103 vars (~1047 tok)
+- `globals.css` — Styles: 8 rules, 103 vars (~1096 tok)
 - `layout.tsx` — inter (~407 tok)
 - `page.tsx` — HomePage (~31 tok)
 
 ## frontend/app/(routes)/
 
-- `layout.tsx` — DashboardLayout (~164 tok)
+- `layout.tsx` — DashboardLayout (~64 tok)
 
 ## frontend/app/(routes)/dashboard/
 
@@ -176,7 +184,11 @@
 
 ## frontend/app/(routes)/sessions/
 
-- `page.tsx` — SessionsPage — renders modal (~3617 tok)
+- `page.tsx` — SessionsPage — renders modal (~3176 tok)
+
+## frontend/app/(routes)/sessions/[id]/summary/
+
+- `page.tsx` — SummaryPreviewContent — renders modal (~2993 tok)
 
 ## frontend/app/login/
 
@@ -190,10 +202,12 @@
 
 - `audio-mode-selector.tsx` — AudioModeSelector (~792 tok)
 - `dashboard-nav-links.tsx` — DashboardNavLinks (~322 tok)
+- `dashboard-shell.tsx` — DashboardShell (~206 tok)
 - `draft-restore-banner.tsx` — DraftRestoreBanner (~333 tok)
-- `navbar.tsx` — Navbar (~1654 tok)
+- `navbar.tsx` — Navbar (~1655 tok)
 - `recording-controls.tsx` — VAD 状态指示器：显示一个小圆点 + 文字 (~1532 tok)
 - `sidebar.tsx` — Sidebar (~611 tok)
+- `summary-markdown.tsx` — SummaryMarkdown (~173 tok)
 - `theme-provider.tsx` — ThemeProvider (~87 tok)
 - `transcript-feed.tsx` — TranscriptFeed — renders modal (~1372 tok)
 
@@ -257,6 +271,7 @@
 
 - `use-audio-recorder.ts` — 跨页面导航缓存服务端下发的 VAD 配置（socket 已连接时不会重发 vad-config） (~6542 tok)
 - `use-draft-sync.ts` — 草稿自动保存：转录追加防抖写入，状态变更立即写入，离开页面时刷盘 (~1194 tok)
+- `use-is-logged-in.ts` — 客户端检测是否已登录（localStorage 中有 token） (~83 tok)
 - `use-mobile.ts` — Exports useIsMobile (~162 tok)
 
 ## frontend/lib/
@@ -264,12 +279,14 @@
 - `api.ts` — Exports api (~134 tok)
 - `app-config.ts` — 是否显示音频源选择器（麦克风/标签页切换） (~98 tok)
 - `audio-utils.ts` — 将 Float32 PCM（-1~1）编码为 16-bit mono WAV (~358 tok)
-- `dashboard-nav.ts` — Exports DashboardNavItem, DASHBOARD_NAV_ITEMS (~126 tok)
+- `copy-to-clipboard.ts` — 复制文本；移动端在异步操作后 clipboard API 常因失去用户手势而失败，提供 textarea 回退 (~243 tok)
+- `dashboard-nav.ts` — Exports DashboardNavItem, DASHBOARD_NAV_ITEMS (~127 tok)
 - `draft-api.ts` — Exports DraftStatus, Draft, fetchDrafts, fetchActiveDraft + 7 more (~861 tok)
 - `pcm-capture.ts` — Target frame size in samples (at 16kHz) (~1350 tok)
 - `session-storage.ts` — Exports Session, useSessionStore (~223 tok)
 - `socket.ts` — Flush buffered segment results in seq order; returns texts ready to display (~1371 tok)
 - `store.ts` — Exports RecordingStatus, AudioMode, useRecordingStore (~653 tok)
+- `summary-export.ts` — API routes: GET (1 endpoints) (~405 tok)
 - `summary-types.ts` — Exports SUMMARY_TYPES, SummaryType, DEFAULT_SUMMARY_TYPE, SUMMARY_TYPE_LABELS, isSummaryType (~128 tok)
 - `types.ts` — Exports Session, TranscriptLine (~84 tok)
 - `utils.ts` — Exports cn (~48 tok)

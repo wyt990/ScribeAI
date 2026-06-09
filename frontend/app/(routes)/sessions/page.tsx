@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -21,7 +22,6 @@ import {
   DEFAULT_SUMMARY_TYPE,
   SUMMARY_TYPE_LABELS,
   SUMMARY_TYPES,
-  isSummaryType,
   type SummaryType,
 } from '@/lib/summary-types';
 
@@ -40,19 +40,21 @@ interface SessionDetail extends SessionListItem {
 }
 
 export default function SessionsPage() {
+  const router = useRouter();
   const [sessions, setSessions] = useState<SessionListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentSession, setCurrentSession] = useState<SessionDetail | null>(null);
   const [openTranscript, setOpenTranscript] = useState(false);
-  const [openSummary, setOpenSummary] = useState(false);
-  const [summary, setSummary] = useState<string | null>(null);
   const [summaryType, setSummaryType] = useState<SummaryType>(DEFAULT_SUMMARY_TYPE);
   const [activeSummaryType, setActiveSummaryType] = useState<SummaryType | null>(null);
   const [loadingSummary, setLoadingSummary] = useState(false);
-  const [loadingSummaryId, setLoadingSummaryId] = useState<string | null>(null);
 
   const hasCachedSummary = (session: SessionListItem, type: SummaryType) =>
     session.summaryTypes?.includes(type) ?? false;
+
+  const goToSummaryPreview = (sessionId: string, type: SummaryType) => {
+    router.push(`/sessions/${sessionId}/summary?summaryType=${type}`);
+  };
 
   const fetchSessionDetail = async (id: string, type: SummaryType = DEFAULT_SUMMARY_TYPE) => {
     const token = localStorage.getItem("token");
@@ -91,9 +93,11 @@ export default function SessionsPage() {
       const data = await fetchSessionDetail(id, preferredType);
       setCurrentSession(data);
       setOpenTranscript(true);
-      setSummary(data.summary ?? null);
+      setSummaryType(preferredType);
       setActiveSummaryType(
-        data.summaryType && isSummaryType(data.summaryType) ? data.summaryType : null
+        data.summaryType && SUMMARY_TYPES.includes(data.summaryType as SummaryType)
+          ? (data.summaryType as SummaryType)
+          : null
       );
     } catch (err) {
       console.error(err);
@@ -101,7 +105,7 @@ export default function SessionsPage() {
   };
 
   const handleDelete = async (id: string, title: string) => {
-    if (!confirm(`确定删除会话「${title}」？此操作不可恢复。`)) return;
+    if (!confirm(`确定删除会议「${title}」？此操作不可恢复。`)) return;
 
     const token = localStorage.getItem("token");
     try {
@@ -115,39 +119,18 @@ export default function SessionsPage() {
       if (currentSession?.id === id) {
         setCurrentSession(null);
         setOpenTranscript(false);
-        setOpenSummary(false);
-        setSummary(null);
-        setActiveSummaryType(null);
       }
     } catch (err) {
       console.error(err);
-      alert("删除会话失败");
+      alert("删除会议失败");
     }
   };
 
-  const viewSummary = () => {
-    if (summary) setOpenSummary(true);
-  };
-
-  const openSummaryFromCard = async (session: SessionListItem) => {
-    setLoadingSummaryId(session.id);
-    try {
-      const type = session.summaryTypes?.includes(DEFAULT_SUMMARY_TYPE)
-        ? DEFAULT_SUMMARY_TYPE
-        : (session.summaryTypes?.[0] as SummaryType) ?? DEFAULT_SUMMARY_TYPE;
-      const data = await fetchSessionDetail(session.id, type);
-      setCurrentSession(data);
-      setSummary(data.summary ?? null);
-      setActiveSummaryType(type);
-      if (data.summary) {
-        setOpenSummary(true);
-      }
-    } catch (err) {
-      console.error(err);
-      alert("加载摘要失败");
-    } finally {
-      setLoadingSummaryId(null);
-    }
+  const openSummaryFromCard = (session: SessionListItem) => {
+    const type = session.summaryTypes?.includes(DEFAULT_SUMMARY_TYPE)
+      ? DEFAULT_SUMMARY_TYPE
+      : (session.summaryTypes?.[0] as SummaryType) ?? DEFAULT_SUMMARY_TYPE;
+    goToSummaryPreview(session.id, type);
   };
 
   const fetchSummary = async (regenerate = false) => {
@@ -177,7 +160,6 @@ export default function SessionsPage() {
         throw new Error(err.error || "生成摘要失败");
       }
       const data = await res.json();
-      setSummary(data.summary);
       setActiveSummaryType(summaryType);
       setCurrentSession((prev) =>
         prev
@@ -205,7 +187,7 @@ export default function SessionsPage() {
             : s
         )
       );
-      setOpenSummary(true);
+      goToSummaryPreview(currentSession.id, summaryType);
     } catch (err) {
       console.error(err);
       alert(err instanceof Error ? err.message : "生成摘要失败");
@@ -218,29 +200,22 @@ export default function SessionsPage() {
     if (!currentSession) return;
     setSummaryType(type);
     if (!hasCachedSummary(currentSession, type)) {
-      setSummary(null);
       setActiveSummaryType(null);
       return;
     }
-    try {
-      const data = await fetchSessionDetail(currentSession.id, type);
-      setSummary(data.summary ?? null);
-      setActiveSummaryType(type);
-      setCurrentSession((prev) => (prev ? { ...prev, ...data } : prev));
-    } catch (err) {
-      console.error(err);
-    }
+    setActiveSummaryType(type);
   };
 
-  const summaryTypeLabel = activeSummaryType
-    ? SUMMARY_TYPE_LABELS[activeSummaryType]
-    : null;
+  const hasSummaryForCurrentType =
+    !!currentSession &&
+    activeSummaryType === summaryType &&
+    hasCachedSummary(currentSession, summaryType);
 
   return (
     <div className="p-6 space-y-6">
       {sessions.length === 0 && !loading ? (
         <div className="flex items-center justify-center h-64 text-muted-foreground">
-          <p className="text-lg">暂无会话记录</p>
+          <p className="text-lg">暂无会议记录</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -269,10 +244,10 @@ export default function SessionsPage() {
                   <Button
                     variant="outline"
                     className="flex-1"
-                    disabled={!session.hasSummary || loadingSummaryId === session.id}
+                    disabled={!session.hasSummary}
                     onClick={() => openSummaryFromCard(session)}
                   >
-                    {loadingSummaryId === session.id ? "加载中..." : "查看摘要"}
+                    查看摘要
                   </Button>
                   <Button className="flex-1" onClick={() => openSession(session.id)}>
                     查看转录
@@ -322,7 +297,7 @@ export default function SessionsPage() {
               </div>
 
               <div className="flex flex-wrap gap-2">
-                {summary && activeSummaryType === summaryType ? (
+                {hasSummaryForCurrentType ? (
                   <>
                     <Button
                       variant="outline"
@@ -331,7 +306,10 @@ export default function SessionsPage() {
                     >
                       {loadingSummary ? "生成中（约 1–3 分钟）..." : "重新生成摘要"}
                     </Button>
-                    <Button onClick={viewSummary} disabled={loadingSummary}>
+                    <Button
+                      onClick={() => goToSummaryPreview(currentSession.id, summaryType)}
+                      disabled={loadingSummary}
+                    >
                       查看摘要
                     </Button>
                   </>
@@ -355,31 +333,6 @@ export default function SessionsPage() {
           </DialogContent>
         </Dialog>
       )}
-
-      <Dialog open={openSummary} onOpenChange={setOpenSummary}>
-        <DialogContent className="p-6 w-[80vw] max-w-2xl max-h-[85vh] flex flex-col">
-          <DialogHeader>
-            <DialogTitle>
-              {summaryTypeLabel ? `${summaryTypeLabel}` : "摘要"}
-            </DialogTitle>
-            {currentSession && (
-              <DialogDescription>{currentSession.title}</DialogDescription>
-            )}
-          </DialogHeader>
-
-          <textarea
-            className="w-full flex-1 min-h-[16rem] p-4 mt-4 border rounded font-mono text-sm"
-            readOnly
-            value={summary || ""}
-          />
-
-          <div className="mt-4 flex justify-end">
-            <Button variant="outline" onClick={() => setOpenSummary(false)}>
-              关闭
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

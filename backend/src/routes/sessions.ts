@@ -1,7 +1,14 @@
 import express from 'express';
 import { prisma } from '../lib/prisma';
 import { verifyUser, AuthenticatedRequest } from '../middleware/authMiddleware';
+import {
+  verifyUserOrShareToken,
+  SummaryAuthRequest,
+} from '../middleware/summaryShareAuth';
 import { generateSummary, getSummaryProviderLabel } from '../lib/summary-llm';
+import { createSummaryShareToken } from '../lib/summary-share-token';
+import { markdownToDocxBuffer } from '../lib/summary-export-docx';
+import { markdownToPdfBuffer } from '../lib/summary-export-pdf';
 import {
   buildSummaryPrompt,
   parseSummaryType,
@@ -11,6 +18,33 @@ import {
 } from '../prompts/build-summary-prompt';
 
 const router = express.Router();
+
+function safeFilename(title: string): string {
+  return title.replace(/[<>:"/\\|?*]/g, '_').slice(0, 80) || 'summary';
+}
+
+async function loadSummaryForSession(
+  sessionId: string,
+  userId: string,
+  summaryType: SummaryType
+) {
+  const transcript = await prisma.transcript.findUnique({
+    where: { id: sessionId },
+    select: {
+      id: true,
+      title: true,
+      createdAt: true,
+      userId: true,
+      summaries: { where: { summaryType } },
+    },
+  });
+
+  if (!transcript || transcript.userId !== userId) return null;
+  const summary = transcript.summaries[0];
+  if (!summary?.text?.trim()) return null;
+
+  return { transcript, summary };
+}
 
 function formatSummaryPayload(summary: { text: string; summaryType: string }) {
   return {
@@ -94,6 +128,134 @@ router.get("/:id", verifyUser, async (req: AuthenticatedRequest, res) => {
 });
 
 const SUMMARY_ROUTE_TIMEOUT_MS = Number(process.env.SUMMARY_ROUTE_TIMEOUT_MS || "300000");
+
+// 预览页数据（支持分享令牌）
+router.get(
+  "/:id/summary/preview",
+  verifyUserOrShareToken,
+  async (req: SummaryAuthRequest, res) => {
+    const { id } = req.params;
+    const summaryType = req.summaryShare
+      ? parseSummaryType(req.summaryShare.summaryType)
+      : parseSummaryType(String(req.query.summaryType || DEFAULT_SUMMARY_TYPE));
+    const userId = req.user!.id;
+
+    try {
+      const data = await loadSummaryForSession(id, userId, summaryType);
+      if (!data) {
+        return res.status(404).json({ error: "Summary not found" });
+      }
+
+      res.json({
+        id: data.transcript.id,
+        title: data.transcript.title,
+        createdAt: data.transcript.createdAt,
+        summary: data.summary.text,
+        summaryType: data.summary.summaryType,
+        summaryTypeLabel:
+          SUMMARY_TYPE_LABELS[data.summary.summaryType as SummaryType] ??
+          data.summary.summaryType,
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: "Failed to load summary preview" });
+    }
+  }
+);
+
+// 导出 Word / PDF（支持分享令牌）
+router.get(
+  "/:id/summary/export",
+  verifyUserOrShareToken,
+  async (req: SummaryAuthRequest, res) => {
+    const { id } = req.params;
+    const format = String(req.query.format || "docx").toLowerCase();
+    const summaryType = req.summaryShare
+      ? parseSummaryType(req.summaryShare.summaryType)
+      : parseSummaryType(String(req.query.summaryType || DEFAULT_SUMMARY_TYPE));
+    const userId = req.user!.id;
+
+    if (format !== "docx" && format !== "pdf") {
+      return res.status(400).json({ error: 'format must be "docx" or "pdf"' });
+    }
+
+    try {
+      const data = await loadSummaryForSession(id, userId, summaryType);
+      if (!data) {
+        return res.status(404).json({ error: "Summary not found" });
+      }
+
+      const baseName = safeFilename(data.transcript.title);
+
+      if (format === "docx") {
+        const buffer = await markdownToDocxBuffer(data.summary.text);
+        res.setHeader(
+          "Content-Type",
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        );
+        res.setHeader(
+          "Content-Disposition",
+          `attachment; filename="${encodeURIComponent(baseName)}.docx"`
+        );
+        return res.send(buffer);
+      }
+
+      const buffer = await markdownToPdfBuffer(data.summary.text, {
+        title: data.transcript.title,
+        createdAt: data.transcript.createdAt,
+      });
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${encodeURIComponent(baseName)}.pdf"`
+      );
+      return res.send(buffer);
+    } catch (err) {
+      console.error("[SummaryExport]", err);
+      return res.status(500).json({ error: "Failed to export summary" });
+    }
+  }
+);
+
+// 生成分享链接（需登录）
+router.post(
+  "/:id/summary/share-link",
+  verifyUser,
+  async (req: AuthenticatedRequest, res) => {
+    const userId = req.user!.id;
+    const { id } = req.params;
+    const summaryType = parseSummaryType(req.body?.summaryType);
+
+    try {
+      const data = await loadSummaryForSession(id, userId, summaryType);
+      if (!data) {
+        return res.status(404).json({ error: "Summary not found" });
+      }
+
+      const shareToken = createSummaryShareToken({
+        userId,
+        sessionId: id,
+        summaryType,
+      });
+
+      const qs = new URLSearchParams({
+        summaryType,
+        shareToken,
+      });
+
+      res.json({
+        shareToken,
+        previewPath: `/sessions/${id}/summary?${qs.toString()}`,
+        docxExportPath: `/api/sessions/${id}/summary/export?format=docx&${qs.toString()}`,
+        pdfExportPath: `/api/sessions/${id}/summary/export?format=pdf&${qs.toString()}`,
+        expiresIn: process.env.SUMMARY_SHARE_TOKEN_EXPIRES || "7d",
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: "Failed to create share link" });
+    }
+  }
+);
 
 // Generate/fetch summary
 router.post("/:id/summary", verifyUser, async (req: AuthenticatedRequest, res) => {

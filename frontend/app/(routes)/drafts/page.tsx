@@ -148,7 +148,7 @@ export default function DraftsPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>保存为正式会话</DialogTitle>
-            <DialogDescription>转正后草稿将移入会话记录，并从此处删除。</DialogDescription>
+            <DialogDescription>转正后草稿将移入会议记录，并从此处删除。</DialogDescription>
           </DialogHeader>
           <Input
             placeholder="输入会话标题"
