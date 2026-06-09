@@ -2,14 +2,14 @@
   "version": 1,
   "created_at": "2026-06-08T14:29:30.868Z",
   "lifetime": {
-    "total_tokens_estimated": 18382541,
-    "total_reads": 4199,
-    "total_writes": 7710,
+    "total_tokens_estimated": 18518018,
+    "total_reads": 4231,
+    "total_writes": 7764,
     "total_sessions": 8,
-    "anatomy_hits": 2105,
-    "anatomy_misses": 1426,
-    "repeated_reads_blocked": 4888,
-    "estimated_savings_vs_bare_cli": 10437267
+    "anatomy_hits": 2123,
+    "anatomy_misses": 1440,
+    "repeated_reads_blocked": 4917,
+    "estimated_savings_vs_bare_cli": 10532821
   },
   "sessions": [
     {
@@ -66331,6 +66331,485 @@
         "reads_count": 32,
         "writes_count": 47,
         "repeated_reads_blocked": 26,
+        "anatomy_lookups": 18
+      }
+    },
+    {
+      "id": "session-2026-06-09-0959",
+      "started": "2026-06-09T01:59:23.606Z",
+      "ended": "2026-06-09T02:41:35.953Z",
+      "reads": [
+        {
+          "file": "/apps/ScribeAI/README.md",
+          "tokens_estimated": 1139,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 6542,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-draft-sync.ts",
+          "tokens_estimated": 1194,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/lib/store.ts",
+          "tokens_estimated": 653,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/lib/socket.ts",
+          "tokens_estimated": 1371,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/app/(routes)/layout.tsx",
+          "tokens_estimated": 164,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/components/recording-controls.tsx",
+          "tokens_estimated": 1532,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/backend/src/socket/socket.ts",
+          "tokens_estimated": 4669,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/backend/src/routes/sessions.ts",
+          "tokens_estimated": 1514,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/backend/src/lib/summary-llm.ts",
+          "tokens_estimated": 884,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/app/(routes)/sessions/page.tsx",
+          "tokens_estimated": 3440,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/backend/prisma/schema.prisma",
+          "tokens_estimated": 491,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/docs/skills/transcript-to-meeting-notes/SOURCE.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/docs/skills/transcript-to-meeting-notes/SKILL.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/docs/skills/transcript-to-meeting-notes/templates.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/backend/src/prompts/types.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/backend/src/prompts/summary-meeting-notes.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/backend/src/prompts/summary-brief.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/backend/src/prompts/build-summary-prompt.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/backend/prisma/migrations/20260609120000_summary_type/migration.sql",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/components/ui/select.tsx",
+          "tokens_estimated": 1799,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/lib/summary-types.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/backend/scripts/test-summary-prompt.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/docs/会话纪要-Skills分析与集成建议.md",
+          "tokens_estimated": 2737,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/.gitignore",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/backend/skills/transcript-to-meeting-notes/SOURCE.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/backend/skills/transcript-to-meeting-notes/SKILL.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/backend/skills/transcript-to-meeting-notes/templates.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/backend/skills/README.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/next.config.ts",
+          "tokens_estimated": 290,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/package.json",
+          "tokens_estimated": 655,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/backend/src/index.ts",
+          "tokens_estimated": 457,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/apps/ScribeAI/README.md",
+          "tokens_estimated": 47,
+          "action": "edit"
+        },
+        {
+          "file": "/apps/ScribeAI/README.md",
+          "tokens_estimated": 20,
+          "action": "edit"
+        },
+        {
+          "file": "/apps/ScribeAI/README.md",
+          "tokens_estimated": 158,
+          "action": "edit"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 370,
+          "action": "edit"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 38,
+          "action": "edit"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 32,
+          "action": "edit"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 29,
+          "action": "edit"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 6366,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 6100,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 6542,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/docs/会话纪要-Skills分析与集成建议.md",
+          "tokens_estimated": 3128,
+          "action": "create"
+        },
+        {
+          "file": "/root/.cursor/projects/apps-ScribeAI/agent-tools/74a67932-35cd-4abf-890f-a723668d3cb5.txt",
+          "tokens_estimated": 8723,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/docs/skills/transcript-to-meeting-notes/SOURCE.md",
+          "tokens_estimated": 208,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/docs/skills/transcript-to-meeting-notes/SKILL.md",
+          "tokens_estimated": 550,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/docs/skills/transcript-to-meeting-notes/templates.md",
+          "tokens_estimated": 527,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/backend/src/prompts/types.ts",
+          "tokens_estimated": 152,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/backend/src/prompts/summary-meeting-notes.ts",
+          "tokens_estimated": 664,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/backend/src/prompts/summary-brief.ts",
+          "tokens_estimated": 91,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/backend/src/prompts/build-summary-prompt.ts",
+          "tokens_estimated": 261,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/backend/prisma/schema.prisma",
+          "tokens_estimated": 572,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/backend/prisma/migrations/20260609120000_summary_type/migration.sql",
+          "tokens_estimated": 159,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/backend/src/routes/sessions.ts",
+          "tokens_estimated": 1463,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/lib/summary-types.ts",
+          "tokens_estimated": 128,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/app/(routes)/sessions/page.tsx",
+          "tokens_estimated": 3453,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/backend/scripts/test-summary-prompt.ts",
+          "tokens_estimated": 525,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/backend/src/prompts/build-summary-prompt.ts",
+          "tokens_estimated": 269,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/backend/prisma/migrations/20260609120000_summary_type/migration.sql",
+          "tokens_estimated": 227,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/app/(routes)/sessions/page.tsx",
+          "tokens_estimated": 3458,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/app/(routes)/sessions/page.tsx",
+          "tokens_estimated": 3440,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/docs/会话纪要-Skills分析与集成建议.md",
+          "tokens_estimated": 3186,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/docs/会话纪要-Skills分析与集成建议.md",
+          "tokens_estimated": 3241,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/backend/skills/transcript-to-meeting-notes/SOURCE.md",
+          "tokens_estimated": 231,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/backend/skills/transcript-to-meeting-notes/SKILL.md",
+          "tokens_estimated": 550,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/backend/skills/transcript-to-meeting-notes/templates.md",
+          "tokens_estimated": 527,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/backend/src/prompts/summary-meeting-notes.ts",
+          "tokens_estimated": 664,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/docs/会话纪要-Skills分析与集成建议.md",
+          "tokens_estimated": 3244,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/backend/skills/README.md",
+          "tokens_estimated": 91,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/docs/会话纪要-Skills分析与集成建议.md",
+          "tokens_estimated": 3245,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/backend/src/routes/sessions.ts",
+          "tokens_estimated": 1534,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/app/(routes)/sessions/page.tsx",
+          "tokens_estimated": 3492,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/app/(routes)/sessions/page.tsx",
+          "tokens_estimated": 3611,
+          "action": "create"
+        },
+        {
+          "file": "/root/.cursor/projects/apps-ScribeAI/agent-tools/46c71987-2cd1-4fa9-82a8-9f82400e6038.txt",
+          "tokens_estimated": 6857,
+          "action": "create"
+        },
+        {
+          "file": "/root/.cursor/projects/apps-ScribeAI/agent-tools/2d0d2800-7d38-42fd-acc2-6de63c75acec.txt",
+          "tokens_estimated": 10821,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/backend/src/routes/sessions.ts",
+          "tokens_estimated": 1600,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/backend/src/index.ts",
+          "tokens_estimated": 510,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/next.config.ts",
+          "tokens_estimated": 323,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/app/(routes)/sessions/page.tsx",
+          "tokens_estimated": 3617,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/README.md",
+          "tokens_estimated": 1313,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/README.md",
+          "tokens_estimated": 1371,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/README.md",
+          "tokens_estimated": 1400,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/README.md",
+          "tokens_estimated": 1499,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/README.md",
+          "tokens_estimated": 1720,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/README.md",
+          "tokens_estimated": 1780,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/README.md",
+          "tokens_estimated": 1819,
+          "action": "create"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 29531,
+        "output_tokens_estimated": 105946,
+        "reads_count": 32,
+        "writes_count": 54,
+        "repeated_reads_blocked": 29,
         "anatomy_lookups": 18
       }
     }
