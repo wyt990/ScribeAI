@@ -12,9 +12,19 @@ router.get("/", verifyUser, async (req: AuthenticatedRequest, res) => {
     const transcripts = await prisma.transcript.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' },
-      select: { id: true, title: true,  createdAt: true },
+      select: {
+        id: true,
+        title: true,
+        createdAt: true,
+        summary: { select: { id: true } },
+      },
     });
-    res.json(transcripts);
+    res.json(
+      transcripts.map(({ summary, ...rest }) => ({
+        ...rest,
+        hasSummary: Boolean(summary),
+      }))
+    );
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to fetch transcripts' });

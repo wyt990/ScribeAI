@@ -11,22 +11,27 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 
-interface Session {
+interface SessionListItem {
   id: string;
   title: string;
-  fullText?: string;
   createdAt: string;
-  summary?: { text: string };
+  hasSummary?: boolean;
+}
+
+interface SessionDetail extends SessionListItem {
+  fullText?: string;
+  summary?: string | null;
 }
 
 export default function SessionsPage() {
-  const [sessions, setSessions] = useState<Session[]>([]);
+  const [sessions, setSessions] = useState<SessionListItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentSession, setCurrentSession] = useState<Session | null>(null);
+  const [currentSession, setCurrentSession] = useState<SessionDetail | null>(null);
   const [openTranscript, setOpenTranscript] = useState(false);
   const [openSummary, setOpenSummary] = useState(false);
   const [summary, setSummary] = useState<string | null>(null);
   const [loadingSummary, setLoadingSummary] = useState(false);
+  const [loadingSummaryId, setLoadingSummaryId] = useState<string | null>(null);
 
   // Fetch all sessions
   useEffect(() => {
@@ -57,7 +62,7 @@ export default function SessionsPage() {
       const data = await res.json();
       setCurrentSession(data);
       setOpenTranscript(true);
-      setSummary(data.summary?.text || null); // preload summary if exists
+      setSummary(data.summary ?? null);
     } catch (err) {
       console.error(err);
     }
@@ -87,7 +92,31 @@ export default function SessionsPage() {
     }
   };
 
-  // Fetch/generate summary
+  const viewSummary = () => {
+    if (summary) setOpenSummary(true);
+  };
+
+  const openSummaryFromCard = async (session: SessionListItem) => {
+    const token = localStorage.getItem("token");
+    setLoadingSummaryId(session.id);
+    try {
+      const res = await fetch(`/api/sessions/${session.id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data: SessionDetail = await res.json();
+      setCurrentSession(data);
+      setSummary(data.summary ?? null);
+      if (data.summary) {
+        setOpenSummary(true);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("加载摘要失败");
+    } finally {
+      setLoadingSummaryId(null);
+    }
+  };
+
   const fetchSummary = async () => {
     const token = localStorage.getItem("token");
     if (!currentSession) return;
@@ -102,7 +131,15 @@ export default function SessionsPage() {
       );
       const data = await res.json();
       setSummary(data.summary);
-      setOpenSummary(true); // open summary modal
+      setCurrentSession((prev) =>
+        prev ? { ...prev, summary: data.summary, hasSummary: true } : prev
+      );
+      setSessions((prev) =>
+        prev.map((s) =>
+          s.id === currentSession.id ? { ...s, hasSummary: true } : s
+        )
+      );
+      setOpenSummary(true);
     } catch (err) {
       console.error(err);
     } finally {
@@ -121,20 +158,35 @@ export default function SessionsPage() {
           {sessions.map((session) => (
             <Card key={session.id} className="hover:shadow-lg transition-shadow">
               <CardHeader>
-                <CardTitle>{session.title}</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <span className="truncate">{session.title}</span>
+                  {session.hasSummary && (
+                    <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-normal text-primary">
+                      已有摘要
+                    </span>
+                  )}
+                </CardTitle>
                 <CardDescription>{new Date(session.createdAt).toLocaleString()}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex gap-2">
-                  <Button className="flex-1" onClick={() => openSession(session.id)}>
-                    查看转录
-                  </Button>
                   <Button
                     variant="outline"
                     className="shrink-0 text-destructive hover:text-destructive"
                     onClick={() => handleDelete(session.id, session.title)}
                   >
                     删除
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    disabled={!session.hasSummary || loadingSummaryId === session.id}
+                    onClick={() => openSummaryFromCard(session)}
+                  >
+                    {loadingSummaryId === session.id ? "加载中..." : "查看摘要"}
+                  </Button>
+                  <Button className="flex-1" onClick={() => openSession(session.id)}>
+                    查看转录
                   </Button>
                 </div>
               </CardContent>
@@ -161,9 +213,13 @@ export default function SessionsPage() {
             />
 
             <div className="mt-4 flex flex-wrap gap-2">
-              <Button onClick={fetchSummary} disabled={loadingSummary}>
-                {loadingSummary ? "生成中..." : "摘要"}
-              </Button>
+              {summary ? (
+                <Button onClick={viewSummary}>查看摘要</Button>
+              ) : (
+                <Button onClick={fetchSummary} disabled={loadingSummary}>
+                  {loadingSummary ? "生成中..." : "生成摘要"}
+                </Button>
+              )}
               <Button
                 variant="outline"
                 className="text-destructive hover:text-destructive"
@@ -184,6 +240,9 @@ export default function SessionsPage() {
         <DialogContent className="p-6 w-[80vw] max-w-2xl">
           <DialogHeader>
             <DialogTitle>摘要</DialogTitle>
+            {currentSession && (
+              <DialogDescription>{currentSession.title}</DialogDescription>
+            )}
           </DialogHeader>
 
           <textarea
@@ -194,7 +253,7 @@ export default function SessionsPage() {
 
           <div className="mt-4 flex justify-end">
             <Button variant="outline" onClick={() => setOpenSummary(false)}>
-              Close
+              关闭
             </Button>
           </div>
         </DialogContent>

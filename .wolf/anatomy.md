@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-06-09T01:44:46.343Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-06-09T01:52:46.928Z
 > Files: 136 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../root/.claude/plans/
@@ -96,7 +96,7 @@
 
 - `authroutes.ts` — routes/auth.js (~1308 tok)
 - `drafts.ts` — 列表：用户所有未转正的草稿 (~1821 tok)
-- `sessions.ts` — API routes: GET, POST, DELETE (4 endpoints) (~1185 tok)
+- `sessions.ts` — API routes: GET, POST, DELETE (4 endpoints) (~1240 tok)
 - `transcript.ts` — API routes: POST (1 endpoints) (~260 tok)
 
 ## backend/src/socket/
@@ -143,7 +143,7 @@
 
 ## frontend/app/(routes)/sessions/
 
-- `page.tsx` — SessionsPage — renders modal (~1823 tok)
+- `page.tsx` — SessionsPage — renders modal (~2397 tok)
 
 ## frontend/app/login/
 

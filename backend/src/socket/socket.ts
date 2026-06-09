@@ -16,7 +16,7 @@ export const createSocketServer = (httpServer: any) => {
   });
 
   io.on("connection", (socket: Socket) => {
-    console.log("Client connected:", socket.id, "| STT provider:", STT_PROVIDER);
+    // console.log("Client connected:", socket.id, "| STT provider:", STT_PROVIDER);
 
     if (STT_PROVIDER === "openai_asr") {
       handleOpenAIASR(socket);
@@ -26,7 +26,7 @@ export const createSocketServer = (httpServer: any) => {
 
     // --- Disconnect cleanup (shared) ---
     socket.on("disconnect", () => {
-      console.log("Client disconnected:", socket.id);
+      // console.log("Client disconnected:", socket.id);
     });
   });
 
@@ -49,13 +49,13 @@ function handleDeepgram(socket: Socket) {
   let currentRecordingId: string | null = null;
 
   deepgramLive.on(LiveTranscriptionEvents.Open, () => {
-    console.log("[Deepgram] Connection opened for", socket.id);
+    // console.log("[Deepgram] Connection opened for", socket.id);
     isDeepgramOpen = true;
     socket.emit("deepgram-ready");
   });
 
   deepgramLive.on(LiveTranscriptionEvents.Close, () => {
-    console.log("[Deepgram] Connection closed for", socket.id);
+    // console.log("[Deepgram] Connection closed for", socket.id);
     isDeepgramOpen = false;
   });
 
@@ -103,11 +103,11 @@ function handleDeepgram(socket: Socket) {
     currentUserId = userId;
     const sessionDir = path.join(STORAGE_CONFIG.uploadsDir, userId, recordingId);
     fs.mkdirSync(sessionDir, { recursive: true });
-    console.log(`[Storage] Session dir: ${userId}/${recordingId}`);
+    // console.log(`[Storage] Session dir: ${userId}/${recordingId}`);
   });
 
   socket.on("reset-recording", () => {
-    console.log("Reset recording requested by", socket.id);
+    // console.log("Reset recording requested by", socket.id);
   });
 
   socket.on("stop-recording", () => {
@@ -200,11 +200,11 @@ function handleOpenAIASR(socket: Socket) {
 
         if (seq !== undefined) {
           socket.emit("segment-result", { seq, text: trimmed });
-          console.log(`[ASR] segment seq=${seq}: "${trimmed.slice(0, 60)}..."`);
+          // console.log(`[ASR] segment seq=${seq}: "${trimmed.slice(0, 60)}..."`);
         } else {
           // Final tail on stop — only unprocessed audio remains
           socket.emit("transcript", trimmed);
-          console.log(`[ASR] final tail: "${trimmed.slice(0, 60)}..."`);
+          // console.log(`[ASR] final tail: "${trimmed.slice(0, 60)}..."`);
         }
       } else {
         if (trimmed.length > lastTranscriptLength) {
@@ -241,7 +241,7 @@ function handleOpenAIASR(socket: Socket) {
     currentUserId = userId;
     const sessionDir = path.join(STORAGE_CONFIG.uploadsDir, userId, recordingId);
     fs.mkdirSync(sessionDir, { recursive: true });
-    console.log(`[Storage] Session dir: ${userId}/${recordingId}`);
+    // console.log(`[Storage] Session dir: ${userId}/${recordingId}`);
   });
 
   // ---- Receive audio chunks ----
@@ -265,7 +265,7 @@ function handleOpenAIASR(socket: Socket) {
         safetyTimer = setInterval(async () => {
           await flushToASR();
         }, SAFETY_FLUSH_MS);
-        console.log(`[Safety] safety flush timer started (${SAFETY_FLUSH_MS}ms interval)`);
+        // console.log(`[Safety] safety flush timer started (${SAFETY_FLUSH_MS}ms interval)`);
       }
     } catch (error) {
       console.error("Error processing audio chunk:", error);
@@ -277,11 +277,11 @@ function handleOpenAIASR(socket: Socket) {
     if (!VAD_ENABLED) return;
 
     if (!audio || audio.byteLength === 0) {
-      console.warn(`[VAD] segment-end seq=${seq} missing audio data, skipping`);
+      // console.warn(`[VAD] segment-end seq=${seq} missing audio data, skipping`);
       return;
     }
 
-    console.log(`[VAD] segment-end seq=${seq}, wav=${audio.byteLength}B`);
+    // console.log(`[VAD] segment-end seq=${seq}, wav=${audio.byteLength}B`);
     try {
       const text = await transcribeAudio(
         Buffer.from(audio),
@@ -294,7 +294,7 @@ function handleOpenAIASR(socket: Socket) {
       );
       if (text?.trim()) {
         socket.emit("segment-result", { seq, text: text.trim() });
-        console.log(`[ASR] segment seq=${seq}: "${text.trim().slice(0, 60)}..."`);
+        // console.log(`[ASR] segment seq=${seq}: "${text.trim().slice(0, 60)}..."`);
       }
     } catch (err) {
       console.error(`[OpenAI ASR] Segment ${seq} error for ${socket.id}:`, err);
@@ -304,7 +304,7 @@ function handleOpenAIASR(socket: Socket) {
 
   // ---- Client signals recording is complete ----
   socket.on("stop-recording", async () => {
-    console.log(`[OpenAI ASR] stop-recording for ${socket.id}`);
+    // console.log(`[OpenAI ASR] stop-recording for ${socket.id}`);
 
     // Stop timers
     if (sliceTimer) {
@@ -332,7 +332,7 @@ function handleOpenAIASR(socket: Socket) {
   });
 
   socket.on("reset-recording", () => {
-    console.log("Reset recording for", socket.id);
+    // console.log("Reset recording for", socket.id);
     resetSessionBuffers();
     if (sliceTimer) {
       clearInterval(sliceTimer);
@@ -424,7 +424,7 @@ function removeSessionDir(userId: string, recordingId: string) {
     const sessionDir = path.join(STORAGE_CONFIG.uploadsDir, userId, recordingId);
     if (fs.existsSync(sessionDir)) {
       fs.rmSync(sessionDir, { recursive: true, force: true });
-      console.log(`[Cleanup] Removed session dir: ${userId}/${recordingId}`);
+      // console.log(`[Cleanup] Removed session dir: ${userId}/${recordingId}`);
     }
   } catch (error) {
     console.error("Error removing session dir:", error);
@@ -483,7 +483,7 @@ function cleanupStaleSessions() {
   }
 
   if (cleanedCount > 0) {
-    console.log(`[StaleCleanup] Cleaned ${cleanedCount} stale session(s)`);
+    // console.log(`[StaleCleanup] Cleaned ${cleanedCount} stale session(s)`);
   }
 }
 
@@ -496,5 +496,5 @@ export function startStaleSessionCleanup() {
 
   cleanupStaleSessions(); // run once on startup
   setInterval(cleanupStaleSessions, intervalMs);
-  console.log(`[StaleCleanup] Scheduled every ${cleanupIntervalMinutes} minute(s)`);
+  // console.log(`[StaleCleanup] Scheduled every ${cleanupIntervalMinutes} minute(s)`);
 }
