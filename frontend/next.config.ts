@@ -5,6 +5,11 @@ const nextConfig: NextConfig = {
   // Socket.io 后端 Engine.IO 要求路径带斜杠才能匹配
   skipTrailingSlashRedirect: true,
 
+  // rewrites 代理默认 30s 会 ECONNRESET；结构化纪要 LLM 常需 1–3 分钟
+  experimental: {
+    proxyTimeout: 600_000, // 5 分钟
+  },
+
   async rewrites() {
     return [
       {

@@ -3,7 +3,7 @@
   "started": "2026-06-09T01:59:23.606Z",
   "files_read": {
     "/apps/ScribeAI/README.md": {
-      "count": 4,
+      "count": 5,
       "tokens": 1139,
       "first_read": "2026-06-09T01:59:26.018Z"
     },
@@ -41,6 +41,126 @@
       "count": 2,
       "tokens": 4669,
       "first_read": "2026-06-09T02:08:08.309Z"
+    },
+    "/apps/ScribeAI/backend/src/routes/sessions.ts": {
+      "count": 5,
+      "tokens": 1514,
+      "first_read": "2026-06-09T02:15:19.290Z"
+    },
+    "/apps/ScribeAI/backend/src/lib/summary-llm.ts": {
+      "count": 2,
+      "tokens": 884,
+      "first_read": "2026-06-09T02:15:19.327Z"
+    },
+    "/apps/ScribeAI/frontend/app/(routes)/sessions/page.tsx": {
+      "count": 6,
+      "tokens": 3440,
+      "first_read": "2026-06-09T02:15:25.081Z"
+    },
+    "/apps/ScribeAI/backend/prisma/schema.prisma": {
+      "count": 2,
+      "tokens": 491,
+      "first_read": "2026-06-09T02:19:46.529Z"
+    },
+    "/apps/ScribeAI/docs/skills/transcript-to-meeting-notes/SOURCE.md": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T02:21:25.077Z"
+    },
+    "/apps/ScribeAI/docs/skills/transcript-to-meeting-notes/SKILL.md": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T02:21:34.260Z"
+    },
+    "/apps/ScribeAI/docs/skills/transcript-to-meeting-notes/templates.md": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T02:21:43.326Z"
+    },
+    "/apps/ScribeAI/backend/src/prompts/types.ts": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T02:21:46.578Z"
+    },
+    "/apps/ScribeAI/backend/src/prompts/summary-meeting-notes.ts": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T02:21:53.263Z"
+    },
+    "/apps/ScribeAI/backend/src/prompts/summary-brief.ts": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T02:21:54.141Z"
+    },
+    "/apps/ScribeAI/backend/src/prompts/build-summary-prompt.ts": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T02:21:55.943Z"
+    },
+    "/apps/ScribeAI/backend/prisma/migrations/20260609120000_summary_type/migration.sql": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T02:22:01.235Z"
+    },
+    "/apps/ScribeAI/frontend/components/ui/select.tsx": {
+      "count": 1,
+      "tokens": 1799,
+      "first_read": "2026-06-09T02:22:10.373Z"
+    },
+    "/apps/ScribeAI/frontend/lib/summary-types.ts": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T02:22:10.798Z"
+    },
+    "/apps/ScribeAI/backend/scripts/test-summary-prompt.ts": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T02:22:23.882Z"
+    },
+    "/apps/ScribeAI/docs/会话纪要-Skills分析与集成建议.md": {
+      "count": 2,
+      "tokens": 2737,
+      "first_read": "2026-06-09T02:24:23.459Z"
+    },
+    "/apps/ScribeAI/.gitignore": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T02:26:11.104Z"
+    },
+    "/apps/ScribeAI/backend/skills/transcript-to-meeting-notes/SOURCE.md": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T02:26:19.834Z"
+    },
+    "/apps/ScribeAI/backend/skills/transcript-to-meeting-notes/SKILL.md": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T02:26:22.740Z"
+    },
+    "/apps/ScribeAI/backend/skills/transcript-to-meeting-notes/templates.md": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T02:26:25.803Z"
+    },
+    "/apps/ScribeAI/backend/skills/README.md": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T02:26:26.874Z"
+    },
+    "/apps/ScribeAI/frontend/next.config.ts": {
+      "count": 2,
+      "tokens": 290,
+      "first_read": "2026-06-09T02:35:02.284Z"
+    },
+    "/apps/ScribeAI/frontend/package.json": {
+      "count": 1,
+      "tokens": 655,
+      "first_read": "2026-06-09T02:35:12.713Z"
+    },
+    "/apps/ScribeAI/backend/src/index.ts": {
+      "count": 2,
+      "tokens": 457,
+      "first_read": "2026-06-09T02:35:12.735Z"
     }
   },
   "files_written": [
@@ -103,15 +223,260 @@
       "action": "create",
       "tokens": 6542,
       "at": "2026-06-09T02:12:04.835Z"
+    },
+    {
+      "file": "/apps/ScribeAI/docs/会话纪要-Skills分析与集成建议.md",
+      "action": "create",
+      "tokens": 3128,
+      "at": "2026-06-09T02:15:55.182Z"
+    },
+    {
+      "file": "/root/.cursor/projects/apps-ScribeAI/agent-tools/74a67932-35cd-4abf-890f-a723668d3cb5.txt",
+      "action": "create",
+      "tokens": 8723,
+      "at": "2026-06-09T02:20:46.302Z"
+    },
+    {
+      "file": "/apps/ScribeAI/docs/skills/transcript-to-meeting-notes/SOURCE.md",
+      "action": "create",
+      "tokens": 208,
+      "at": "2026-06-09T02:21:25.915Z"
+    },
+    {
+      "file": "/apps/ScribeAI/docs/skills/transcript-to-meeting-notes/SKILL.md",
+      "action": "create",
+      "tokens": 550,
+      "at": "2026-06-09T02:21:35.176Z"
+    },
+    {
+      "file": "/apps/ScribeAI/docs/skills/transcript-to-meeting-notes/templates.md",
+      "action": "create",
+      "tokens": 527,
+      "at": "2026-06-09T02:21:44.097Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/prompts/types.ts",
+      "action": "create",
+      "tokens": 152,
+      "at": "2026-06-09T02:21:47.225Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/prompts/summary-meeting-notes.ts",
+      "action": "create",
+      "tokens": 664,
+      "at": "2026-06-09T02:21:53.931Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/prompts/summary-brief.ts",
+      "action": "create",
+      "tokens": 91,
+      "at": "2026-06-09T02:21:55.397Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/prompts/build-summary-prompt.ts",
+      "action": "create",
+      "tokens": 261,
+      "at": "2026-06-09T02:21:57.244Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/prisma/schema.prisma",
+      "action": "create",
+      "tokens": 572,
+      "at": "2026-06-09T02:22:01.514Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/prisma/migrations/20260609120000_summary_type/migration.sql",
+      "action": "create",
+      "tokens": 159,
+      "at": "2026-06-09T02:22:03.094Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/routes/sessions.ts",
+      "action": "create",
+      "tokens": 1463,
+      "at": "2026-06-09T02:22:08.133Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/lib/summary-types.ts",
+      "action": "create",
+      "tokens": 128,
+      "at": "2026-06-09T02:22:11.521Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/app/(routes)/sessions/page.tsx",
+      "action": "create",
+      "tokens": 3453,
+      "at": "2026-06-09T02:22:22.148Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/scripts/test-summary-prompt.ts",
+      "action": "create",
+      "tokens": 525,
+      "at": "2026-06-09T02:22:24.587Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/prompts/build-summary-prompt.ts",
+      "action": "create",
+      "tokens": 269,
+      "at": "2026-06-09T02:22:44.739Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/prisma/migrations/20260609120000_summary_type/migration.sql",
+      "action": "create",
+      "tokens": 227,
+      "at": "2026-06-09T02:22:57.807Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/app/(routes)/sessions/page.tsx",
+      "action": "create",
+      "tokens": 3458,
+      "at": "2026-06-09T02:24:23.763Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/app/(routes)/sessions/page.tsx",
+      "action": "create",
+      "tokens": 3440,
+      "at": "2026-06-09T02:24:26.512Z"
+    },
+    {
+      "file": "/apps/ScribeAI/docs/会话纪要-Skills分析与集成建议.md",
+      "action": "create",
+      "tokens": 3186,
+      "at": "2026-06-09T02:24:31.948Z"
+    },
+    {
+      "file": "/apps/ScribeAI/docs/会话纪要-Skills分析与集成建议.md",
+      "action": "create",
+      "tokens": 3241,
+      "at": "2026-06-09T02:24:35.586Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/skills/transcript-to-meeting-notes/SOURCE.md",
+      "action": "create",
+      "tokens": 231,
+      "at": "2026-06-09T02:26:20.633Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/skills/transcript-to-meeting-notes/SKILL.md",
+      "action": "create",
+      "tokens": 550,
+      "at": "2026-06-09T02:26:23.449Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/skills/transcript-to-meeting-notes/templates.md",
+      "action": "create",
+      "tokens": 527,
+      "at": "2026-06-09T02:26:27.386Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/prompts/summary-meeting-notes.ts",
+      "action": "create",
+      "tokens": 664,
+      "at": "2026-06-09T02:26:27.402Z"
+    },
+    {
+      "file": "/apps/ScribeAI/docs/会话纪要-Skills分析与集成建议.md",
+      "action": "create",
+      "tokens": 3244,
+      "at": "2026-06-09T02:26:27.965Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/skills/README.md",
+      "action": "create",
+      "tokens": 91,
+      "at": "2026-06-09T02:26:29.763Z"
+    },
+    {
+      "file": "/apps/ScribeAI/docs/会话纪要-Skills分析与集成建议.md",
+      "action": "create",
+      "tokens": 3245,
+      "at": "2026-06-09T02:26:29.937Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/routes/sessions.ts",
+      "action": "create",
+      "tokens": 1534,
+      "at": "2026-06-09T02:31:36.034Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/app/(routes)/sessions/page.tsx",
+      "action": "create",
+      "tokens": 3492,
+      "at": "2026-06-09T02:31:38.105Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/app/(routes)/sessions/page.tsx",
+      "action": "create",
+      "tokens": 3611,
+      "at": "2026-06-09T02:31:40.385Z"
+    },
+    {
+      "file": "/root/.cursor/projects/apps-ScribeAI/agent-tools/46c71987-2cd1-4fa9-82a8-9f82400e6038.txt",
+      "action": "create",
+      "tokens": 6857,
+      "at": "2026-06-09T02:35:07.039Z"
+    },
+    {
+      "file": "/root/.cursor/projects/apps-ScribeAI/agent-tools/2d0d2800-7d38-42fd-acc2-6de63c75acec.txt",
+      "action": "create",
+      "tokens": 10821,
+      "at": "2026-06-09T02:35:07.825Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/routes/sessions.ts",
+      "action": "create",
+      "tokens": 1600,
+      "at": "2026-06-09T02:35:29.684Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/index.ts",
+      "action": "create",
+      "tokens": 510,
+      "at": "2026-06-09T02:35:29.958Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/next.config.ts",
+      "action": "create",
+      "tokens": 323,
+      "at": "2026-06-09T02:35:29.991Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/app/(routes)/sessions/page.tsx",
+      "action": "create",
+      "tokens": 3617,
+      "at": "2026-06-09T02:35:32.555Z"
     }
   ],
   "edit_counts": {
     "README.md": 3,
-    "frontend/hooks/use-audio-recorder.ts": 7
+    "frontend/hooks/use-audio-recorder.ts": 7,
+    "docs/会话纪要-Skills分析与集成建议.md": 5,
+    "../../root/.cursor/projects/apps-ScribeAI/agent-tools/74a67932-35cd-4abf-890f-a723668d3cb5.txt": 1,
+    "docs/skills/transcript-to-meeting-notes/SOURCE.md": 1,
+    "docs/skills/transcript-to-meeting-notes/SKILL.md": 1,
+    "docs/skills/transcript-to-meeting-notes/templates.md": 1,
+    "backend/src/prompts/types.ts": 1,
+    "backend/src/prompts/summary-meeting-notes.ts": 2,
+    "backend/src/prompts/summary-brief.ts": 1,
+    "backend/src/prompts/build-summary-prompt.ts": 2,
+    "backend/prisma/schema.prisma": 1,
+    "backend/prisma/migrations/20260609120000_summary_type/migration.sql": 2,
+    "backend/src/routes/sessions.ts": 3,
+    "frontend/lib/summary-types.ts": 1,
+    "frontend/app/(routes)/sessions/page.tsx": 6,
+    "backend/scripts/test-summary-prompt.ts": 1,
+    "backend/skills/transcript-to-meeting-notes/SOURCE.md": 1,
+    "backend/skills/transcript-to-meeting-notes/SKILL.md": 1,
+    "backend/skills/transcript-to-meeting-notes/templates.md": 1,
+    "backend/skills/README.md": 1,
+    "../../root/.cursor/projects/apps-ScribeAI/agent-tools/46c71987-2cd1-4fa9-82a8-9f82400e6038.txt": 1,
+    "../../root/.cursor/projects/apps-ScribeAI/agent-tools/2d0d2800-7d38-42fd-acc2-6de63c75acec.txt": 1,
+    "backend/src/index.ts": 1,
+    "frontend/next.config.ts": 1
   },
-  "anatomy_hits": 8,
-  "anatomy_misses": 0,
-  "repeated_reads_warned": 11,
+  "anatomy_hits": 18,
+  "anatomy_misses": 14,
+  "repeated_reads_warned": 26,
   "cerebrum_warnings": 0,
-  "stop_count": 5
+  "stop_count": 10
 }

@@ -10,17 +10,33 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  DEFAULT_SUMMARY_TYPE,
+  SUMMARY_TYPE_LABELS,
+  SUMMARY_TYPES,
+  isSummaryType,
+  type SummaryType,
+} from '@/lib/summary-types';
 
 interface SessionListItem {
   id: string;
   title: string;
   createdAt: string;
   hasSummary?: boolean;
+  summaryTypes?: string[];
 }
 
 interface SessionDetail extends SessionListItem {
   fullText?: string;
   summary?: string | null;
+  summaryType?: string | null;
 }
 
 export default function SessionsPage() {
@@ -30,10 +46,22 @@ export default function SessionsPage() {
   const [openTranscript, setOpenTranscript] = useState(false);
   const [openSummary, setOpenSummary] = useState(false);
   const [summary, setSummary] = useState<string | null>(null);
+  const [summaryType, setSummaryType] = useState<SummaryType>(DEFAULT_SUMMARY_TYPE);
+  const [activeSummaryType, setActiveSummaryType] = useState<SummaryType | null>(null);
   const [loadingSummary, setLoadingSummary] = useState(false);
   const [loadingSummaryId, setLoadingSummaryId] = useState<string | null>(null);
 
-  // Fetch all sessions
+  const hasCachedSummary = (session: SessionListItem, type: SummaryType) =>
+    session.summaryTypes?.includes(type) ?? false;
+
+  const fetchSessionDetail = async (id: string, type: SummaryType = DEFAULT_SUMMARY_TYPE) => {
+    const token = localStorage.getItem("token");
+    const res = await fetch(`/api/sessions/${id}?summaryType=${type}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return res.json() as Promise<SessionDetail>;
+  };
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     const fetchSessions = async () => {
@@ -52,17 +80,21 @@ export default function SessionsPage() {
     fetchSessions();
   }, []);
 
-  // Open transcript dialog
   const openSession = async (id: string) => {
-    const token = localStorage.getItem("token");
     try {
-      const res = await fetch(`/api/sessions/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
+      const preferredType = hasCachedSummary(
+        sessions.find((s) => s.id === id) ?? { id, title: '', createdAt: '' },
+        summaryType
+      )
+        ? summaryType
+        : DEFAULT_SUMMARY_TYPE;
+      const data = await fetchSessionDetail(id, preferredType);
       setCurrentSession(data);
       setOpenTranscript(true);
       setSummary(data.summary ?? null);
+      setActiveSummaryType(
+        data.summaryType && isSummaryType(data.summaryType) ? data.summaryType : null
+      );
     } catch (err) {
       console.error(err);
     }
@@ -85,6 +117,7 @@ export default function SessionsPage() {
         setOpenTranscript(false);
         setOpenSummary(false);
         setSummary(null);
+        setActiveSummaryType(null);
       }
     } catch (err) {
       console.error(err);
@@ -97,15 +130,15 @@ export default function SessionsPage() {
   };
 
   const openSummaryFromCard = async (session: SessionListItem) => {
-    const token = localStorage.getItem("token");
     setLoadingSummaryId(session.id);
     try {
-      const res = await fetch(`/api/sessions/${session.id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data: SessionDetail = await res.json();
+      const type = session.summaryTypes?.includes(DEFAULT_SUMMARY_TYPE)
+        ? DEFAULT_SUMMARY_TYPE
+        : (session.summaryTypes?.[0] as SummaryType) ?? DEFAULT_SUMMARY_TYPE;
+      const data = await fetchSessionDetail(session.id, type);
       setCurrentSession(data);
       setSummary(data.summary ?? null);
+      setActiveSummaryType(type);
       if (data.summary) {
         setOpenSummary(true);
       }
@@ -117,35 +150,91 @@ export default function SessionsPage() {
     }
   };
 
-  const fetchSummary = async () => {
-    const token = localStorage.getItem("token");
+  const fetchSummary = async (regenerate = false) => {
     if (!currentSession) return;
+    if (
+      regenerate &&
+      !confirm(
+        `确定重新生成「${SUMMARY_TYPE_LABELS[summaryType]}」？将覆盖当前已保存的摘要。`
+      )
+    ) {
+      return;
+    }
+
     setLoadingSummary(true);
+    const token = localStorage.getItem("token");
     try {
-      const res = await fetch(
-        `/api/sessions/${currentSession.id}/summary`,
-        {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const res = await fetch(`/api/sessions/${currentSession.id}/summary`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ summaryType, regenerate }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || "生成摘要失败");
+      }
       const data = await res.json();
       setSummary(data.summary);
+      setActiveSummaryType(summaryType);
       setCurrentSession((prev) =>
-        prev ? { ...prev, summary: data.summary, hasSummary: true } : prev
+        prev
+          ? {
+              ...prev,
+              summary: data.summary,
+              summaryType: data.summaryType,
+              hasSummary: true,
+              summaryTypes: Array.from(
+                new Set([...(prev.summaryTypes ?? []), data.summaryType])
+              ),
+            }
+          : prev
       );
       setSessions((prev) =>
         prev.map((s) =>
-          s.id === currentSession.id ? { ...s, hasSummary: true } : s
+          s.id === currentSession.id
+            ? {
+                ...s,
+                hasSummary: true,
+                summaryTypes: Array.from(
+                  new Set([...(s.summaryTypes ?? []), data.summaryType])
+                ),
+              }
+            : s
         )
       );
       setOpenSummary(true);
     } catch (err) {
       console.error(err);
+      alert(err instanceof Error ? err.message : "生成摘要失败");
     } finally {
       setLoadingSummary(false);
     }
   };
+
+  const switchCachedSummaryType = async (type: SummaryType) => {
+    if (!currentSession) return;
+    setSummaryType(type);
+    if (!hasCachedSummary(currentSession, type)) {
+      setSummary(null);
+      setActiveSummaryType(null);
+      return;
+    }
+    try {
+      const data = await fetchSessionDetail(currentSession.id, type);
+      setSummary(data.summary ?? null);
+      setActiveSummaryType(type);
+      setCurrentSession((prev) => (prev ? { ...prev, ...data } : prev));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const summaryTypeLabel = activeSummaryType
+    ? SUMMARY_TYPE_LABELS[activeSummaryType]
+    : null;
 
   return (
     <div className="p-6 space-y-6">
@@ -195,7 +284,6 @@ export default function SessionsPage() {
         </div>
       )}
 
-      {/* Transcript Dialog */}
       {currentSession && (
         <Dialog open={openTranscript} onOpenChange={setOpenTranscript}>
           <DialogContent className="p-6 w-[90vw] max-w-3xl">
@@ -212,41 +300,75 @@ export default function SessionsPage() {
               value={currentSession.fullText}
             />
 
-            <div className="mt-4 flex flex-wrap gap-2">
-              {summary ? (
-                <Button onClick={viewSummary}>查看摘要</Button>
-              ) : (
-                <Button onClick={fetchSummary} disabled={loadingSummary}>
-                  {loadingSummary ? "生成中..." : "生成摘要"}
+            <div className="mt-4 space-y-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-sm text-muted-foreground shrink-0">摘要模式</span>
+                <Select
+                  value={summaryType}
+                  onValueChange={(v) => void switchCachedSummaryType(v as SummaryType)}
+                >
+                  <SelectTrigger className="w-[220px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SUMMARY_TYPES.map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {SUMMARY_TYPE_LABELS[type]}
+                        {hasCachedSummary(currentSession, type) ? " ✓" : ""}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                {summary && activeSummaryType === summaryType ? (
+                  <>
+                    <Button
+                      variant="outline"
+                      onClick={() => void fetchSummary(true)}
+                      disabled={loadingSummary}
+                    >
+                      {loadingSummary ? "生成中（约 1–3 分钟）..." : "重新生成摘要"}
+                    </Button>
+                    <Button onClick={viewSummary} disabled={loadingSummary}>
+                      查看摘要
+                    </Button>
+                  </>
+                ) : (
+                  <Button onClick={() => void fetchSummary()} disabled={loadingSummary}>
+                    {loadingSummary ? "生成中（约 1–3 分钟）..." : "生成摘要"}
+                  </Button>
+                )}
+                <Button
+                  variant="outline"
+                  className="text-destructive hover:text-destructive"
+                  onClick={() => handleDelete(currentSession.id, currentSession.title)}
+                >
+                  删除
                 </Button>
-              )}
-              <Button
-                variant="outline"
-                className="text-destructive hover:text-destructive"
-                onClick={() => handleDelete(currentSession.id, currentSession.title)}
-              >
-                删除
-              </Button>
-              <Button variant="outline" onClick={() => setOpenTranscript(false)}>
-                关闭
-              </Button>
+                <Button variant="outline" onClick={() => setOpenTranscript(false)}>
+                  关闭
+                </Button>
+              </div>
             </div>
           </DialogContent>
         </Dialog>
       )}
 
-      {/* Summary Dialog */}
       <Dialog open={openSummary} onOpenChange={setOpenSummary}>
-        <DialogContent className="p-6 w-[80vw] max-w-2xl">
+        <DialogContent className="p-6 w-[80vw] max-w-2xl max-h-[85vh] flex flex-col">
           <DialogHeader>
-            <DialogTitle>摘要</DialogTitle>
+            <DialogTitle>
+              {summaryTypeLabel ? `${summaryTypeLabel}` : "摘要"}
+            </DialogTitle>
             {currentSession && (
               <DialogDescription>{currentSession.title}</DialogDescription>
             )}
           </DialogHeader>
 
           <textarea
-            className="w-full h-64 p-4 mt-4 border rounded"
+            className="w-full flex-1 min-h-[16rem] p-4 mt-4 border rounded font-mono text-sm"
             readOnly
             value={summary || ""}
           />

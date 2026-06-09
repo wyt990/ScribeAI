@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-06-09T02:12:04.821Z
-> Files: 136 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-06-09T02:35:32.539Z
+> Files: 152 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../root/.claude/plans/
 
@@ -16,10 +16,13 @@
 ## ../../root/.cursor/projects/apps-ScribeAI/agent-tools/
 
 - `28f00ecf-78f3-405b-b1c9-a27f433f69f9.txt` — Skill authoring best practices (~9943 tok)
+- `2d0d2800-7d38-42fd-acc2-6de63c75acec.txt` — withBundleAnalyzer: middleware (~9468 tok)
+- `46c71987-2cd1-4fa9-82a8-9f82400e6038.txt` — Issue: vercel/next.js #36251 (~6000 tok)
 - `51fcb130-51a6-40b3-8482-daa977721c1e.txt` — File: anthropics/skills/skills/skill-creator/SKILL.md (~8263 tok)
 - `5d5e746b-aa2e-4ae2-a2ff-13bece07f457.txt` — File: openclaw/skills/skills/jeffjhunter/ai-meeting-notes/SKILL.md (~6028 tok)
 - `67145384-edf8-4cd6-bc29-f8e9d5132897.txt` — File: daymade/claude-code-skills/suites/daymade-docs/meeting-minutes-taker/SKILL.md (~7727 tok)
 - `67a15260-99bf-45a8-8a74-fbaa1ddd0f06.txt` — Repository: spencerpauly/awesome-cursor-skills (~6777 tok)
+- `74a67932-35cd-4abf-890f-a723668d3cb5.txt` (~7633 tok)
 - `98523a23-7366-4678-b9b0-61565f304a9d.txt` — Repository: ComposioHQ/awesome-claude-skills (~9903 tok)
 - `d4dbccee-6f82-422e-af30-1c9736653053.txt` — Declares serve (~10424 tok)
 - `e7420b87-3e70-4bd3-a26c-72867a19fa36.txt` — Declares registry (~7697 tok)
@@ -47,7 +50,7 @@
 
 ## backend/prisma/
 
-- `schema.prisma` (~491 tok)
+- `schema.prisma` (~534 tok)
 
 ## backend/prisma/migrations/
 
@@ -77,9 +80,26 @@
 
 - `migration.sql` — CreateTable (~246 tok)
 
+## backend/prisma/migrations/20260609120000_summary_type/
+
+- `migration.sql` — Add summaryType, allow multiple summaries per transcript (by type) (~212 tok)
+
+## backend/scripts/
+
+- `test-summary-prompt.ts` — 本地测试：prompt 构建 +（可选）真实 LLM 调用 (~525 tok)
+
+## backend/skills/
+
+- `README.md` — Project documentation (~80 tok)
+
+## backend/skills/transcript-to-meeting-notes/
+
+- `SKILL.md` — Transcript to Meeting Notes (~481 tok)
+- `SOURCE.md` — 来源说明 (~202 tok)
+
 ## backend/src/
 
-- `index.ts` — Declares app (~457 tok)
+- `index.ts` — Declares app (~527 tok)
 
 ## backend/src/lib/
 
@@ -92,11 +112,18 @@
 
 - `authMiddleware.ts` — Exports AuthenticatedRequest, verifyUser (~364 tok)
 
+## backend/src/prompts/
+
+- `build-summary-prompt.ts` — Exports SummaryPromptMeta, buildSummaryPrompt (~269 tok)
+- `summary-brief.ts` — 保留的简要摘要模式（旧版单行 prompt 等价） (~91 tok)
+- `summary-meeting-notes.ts` — Prompt rules derived from backend/skills/transcript-to-meeting-notes/ (~664 tok)
+- `types.ts` — Exports SUMMARY_TYPES, SummaryType, DEFAULT_SUMMARY_TYPE, parseSummaryType, SUMMARY_TYPE_LABELS (~152 tok)
+
 ## backend/src/routes/
 
 - `authroutes.ts` — routes/auth.js (~1308 tok)
 - `drafts.ts` — 列表：用户所有未转正的草稿 (~1821 tok)
-- `sessions.ts` — API routes: GET, POST, DELETE (4 endpoints) (~1240 tok)
+- `sessions.ts` — API routes: GET, POST, DELETE (4 endpoints) (~1654 tok)
 - `transcript.ts` — API routes: POST (1 endpoints) (~260 tok)
 
 ## backend/src/socket/
@@ -105,14 +132,20 @@
 
 ## docs/
 
-- `会话纪要-Skills分析与集成建议.md` — ScribeAI 会话纪要 Skills 分析与集成建议 (~1826 tok)
+- `会话纪要-Skills分析与集成建议.md` — ScribeAI 会话纪要 Skills 分析与集成建议 (~2839 tok)
+
+## docs/skills/transcript-to-meeting-notes/
+
+- `SKILL.md` — Transcript to Meeting Notes (~481 tok)
+- `SOURCE.md` — 来源说明 (~182 tok)
+- `templates.md` — Meeting Summary Template (~461 tok)
 
 ## frontend/
 
 - `.gitignore` — Git ignore rules (~128 tok)
 - `components.json` (~128 tok)
 - `eslint.config.mjs` — ESLint flat configuration (~124 tok)
-- `next.config.ts` — Declares nextConfig (~290 tok)
+- `next.config.ts` — Declares nextConfig (~323 tok)
 - `package-lock.json` — npm lock file (~97635 tok)
 - `package.json` — Node.js package manifest (~655 tok)
 - `postcss.config.mjs` — Declares config (~26 tok)
@@ -143,7 +176,7 @@
 
 ## frontend/app/(routes)/sessions/
 
-- `page.tsx` — SessionsPage — renders modal (~2397 tok)
+- `page.tsx` — SessionsPage — renders modal (~3617 tok)
 
 ## frontend/app/login/
 
@@ -237,6 +270,7 @@
 - `session-storage.ts` — Exports Session, useSessionStore (~223 tok)
 - `socket.ts` — Flush buffered segment results in seq order; returns texts ready to display (~1371 tok)
 - `store.ts` — Exports RecordingStatus, AudioMode, useRecordingStore (~653 tok)
+- `summary-types.ts` — Exports SUMMARY_TYPES, SummaryType, DEFAULT_SUMMARY_TYPE, SUMMARY_TYPE_LABELS, isSummaryType (~128 tok)
 - `types.ts` — Exports Session, TranscriptLine (~84 tok)
 - `utils.ts` — Exports cn (~48 tok)
 - `vad.ts` — RMS energy threshold (0~1). Below this = silence. (~1815 tok)

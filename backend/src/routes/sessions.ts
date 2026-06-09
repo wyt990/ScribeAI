@@ -2,8 +2,24 @@ import express from 'express';
 import { prisma } from '../lib/prisma';
 import { verifyUser, AuthenticatedRequest } from '../middleware/authMiddleware';
 import { generateSummary, getSummaryProviderLabel } from '../lib/summary-llm';
+import {
+  buildSummaryPrompt,
+  parseSummaryType,
+  DEFAULT_SUMMARY_TYPE,
+  SUMMARY_TYPE_LABELS,
+  type SummaryType,
+} from '../prompts/build-summary-prompt';
 
 const router = express.Router();
+
+function formatSummaryPayload(summary: { text: string; summaryType: string }) {
+  return {
+    summary: summary.text,
+    summaryType: summary.summaryType,
+    summaryTypeLabel:
+      SUMMARY_TYPE_LABELS[summary.summaryType as SummaryType] ?? summary.summaryType,
+  };
+}
 
 // Fetch all transcripts for user
 router.get("/", verifyUser, async (req: AuthenticatedRequest, res) => {
@@ -16,13 +32,14 @@ router.get("/", verifyUser, async (req: AuthenticatedRequest, res) => {
         id: true,
         title: true,
         createdAt: true,
-        summary: { select: { id: true } },
+        summaries: { select: { summaryType: true } },
       },
     });
     res.json(
-      transcripts.map(({ summary, ...rest }) => ({
+      transcripts.map(({ summaries, ...rest }) => ({
         ...rest,
-        hasSummary: Boolean(summary),
+        hasSummary: summaries.length > 0,
+        summaryTypes: summaries.map((s) => s.summaryType),
       }))
     );
   } catch (err) {
@@ -31,11 +48,13 @@ router.get("/", verifyUser, async (req: AuthenticatedRequest, res) => {
   }
 });
 
-// Fetch single transcript with optional summary
-// Fetch single transcript with fullText and summary
+// Fetch single transcript with summaries
 router.get("/:id", verifyUser, async (req: AuthenticatedRequest, res) => {
   const userId = req.user!.id;
   const { id } = req.params;
+  const requestedType = req.query.summaryType
+    ? parseSummaryType(String(req.query.summaryType))
+    : DEFAULT_SUMMARY_TYPE;
 
   try {
     const transcript = await prisma.transcript.findUnique({
@@ -45,7 +64,7 @@ router.get("/:id", verifyUser, async (req: AuthenticatedRequest, res) => {
         title: true,
         fullText: true,
         createdAt: true,
-        summary: { select: { text: true } },
+        summaries: { select: { text: true, summaryType: true } },
         userId: true,
       },
     });
@@ -54,13 +73,19 @@ router.get("/:id", verifyUser, async (req: AuthenticatedRequest, res) => {
       return res.status(404).json({ error: "Transcript not found" });
     }
 
-    // Flatten summary text for frontend
+    const matched =
+      transcript.summaries.find((s) => s.summaryType === requestedType) ??
+      transcript.summaries[0] ??
+      null;
+
     res.json({
       id: transcript.id,
       title: transcript.title,
       fullText: transcript.fullText,
       createdAt: transcript.createdAt,
-      summary: transcript.summary?.text || null,
+      summary: matched?.text ?? null,
+      summaryType: matched?.summaryType ?? null,
+      summaryTypes: transcript.summaries.map((s) => s.summaryType),
     });
   } catch (err) {
     console.error(err);
@@ -68,58 +93,73 @@ router.get("/:id", verifyUser, async (req: AuthenticatedRequest, res) => {
   }
 });
 
-
-// Generate/fetch summary
-
-
+const SUMMARY_ROUTE_TIMEOUT_MS = Number(process.env.SUMMARY_ROUTE_TIMEOUT_MS || "300000");
 
 // Generate/fetch summary
 router.post("/:id/summary", verifyUser, async (req: AuthenticatedRequest, res) => {
   const userId = req.user!.id;
   const { id } = req.params;
+  const summaryType = parseSummaryType(req.body?.summaryType);
+  const regenerate = req.body?.regenerate === true;
+
+  req.setTimeout(SUMMARY_ROUTE_TIMEOUT_MS);
+  res.setTimeout(SUMMARY_ROUTE_TIMEOUT_MS);
+  req.socket?.setTimeout(SUMMARY_ROUTE_TIMEOUT_MS);
 
   try {
-    // 1️⃣ Fetch transcript including summary
     const transcript = await prisma.transcript.findUnique({
       where: { id },
-      include: { summary: true },
+      include: {
+        summaries: { where: { summaryType } },
+      },
     });
 
     if (!transcript || transcript.userId !== userId) {
       return res.status(404).json({ error: "Transcript not found" });
     }
 
-    // 2️⃣ If summary already exists → return it
-    if (transcript.summary) {
-      return res.json({ summary: transcript.summary.text });
+    if (!transcript.fullText?.trim()) {
+      return res.status(400).json({ error: "Transcript is empty" });
     }
 
-    const prompt = `Summarize the following transcript with all important key points:\n\n${transcript.fullText}`;
+    const existing = transcript.summaries[0];
+    if (existing && !regenerate) {
+      return res.json(formatSummaryPayload(existing));
+    }
+
+    const { prompt } = buildSummaryPrompt(summaryType, transcript.fullText, {
+      title: transcript.title,
+      createdAt: transcript.createdAt,
+    });
+
     const generatedSummary = await generateSummary(prompt);
 
-    // 5️⃣ Validate summary
     if (!generatedSummary || generatedSummary.trim().length < 5) {
       return res.status(500).json({ error: "Summary generation failed" });
     }
 
-    // 6️⃣ Save summary to DB
-    const newSummary = await prisma.summary.create({
-      data: {
-        userId,
-        transcriptId: transcript.id,
-        text: generatedSummary,
-      },
-    });
+    const savedSummary = existing
+      ? await prisma.summary.update({
+          where: { id: existing.id },
+          data: { text: generatedSummary },
+        })
+      : await prisma.summary.create({
+          data: {
+            userId,
+            transcriptId: transcript.id,
+            summaryType,
+            text: generatedSummary,
+          },
+        });
 
-    return res.json({ summary: newSummary.text });
-
+    return res.json(formatSummaryPayload(savedSummary));
   } catch (err) {
     console.error(`[SummaryLLM:${getSummaryProviderLabel()}]`, err);
     return res.status(500).json({ error: "Failed to generate/fetch summary" });
   }
 });
 
-// Delete transcript (and linked summary if any)
+// Delete transcript (and linked summaries)
 router.delete("/:id", verifyUser, async (req: AuthenticatedRequest, res) => {
   const userId = req.user!.id;
   const { id } = req.params;
