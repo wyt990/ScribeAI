@@ -26,7 +26,6 @@ import { copyTextToClipboard } from '@/lib/copy-to-clipboard';
 import { useIsLoggedIn } from '@/hooks/use-is-logged-in';
 import {
   DEFAULT_SUMMARY_TYPE,
-  SUMMARY_TYPE_LABELS,
   isSummaryType,
   type SummaryType,
 } from '@/lib/summary-types';
@@ -214,9 +213,6 @@ function SummaryPreviewContent() {
     );
   }
 
-  const typeLabel =
-    SUMMARY_TYPE_LABELS[summaryType] || data.summaryTypeLabel || '纪要';
-
   return (
     <div className="summary-preview-page min-h-full bg-muted/30 print:bg-white">
       {/* 工具栏 — 打印时隐藏 */}
@@ -313,18 +309,6 @@ function SummaryPreviewContent() {
       {/* 文档主体 */}
       <div className="mx-auto max-w-4xl px-4 py-8 print:max-w-none print:px-0 print:py-0">
         <div className="rounded-lg border bg-card px-6 py-8 shadow-sm print:border-0 print:shadow-none print:rounded-none">
-          <header className="mb-8 border-b pb-6 print:mb-6">
-            <p className="text-xs uppercase tracking-wide text-muted-foreground print:text-gray-500">
-              ScribeAI · {typeLabel}
-            </p>
-            <h1 className="mt-2 text-2xl font-semibold leading-tight print:text-black">
-              {data.title}
-            </h1>
-            <p className="mt-2 text-sm text-muted-foreground print:text-gray-600">
-              {new Date(data.createdAt).toLocaleString('zh-CN')}
-            </p>
-          </header>
-
           <SummaryMarkdown content={data.summary} />
         </div>
       </div>

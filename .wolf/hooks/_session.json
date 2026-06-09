@@ -28,7 +28,7 @@
       "first_read": "2026-06-09T07:30:45.018Z"
     },
     "/apps/ScribeAI/frontend/app/(routes)/dashboard/page.tsx": {
-      "count": 11,
+      "count": 13,
       "tokens": 2206,
       "first_read": "2026-06-09T07:30:45.075Z"
     },
@@ -38,8 +38,8 @@
       "first_read": "2026-06-09T07:35:40.771Z"
     },
     "/apps/ScribeAI/frontend/components/transcript-feed.tsx": {
-      "count": 8,
-      "tokens": 1489,
+      "count": 11,
+      "tokens": 855,
       "first_read": "2026-06-09T07:39:59.702Z"
     },
     "/apps/ScribeAI/frontend/components/recording-controls.tsx": {
@@ -58,7 +58,7 @@
       "first_read": "2026-06-09T07:40:12.877Z"
     },
     "/apps/ScribeAI/frontend/app/(routes)/sessions/page.tsx": {
-      "count": 2,
+      "count": 6,
       "tokens": 3176,
       "first_read": "2026-06-09T07:44:00.052Z"
     },
@@ -108,7 +108,7 @@
       "first_read": "2026-06-09T07:54:33.731Z"
     },
     "/apps/ScribeAI/frontend/next.config.ts": {
-      "count": 3,
+      "count": 4,
       "tokens": 456,
       "first_read": "2026-06-09T07:57:23.348Z"
     },
@@ -188,12 +188,12 @@
       "first_read": "2026-06-09T08:12:30.264Z"
     },
     "/apps/ScribeAI/frontend/lib/draft-api.ts": {
-      "count": 1,
+      "count": 2,
       "tokens": 861,
       "first_read": "2026-06-09T08:14:28.464Z"
     },
     "/apps/ScribeAI/backend/src/routes/drafts.ts": {
-      "count": 1,
+      "count": 4,
       "tokens": 1821,
       "first_read": "2026-06-09T08:14:32.006Z"
     },
@@ -203,7 +203,7 @@
       "first_read": "2026-06-09T08:25:53.861Z"
     },
     "/apps/ScribeAI/frontend/hooks/use-draft-sync.ts": {
-      "count": 1,
+      "count": 2,
       "tokens": 1194,
       "first_read": "2026-06-09T08:25:53.879Z"
     },
@@ -218,13 +218,13 @@
       "first_read": "2026-06-09T08:26:37.354Z"
     },
     "/apps/ScribeAI/frontend/components/promote-draft-button.tsx": {
-      "count": 1,
-      "tokens": 0,
+      "count": 2,
+      "tokens": 685,
       "first_read": "2026-06-09T08:26:37.515Z"
     },
     "/apps/ScribeAI/frontend/components/mobile-promote-bar.tsx": {
-      "count": 1,
-      "tokens": 0,
+      "count": 6,
+      "tokens": 277,
       "first_read": "2026-06-09T08:26:37.559Z"
     },
     "/apps/ScribeAI/frontend/package.json": {
@@ -236,6 +236,86 @@
       "count": 1,
       "tokens": 1856,
       "first_read": "2026-06-09T08:38:19.205Z"
+    },
+    "/apps/ScribeAI/backend/src/prompts/summary-brief.ts": {
+      "count": 1,
+      "tokens": 91,
+      "first_read": "2026-06-09T09:46:20.741Z"
+    },
+    "/apps/ScribeAI/backend/skills/transcript-to-meeting-notes/SKILL.md": {
+      "count": 3,
+      "tokens": 292,
+      "first_read": "2026-06-09T09:46:29.212Z"
+    },
+    "/apps/ScribeAI/backend/skills/transcript-to-meeting-notes/SOURCE.md": {
+      "count": 2,
+      "tokens": 202,
+      "first_read": "2026-06-09T09:46:29.223Z"
+    },
+    "/apps/ScribeAI/backend/src/prompts/summary-meeting-notes.ts": {
+      "count": 4,
+      "tokens": 504,
+      "first_read": "2026-06-09T09:46:34.203Z"
+    },
+    "/apps/ScribeAI/backend/src/prompts/types.ts": {
+      "count": 1,
+      "tokens": 152,
+      "first_read": "2026-06-09T09:46:34.251Z"
+    },
+    "/apps/ScribeAI/frontend/components/summary-markdown.tsx": {
+      "count": 2,
+      "tokens": 173,
+      "first_read": "2026-06-09T10:02:20.658Z"
+    },
+    "/apps/ScribeAI/frontend/app/(routes)/sessions/[id]/summary/page.tsx": {
+      "count": 2,
+      "tokens": 2993,
+      "first_read": "2026-06-09T10:16:48.083Z"
+    },
+    "/apps/ScribeAI/backend/src/routes/sessions.ts": {
+      "count": 1,
+      "tokens": 3102,
+      "first_read": "2026-06-09T10:24:50.308Z"
+    },
+    "/apps/ScribeAI/backend/src/lib/summary-llm.ts": {
+      "count": 1,
+      "tokens": 884,
+      "first_read": "2026-06-09T10:24:58.368Z"
+    },
+    "/apps/ScribeAI/backend/src/index.ts": {
+      "count": 1,
+      "tokens": 551,
+      "first_read": "2026-06-09T10:24:58.416Z"
+    },
+    "/apps/ScribeAI/backend/src/prompts/suggest-session-title.ts": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T10:25:16.576Z"
+    },
+    "/apps/ScribeAI/frontend/lib/session-summary.ts": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T10:25:33.340Z"
+    },
+    "/apps/ScribeAI/frontend/lib/promote-and-summarize.ts": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T10:25:33.576Z"
+    },
+    "/apps/ScribeAI/frontend/components/generate-meeting-summary-button.tsx": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T10:25:35.978Z"
+    },
+    "/apps/ScribeAI/frontend/components/dashboard-draft-actions.tsx": {
+      "count": 3,
+      "tokens": 252,
+      "first_read": "2026-06-09T10:25:36.123Z"
+    },
+    "/apps/ScribeAI/frontend/lib/summary-types.ts": {
+      "count": 1,
+      "tokens": 128,
+      "first_read": "2026-06-09T10:26:45.816Z"
     }
   },
   "files_written": [
@@ -790,6 +870,216 @@
       "action": "create",
       "tokens": 707,
       "at": "2026-06-09T08:41:51.262Z"
+    },
+    {
+      "file": "/root/.cursor/projects/apps-ScribeAI/assets/c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-58e2039a-2ccd-405c-9271-750d0c503e75.png",
+      "action": "create",
+      "tokens": 0,
+      "at": "2026-06-09T09:45:43.637Z"
+    },
+    {
+      "file": "/root/.cursor/projects/apps-ScribeAI/assets/c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-cda7c170-809f-441e-90e8-1e79fdbf5ad4.png",
+      "action": "create",
+      "tokens": 0,
+      "at": "2026-06-09T09:45:43.722Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/skills/transcript-to-meeting-notes/templates.md",
+      "action": "create",
+      "tokens": 303,
+      "at": "2026-06-09T09:46:48.541Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/skills/transcript-to-meeting-notes/SKILL.md",
+      "action": "create",
+      "tokens": 333,
+      "at": "2026-06-09T09:46:54.278Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/prompts/summary-meeting-notes.ts",
+      "action": "create",
+      "tokens": 504,
+      "at": "2026-06-09T09:46:59.155Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/skills/transcript-to-meeting-notes/SOURCE.md",
+      "action": "create",
+      "tokens": 232,
+      "at": "2026-06-09T09:47:10.798Z"
+    },
+    {
+      "file": "/root/.cursor/projects/apps-ScribeAI/assets/c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-4c02e8b9-cf66-426a-95c2-5901c8acdc09.png",
+      "action": "create",
+      "tokens": 0,
+      "at": "2026-06-09T10:01:47.170Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/skills/transcript-to-meeting-notes/templates.md",
+      "action": "create",
+      "tokens": 316,
+      "at": "2026-06-09T10:03:04.472Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/prompts/summary-meeting-notes.ts",
+      "action": "create",
+      "tokens": 518,
+      "at": "2026-06-09T10:03:05.084Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/summary-markdown.tsx",
+      "action": "create",
+      "tokens": 185,
+      "at": "2026-06-09T10:03:08.372Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/skills/transcript-to-meeting-notes/SKILL.md",
+      "action": "create",
+      "tokens": 344,
+      "at": "2026-06-09T10:03:08.521Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/prompts/summary-meeting-notes.ts",
+      "action": "create",
+      "tokens": 519,
+      "at": "2026-06-09T10:03:12.147Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/summary-markdown.tsx",
+      "action": "create",
+      "tokens": 189,
+      "at": "2026-06-09T10:03:12.161Z"
+    },
+    {
+      "file": "/root/.cursor/projects/apps-ScribeAI/assets/c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-352b296d-98cc-4580-9db2-ae4a319b5216.png",
+      "action": "create",
+      "tokens": 0,
+      "at": "2026-06-09T10:16:16.407Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/app/(routes)/sessions/[id]/summary/page.tsx",
+      "action": "create",
+      "tokens": 2968,
+      "at": "2026-06-09T10:17:03.878Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/app/(routes)/sessions/[id]/summary/page.tsx",
+      "action": "create",
+      "tokens": 2814,
+      "at": "2026-06-09T10:17:06.314Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/app/(routes)/sessions/[id]/summary/page.tsx",
+      "action": "create",
+      "tokens": 2808,
+      "at": "2026-06-09T10:17:22.455Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/prompts/suggest-session-title.ts",
+      "action": "create",
+      "tokens": 107,
+      "at": "2026-06-09T10:25:17.683Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/routes/drafts.ts",
+      "action": "create",
+      "tokens": 1860,
+      "at": "2026-06-09T10:25:36.877Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/lib/session-summary.ts",
+      "action": "create",
+      "tokens": 793,
+      "at": "2026-06-09T10:25:45.417Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/lib/draft-api.ts",
+      "action": "create",
+      "tokens": 989,
+      "at": "2026-06-09T10:25:45.425Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/lib/promote-and-summarize.ts",
+      "action": "create",
+      "tokens": 367,
+      "at": "2026-06-09T10:25:45.443Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/dashboard-draft-actions.tsx",
+      "action": "create",
+      "tokens": 276,
+      "at": "2026-06-09T10:25:45.524Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/routes/drafts.ts",
+      "action": "create",
+      "tokens": 2154,
+      "at": "2026-06-09T10:25:50.967Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/dashboard-draft-actions.tsx",
+      "action": "create",
+      "tokens": 262,
+      "at": "2026-06-09T10:27:33.310Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/generate-meeting-summary-button.tsx",
+      "action": "create",
+      "tokens": 416,
+      "at": "2026-06-09T10:27:33.315Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/mobile-promote-bar.tsx",
+      "action": "create",
+      "tokens": 275,
+      "at": "2026-06-09T10:27:33.440Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/transcript-feed.tsx",
+      "action": "create",
+      "tokens": 834,
+      "at": "2026-06-09T10:27:40.096Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/app/(routes)/sessions/page.tsx",
+      "action": "create",
+      "tokens": 3194,
+      "at": "2026-06-09T10:27:48.631Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/mobile-promote-bar.tsx",
+      "action": "create",
+      "tokens": 277,
+      "at": "2026-06-09T10:27:51.167Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/dashboard-draft-actions.tsx",
+      "action": "create",
+      "tokens": 252,
+      "at": "2026-06-09T10:27:51.276Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/transcript-feed.tsx",
+      "action": "create",
+      "tokens": 837,
+      "at": "2026-06-09T10:27:54.052Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/app/(routes)/sessions/page.tsx",
+      "action": "create",
+      "tokens": 3050,
+      "at": "2026-06-09T10:28:00.795Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/mobile-promote-bar.tsx",
+      "action": "create",
+      "tokens": 278,
+      "at": "2026-06-09T10:38:43.099Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/dashboard-draft-actions.tsx",
+      "action": "create",
+      "tokens": 199,
+      "at": "2026-06-09T10:38:43.172Z"
     }
   ],
   "edit_counts": {
@@ -800,7 +1090,7 @@
     "Android-Client/app/src/main/java/com/scribeai/client/MainActivity.kt": 9,
     "Android-Client/README.md": 1,
     "frontend/app/(routes)/dashboard/page.tsx": 16,
-    "frontend/components/transcript-feed.tsx": 13,
+    "frontend/components/transcript-feed.tsx": 15,
     "frontend/components/dashboard-shell.tsx": 9,
     "frontend/components/navbar.tsx": 1,
     "frontend/app/layout.tsx": 1,
@@ -814,12 +1104,30 @@
     "../../root/.cursor/projects/apps-ScribeAI/assets/c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_12d9ad4864617a6acf9b7a6aff0dc44-18ba5176-b2f7-46b1-8575-dc2ceb9388df.png": 1,
     "frontend/hooks/use-can-promote.ts": 1,
     "frontend/components/promote-draft-button.tsx": 2,
-    "frontend/components/mobile-promote-bar.tsx": 2,
-    "frontend/package.json": 2
+    "frontend/components/mobile-promote-bar.tsx": 5,
+    "frontend/package.json": 2,
+    "../../root/.cursor/projects/apps-ScribeAI/assets/c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-58e2039a-2ccd-405c-9271-750d0c503e75.png": 1,
+    "../../root/.cursor/projects/apps-ScribeAI/assets/c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-cda7c170-809f-441e-90e8-1e79fdbf5ad4.png": 1,
+    "backend/skills/transcript-to-meeting-notes/templates.md": 2,
+    "backend/skills/transcript-to-meeting-notes/SKILL.md": 2,
+    "backend/src/prompts/summary-meeting-notes.ts": 3,
+    "backend/skills/transcript-to-meeting-notes/SOURCE.md": 1,
+    "../../root/.cursor/projects/apps-ScribeAI/assets/c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-4c02e8b9-cf66-426a-95c2-5901c8acdc09.png": 1,
+    "frontend/components/summary-markdown.tsx": 2,
+    "../../root/.cursor/projects/apps-ScribeAI/assets/c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-352b296d-98cc-4580-9db2-ae4a319b5216.png": 1,
+    "frontend/app/(routes)/sessions/[id]/summary/page.tsx": 3,
+    "backend/src/prompts/suggest-session-title.ts": 1,
+    "backend/src/routes/drafts.ts": 2,
+    "frontend/lib/session-summary.ts": 1,
+    "frontend/lib/draft-api.ts": 1,
+    "frontend/lib/promote-and-summarize.ts": 1,
+    "frontend/components/dashboard-draft-actions.tsx": 4,
+    "frontend/components/generate-meeting-summary-button.tsx": 1,
+    "frontend/app/(routes)/sessions/page.tsx": 2
   },
-  "anatomy_hits": 34,
-  "anatomy_misses": 12,
-  "repeated_reads_warned": 71,
+  "anatomy_hits": 45,
+  "anatomy_misses": 17,
+  "repeated_reads_warned": 102,
   "cerebrum_warnings": 0,
-  "stop_count": 22
+  "stop_count": 27
 }

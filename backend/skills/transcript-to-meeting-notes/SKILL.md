@@ -1,77 +1,59 @@
 ---
 name: transcript-to-meeting-notes
-description: "Converts meeting transcripts (.vtt, .docx, .md, .txt) into structured meeting summaries. Uses a single unified template for all meeting types (discovery, engineering, technical). Outputs a Discovery Summary with decisions table, topic-by-topic findings with traceability, know/don't-know analysis, assumptions, open questions, and next steps. Topic internal structure adapts based on meeting type. Use when given a transcript file or asked to summarize a meeting, call, sync, or session."
-source: rushikeshpol02/ai-skills (local copy, see SOURCE.md)
+description: "将会议转录稿整理为学校行政例会风格的结构化会议纪要：含时间/地点/出席/主持/记录等元数据，按「一、二、三」分议题，条目式记录并标注责任部门。"
+source: 本校行政例会纪要样例（2025.5.29 行政例会主要内容、2026.4.10 第 6 周行政会议记录）
 ---
 
-# Transcript to Meeting Notes
+# Transcript to Meeting Notes（行政会议纪要）
 
-将会议转录稿（.vtt / .docx / .md / .txt / 纯文本）整理为**结构化会议纪要**（Discovery / Meeting Summary）。
+将语音/文本转录稿整理为**学校行政例会**风格的 Markdown 纪要。
 
 ## 何时使用
 
-- 用户提供转录文件或粘贴转录文本
-- 用户要求「整理会议纪要」「discovery summary」「会议摘要」
+- 用户提供行政例会、部门例会、校务会议等转录
+- 用户要求「会议纪要」「会议记录」「行政例会主要内容」
 
 ## 输出语言
 
-- 默认使用**中文**输出（除非转录主要为英文且用户要求英文）
-- 保留关键术语原文时可中英并列
+- 默认**中文**公文纪要体
+- 保留文件、制度等专有名词原文
+
+## 目标版式（对照样例）
+
+1. **标题**：会议全称，如 `2025-2026 学年第二学期第 6 周行政会议记录`
+2. **元数据块**（时间、地点、出席、主持、记录）：每项单独成段，**项与项之间空一行**（Markdown 单换行不会显示为换行）
+3. **会议内容摘要**：可选总述；能识别发言人时可按发言人组织（如 **××校长**：）
+4. **正文分议题**：`一、` `二、` `三、` … 中文序号大标题
+5. **条目**：各议题下用 `1.` `2.` `3.` 编号
+6. **责任标注**：条目末尾括号注明部门，如 `（总务、学生处、校办）`；需另报方案的写 `（请教学处拿方案）`
+7. **细节**：条目下用 `-` 缩进列表补充措施、流程、数据
 
 ## 处理步骤
 
-### Step 1: 阅读并分析转录
+### Step 1: 阅读转录
 
-- 识别会议类型：discovery / engineering / technical / 一般同步会
-- 划分主要议题（Topic）
-- 标注决策、待办、开放问题、假设
-- **不要编造**：转录未提及的内容标为「未知 / TBD」
-- ASR 转录可能有错误，不确定处标注「待确认」
+- 提取时间、地点、出席、主持、记录人（缺失标 TBD）
+- 按议题归类（如：新学年准备、近期工作、学生管理等）
+- 识别决策、安排、交办事项与责任部门
+- **不要编造**转录未出现的人名、部门、日期
 
-### Step 2: 按 templates.md 生成文档
+### Step 2: 按 templates.md 生成
 
-严格遵循 [templates.md](./templates.md) 的章节顺序与格式。
+严格遵循 [templates.md](./templates.md) 章节顺序。
 
-### Step 3: 必填章节
+### Step 3: 质量规则
 
-1. **会议元数据** — 标题、日期、时长（可估）、类型
-2. **Decisions Made 决策表** — 顶层汇总；无决策时写「本次会议未达成正式决策」
-3. **Topics 分议题记录** — 每个主要议题一节，含要点与可追溯引用（转录摘录）
-4. **What We Know vs What We Don't Know** — 按议题对比已知/未知与信心等级
-5. **Assumptions That Need Validation** — 仅列若错误会影响设计或决策的假设
-6. **Open Questions** — 按 🔴 HIGH / 🟡 MEDIUM / 🟢 LOWER 分组
-7. **Agreed Next Steps** — Owner | Action | Due | Trace 表格
+- 一条一事，避免长段落
+- 责任部门无法从转录确定时写 `（待定）` 或省略括号，勿猜测
+- ASR 错误处标注「待确认」
+- 无说话人分离时，不强行写发言人，仅在摘要中概括
+- 不要把口语原句大段粘贴；提炼为纪要表述
 
-### Step 4: 议题内部结构（按会议类型）
+## 不适用本 skill 的内容
 
-#### Discovery
-
-- 背景与目标
-- 用户/业务发现
-- 约束与依赖
-- 初步方案方向
-
-#### Engineering / Technical
-
-- 现状与问题
-- 方案讨论（✅ 采纳 / ❌ 拒绝 / ⏸️ 延后）
-- 技术风险
-- Key Technical Insights（非显而易见的技术结论）
-
-#### 一般同步会
-
-- 进展更新
-- 阻塞项
-- 需协调事项
-
-## 质量规则
-
-- 决策与待办**单独成章**，不要埋在讨论段落里
-- 每个 Action Item 必须有负责人（无法推断则标 TBD）
-- 引用转录时使用 `> "摘录"` 格式
-- 缺失字段（参会人、议程等）标 TBD，不要猜测
-- 无说话人分离时，负责人从上下文推断并注明「推断」
+- 不要用 Discovery / 产品评审的「已知/未知」「假设验证」等英文模板章节
+- 不要用 emoji 信心等级表（🟢🟡🔴）除非转录明确讨论风险分级
 
 ## 输出文件名（供参考）
 
-`[Feature]_Meeting_Summary_[YYYYMMDD].md`
+`[学年周次]_行政会议记录_[YYYYMMDD].md`

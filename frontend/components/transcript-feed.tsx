@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { PromoteDraftButton } from "@/components/promote-draft-button";
+import { DashboardDraftActions } from "@/components/dashboard-draft-actions";
 
 export function TranscriptFeed() {
   const { transcript, status, draftId, draftTitle } = useRecordingStore();
@@ -72,8 +72,8 @@ export function TranscriptFeed() {
       </Card>
 
       {/* 桌面端：按钮在转录卡片下方；移动端由 MobilePromoteBar 负责 */}
-      <div className="hidden md:flex shrink-0 justify-end pt-2">
-        <PromoteDraftButton />
+      <div className="hidden md:flex shrink-0 pt-2">
+        <DashboardDraftActions className="w-full" />
       </div>
     </div>
   );

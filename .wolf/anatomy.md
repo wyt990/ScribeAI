@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-06-09T08:41:51.247Z
-> Files: 194 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-06-09T10:38:43.157Z
+> Files: 204 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../root/.claude/plans/
 
@@ -30,8 +30,12 @@
 ## ../../root/.cursor/projects/apps-ScribeAI/assets/
 
 - `c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_12d9ad4864617a6acf9b7a6aff0dc44-18ba5176-b2f7-46b1-8575-dc2ceb9388df.png` (~6488 tok)
+- `c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-352b296d-98cc-4580-9db2-ae4a319b5216.png` (~13884 tok)
+- `c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-4c02e8b9-cf66-426a-95c2-5901c8acdc09.png` (~6366 tok)
 - `c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-54026190-d945-4ddf-9bae-1ba519897844.png` (~19552 tok)
+- `c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-58e2039a-2ccd-405c-9271-750d0c503e75.png` (~30257 tok)
 - `c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-76e820c6-7462-46fd-b194-183bc411cfdd.png` (~11832 tok)
+- `c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-cda7c170-809f-441e-90e8-1e79fdbf5ad4.png` (~37594 tok)
 
 ## ./
 
@@ -150,8 +154,9 @@
 
 ## backend/skills/transcript-to-meeting-notes/
 
-- `SKILL.md` — Transcript to Meeting Notes (~481 tok)
-- `SOURCE.md` — 来源说明 (~202 tok)
+- `SKILL.md` — Transcript to Meeting Notes（行政会议纪要） (~301 tok)
+- `SOURCE.md` — 来源说明 (~203 tok)
+- `templates.md` — 行政会议纪要模板 (~277 tok)
 
 ## backend/src/
 
@@ -175,15 +180,16 @@
 ## backend/src/prompts/
 
 - `build-summary-prompt.ts` — Exports SummaryPromptMeta, buildSummaryPrompt (~269 tok)
+- `suggest-session-title.ts` — 根据转录正文生成简短会议标题 (~107 tok)
 - `summary-brief.ts` — 保留的简要摘要模式（旧版单行 prompt 等价） (~91 tok)
-- `summary-meeting-notes.ts` — Prompt rules derived from backend/skills/transcript-to-meeting-notes/ (~664 tok)
+- `summary-meeting-notes.ts` — Prompt rules derived from backend/skills/transcript-to-meeting-notes/ (~518 tok)
 - `types.ts` — Exports SUMMARY_TYPES, SummaryType, DEFAULT_SUMMARY_TYPE, parseSummaryType, SUMMARY_TYPE_LABELS (~152 tok)
 
 ## backend/src/routes/
 
 - `authroutes.ts` — routes/auth.js (~1360 tok)
 - `downloads.ts` — API routes: GET (2 endpoints) (~346 tok)
-- `drafts.ts` — 列表：用户所有未转正的草稿 (~1821 tok)
+- `drafts.ts` — 列表：用户所有未转正的草稿 (~2154 tok)
 - `sessions.ts` — API routes: GET, POST, DELETE (7 endpoints) (~3102 tok)
 - `transcript.ts` — API routes: POST (1 endpoints) (~260 tok)
 
@@ -237,11 +243,11 @@
 
 ## frontend/app/(routes)/sessions/
 
-- `page.tsx` — SessionsPage — renders modal (~3176 tok)
+- `page.tsx` — SessionsPage — renders modal (~3050 tok)
 
 ## frontend/app/(routes)/sessions/[id]/summary/
 
-- `page.tsx` — SummaryPreviewContent — renders modal (~2993 tok)
+- `page.tsx` — SummaryPreviewContent — renders modal (~2808 tok)
 
 ## frontend/app/login/
 
@@ -255,17 +261,19 @@
 
 - `audio-mode-selector.tsx` — AudioModeSelector (~792 tok)
 - `build-stamp.tsx` — 移动端右下角版本戳，便于确认 WebView 是否加载到最新构建 (~139 tok)
+- `dashboard-draft-actions.tsx` — 录音页：生成会议纪要 + 保存为正式会话 (~199 tok)
 - `dashboard-nav-links.tsx` — DashboardNavLinks (~398 tok)
 - `dashboard-shell.tsx` — 会议录音页需要锁高度、内部弹性布局；其余页面允许纵向滚动 (~369 tok)
 - `draft-restore-banner.tsx` — DraftRestoreBanner (~333 tok)
-- `mobile-promote-bar.tsx` — 移动端底栏：作为 shell 的 flex 子项，避免 WebView 裁切 fixed/portal (~273 tok)
+- `generate-meeting-summary-button.tsx` — GenerateMeetingSummaryButton (~416 tok)
+- `mobile-promote-bar.tsx` — 移动端底栏：作为 shell 的 flex 子项，避免 WebView 裁切 fixed/portal (~278 tok)
 - `navbar.tsx` — Navbar (~1658 tok)
 - `promote-draft-button.tsx` — PromoteDraftButton — renders modal (~685 tok)
 - `recording-controls.tsx` — VAD 状态指示器：显示一个小圆点 + 文字 (~1532 tok)
 - `sidebar.tsx` — Sidebar (~611 tok)
-- `summary-markdown.tsx` — SummaryMarkdown (~173 tok)
+- `summary-markdown.tsx` — SummaryMarkdown (~189 tok)
 - `theme-provider.tsx` — ThemeProvider (~87 tok)
-- `transcript-feed.tsx` — TranscriptFeed (~855 tok)
+- `transcript-feed.tsx` — TranscriptFeed (~860 tok)
 
 ## frontend/components/ui/
 
@@ -344,7 +352,9 @@
 - `draft-api.ts` — Exports DraftStatus, Draft, fetchDrafts, fetchActiveDraft + 7 more (~861 tok)
 - `navigation.ts` — Android WebView 壳应用（MainActivity 自定义 UA） (~358 tok)
 - `pcm-capture.ts` — Target frame size in samples (at 16kHz) (~1350 tok)
+- `promote-and-summarize.ts` — 保存最新转录到草稿后再转正 (~367 tok)
 - `session-storage.ts` — Exports Session, useSessionStore (~223 tok)
+- `session-summary.ts` — 为 true 时重新生成并覆盖已有纪要 (~793 tok)
 - `socket.ts` — Flush buffered segment results in seq order; returns texts ready to display (~1371 tok)
 - `store.ts` — Exports RecordingStatus, AudioMode, useRecordingStore (~653 tok)
 - `summary-export.ts` — API routes: GET (1 endpoints) (~405 tok)

@@ -24,6 +24,7 @@ import {
   SUMMARY_TYPES,
   type SummaryType,
 } from '@/lib/summary-types';
+import { runGenerateSummaryFlow } from '@/lib/session-summary';
 
 interface SessionListItem {
   id: string;
@@ -135,31 +136,18 @@ export default function SessionsPage() {
 
   const fetchSummary = async (regenerate = false) => {
     if (!currentSession) return;
-    if (
-      regenerate &&
-      !confirm(
-        `确定重新生成「${SUMMARY_TYPE_LABELS[summaryType]}」？将覆盖当前已保存的纪要。`
-      )
-    ) {
-      return;
-    }
 
     setLoadingSummary(true);
-    const token = localStorage.getItem("token");
     try {
-      const res = await fetch(`/api/sessions/${currentSession.id}/summary`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ summaryType, regenerate }),
+      const data = await runGenerateSummaryFlow({
+        sessionId: currentSession.id,
+        summaryType,
+        regenerate,
+        navigateToPreview: true,
+        router,
       });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || "生成纪要失败");
-      }
-      const data = await res.json();
+      if (!data) return;
+
       setActiveSummaryType(summaryType);
       setCurrentSession((prev) =>
         prev
@@ -187,7 +175,6 @@ export default function SessionsPage() {
             : s
         )
       );
-      goToSummaryPreview(currentSession.id, summaryType);
     } catch (err) {
       console.error(err);
       alert(err instanceof Error ? err.message : "生成纪要失败");

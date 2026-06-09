@@ -1,6 +1,8 @@
 import express from 'express';
 import { prisma } from '../lib/prisma';
 import { verifyUser, AuthenticatedRequest } from '../middleware/authMiddleware';
+import { generateSummary } from '../lib/summary-llm';
+import { buildSuggestSessionTitlePrompt } from '../prompts/suggest-session-title';
 
 const router = express.Router();
 
@@ -164,6 +166,41 @@ router.delete('/:id', verifyUser, async (req: AuthenticatedRequest, res) => {
   } catch (err) {
     console.error('[Drafts] delete error:', err);
     res.status(500).json({ error: 'Failed to delete draft' });
+  }
+});
+
+/** AI 根据转录建议正式会话标题 */
+router.post('/:id/suggest-title', verifyUser, async (req: AuthenticatedRequest, res) => {
+  const userId = req.user!.id;
+  const { id } = req.params;
+
+  try {
+    const draft = await prisma.draft.findUnique({ where: { id } });
+    if (!draft || draft.userId !== userId) {
+      return res.status(404).json({ error: 'Draft not found' });
+    }
+
+    const fullText = draft.fullText?.trim();
+    if (!fullText) {
+      return res.status(400).json({ error: 'Draft has no transcript content' });
+    }
+
+    const generated = await generateSummary(buildSuggestSessionTitlePrompt(fullText));
+    const title = generated
+      .trim()
+      .split('\n')[0]
+      .replace(/^["'「『【\[]+|["'」』】\]]+$/g, '')
+      .trim()
+      .slice(0, 80);
+
+    if (!title) {
+      return res.status(500).json({ error: 'Failed to suggest title' });
+    }
+
+    res.json({ title });
+  } catch (err) {
+    console.error('[Drafts] suggest-title error:', err);
+    res.status(500).json({ error: 'Failed to suggest title' });
   }
 });
 

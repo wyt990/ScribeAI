@@ -79,6 +79,20 @@ export async function deleteDraft(id: string): Promise<void> {
   if (!res.ok) throw new Error('Failed to delete draft');
 }
 
+export async function suggestDraftTitle(id: string): Promise<string> {
+  const res = await fetch(`/api/drafts/${id}/suggest-title`, {
+    method: 'POST',
+    headers: authHeaders(),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || '生成标题失败');
+  }
+  const data = (await res.json()) as { title?: string };
+  if (!data.title?.trim()) throw new Error('生成标题失败');
+  return data.title.trim();
+}
+
 export async function promoteDraft(id: string, title: string): Promise<{ transcript: { id: string } }> {
   const res = await fetch(`/api/drafts/${id}/promote`, {
     method: 'POST',
