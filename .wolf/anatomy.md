@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-06-09T01:59:36.803Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-06-09T02:12:04.821Z
 > Files: 136 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../root/.claude/plans/
@@ -222,7 +222,7 @@
 
 ## frontend/hooks/
 
-- `use-audio-recorder.ts` — 跨页面导航缓存服务端下发的 VAD 配置（socket 已连接时不会重发 vad-config） (~5947 tok)
+- `use-audio-recorder.ts` — 跨页面导航缓存服务端下发的 VAD 配置（socket 已连接时不会重发 vad-config） (~6542 tok)
 - `use-draft-sync.ts` — 草稿自动保存：转录追加防抖写入，状态变更立即写入，离开页面时刷盘 (~1194 tok)
 - `use-mobile.ts` — Exports useIsMobile (~162 tok)
 

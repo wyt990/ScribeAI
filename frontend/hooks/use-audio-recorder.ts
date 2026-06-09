@@ -95,11 +95,54 @@ type DraftSyncHelpers = {
 export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
   const { status, audioMode, setStatus, setError, clearTranscript, userId, setRecordingId } = useRecordingStore();
 
+  const statusRef = useRef(status);
+  statusRef.current = status;
+  const draftSyncRef = useRef(draftSync);
+  draftSyncRef.current = draftSync;
+
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const socketRef = useRef<ReturnType<typeof getSocket> | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const listenersAttachedRef = useRef(false);
+
+  // Wake Lock refs
+  const wakeLockRef = useRef<WakeLockSentinel | null>(null);
+
+  const requestWakeLock = useCallback(async () => {
+    if (!('wakeLock' in navigator)) return;
+    try {
+      await releaseWakeLock();
+      const sentinel = await navigator.wakeLock.request('screen');
+      wakeLockRef.current = sentinel;
+      sentinel.onrelease = () => {
+        wakeLockRef.current = null;
+      };
+    } catch (err) {
+      // Wake lock not granted — non-critical, proceed without it
+      console.warn('[WakeLock] failed to acquire:', (err as Error)?.message);
+    }
+  }, []);
+
+  const releaseWakeLock = useCallback(async () => {
+    if (wakeLockRef.current) {
+      try {
+        await wakeLockRef.current.release();
+      } catch { /* ignore */ }
+      wakeLockRef.current = null;
+    }
+  }, []);
+
+  // Re-acquire wake lock when page becomes visible again while recording
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible' && status === 'recording') {
+        requestWakeLock();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, [status, requestWakeLock]);
 
   // VAD refs
   const vadRef = useRef<any>(null);
@@ -383,35 +426,6 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
     socket.connect();
   }, [preloadVAD]);
 
-  useEffect(() => {
-    initSocket();
-
-    return () => {
-      try {
-        vadPreloadGenRef.current += 1;
-        if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-          mediaRecorderRef.current.stop();
-        }
-        if (streamRef.current) {
-          streamRef.current.getTracks().forEach((t) => t.stop());
-          streamRef.current = null;
-        }
-        stopAudioMeter();
-        void destroyVAD();
-        if (socketRef.current) {
-          socketRef.current.off('connect');
-          socketRef.current.off('disconnect');
-          socketRef.current.off('connect_error');
-          socketRef.current.off('deepgram-ready');
-          socketRef.current.off('vad-config');
-          listenersAttachedRef.current = false;
-        }
-      } catch (err) {
-        console.error('[useAudioRecorder] cleanup error', err);
-      }
-    };
-  }, [initSocket, destroyVAD, stopAudioMeter]);
-
   const startRecording = useCallback(async () => {
     if (isResetting) {
       console.warn('[useAudioRecorder] start prevented - resetting in progress');
@@ -517,6 +531,7 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
 
       mediaRecorder.start(1000);
       startAudioMeter(stream, audioContext);
+      requestWakeLock();
       setStatus('recording');
     } catch (err) {
       console.error('[useAudioRecorder] startRecording error', err);
@@ -557,35 +572,89 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
     }
   }, [setStatus, startAudioMeter]);
 
+  /** 释放录音硬件与后端会话；与点「停止」及组件卸载时共用 */
+  const finalizeActiveRecording = useCallback(
+    (opts?: { notifyBackend?: boolean }) => {
+      const recorderActive =
+        mediaRecorderRef.current != null &&
+        mediaRecorderRef.current.state !== 'inactive';
+
+      try {
+        if (recorderActive) {
+          mediaRecorderRef.current!.stop();
+        }
+
+        if (streamRef.current) {
+          streamRef.current.getTracks().forEach((t) => t.stop());
+          streamRef.current = null;
+        }
+        vadPendingStreamRef.current = null;
+        audioContextRef.current = null;
+
+        stopAudioMeter();
+        void pauseVAD();
+        void draftSyncRef.current?.flushDraft?.();
+        void releaseWakeLock();
+
+        if (vadRef.current) {
+          setVadStatus('ready');
+        }
+
+        if (opts?.notifyBackend && recorderActive) {
+          emitStopRecording();
+        }
+      } catch (err) {
+        console.error('[useAudioRecorder] finalizeActiveRecording error', err);
+        setStatus('idle');
+      }
+    },
+    [pauseVAD, stopAudioMeter, releaseWakeLock, setStatus]
+  );
+
   const stopRecording = useCallback(() => {
-    try {
-      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-        mediaRecorderRef.current.stop();
-      }
+    const recorderActive =
+      mediaRecorderRef.current != null &&
+      mediaRecorderRef.current.state !== 'inactive';
 
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach((t) => t.stop());
-        streamRef.current = null;
-      }
-      vadPendingStreamRef.current = null;
-      audioContextRef.current = null;
-
-      stopAudioMeter();
-      void pauseVAD();
-      void draftSync?.flushDraft?.();
-      // Keep preloaded model in memory for next recording
-      if (vadRef.current) {
-        setVadStatus('ready');
-      }
-
-      setTimeout(() => {
-        emitStopRecording();
-      }, 200);
-    } catch (err) {
-      console.error('[useAudioRecorder] stopRecording error', err);
-      setStatus('idle');
+    finalizeActiveRecording();
+    if (recorderActive) {
+      setTimeout(() => emitStopRecording(), 200);
     }
-  }, [pauseVAD, stopAudioMeter, draftSync]);
+  }, [finalizeActiveRecording]);
+
+  useEffect(() => {
+    initSocket();
+
+    return () => {
+      try {
+        vadPreloadGenRef.current += 1;
+
+        const wasActive =
+          statusRef.current === 'recording' ||
+          statusRef.current === 'paused' ||
+          (mediaRecorderRef.current != null &&
+            mediaRecorderRef.current.state !== 'inactive');
+
+        if (wasActive) {
+          finalizeActiveRecording({ notifyBackend: true });
+        } else {
+          void releaseWakeLock();
+        }
+
+        void destroyVAD();
+        if (socketRef.current) {
+          socketRef.current.off('connect');
+          socketRef.current.off('disconnect');
+          socketRef.current.off('connect_error');
+          socketRef.current.off('deepgram-ready');
+          socketRef.current.off('vad-config');
+          listenersAttachedRef.current = false;
+        }
+      } catch (err) {
+        console.error('[useAudioRecorder] cleanup error', err);
+      }
+    };
+  }, [initSocket, destroyVAD, finalizeActiveRecording, releaseWakeLock]);
 
   const resetRecording = useCallback(() => {
     setIsResetting(true);
@@ -607,6 +676,7 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
 
       stopAudioMeter();
       void pauseVAD();
+      releaseWakeLock();
       if (vadRef.current) {
         setVadStatus('ready');
       }

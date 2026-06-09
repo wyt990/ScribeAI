@@ -753,6 +753,22 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-06-09T01:25:21.791Z"
+    },
+    {
+      "id": "bug-048",
+      "timestamp": "2026-06-09T02:03:38.771Z",
+      "error_message": "Missing error handling in unknown",
+      "file": "frontend/hooks/use-audio-recorder.ts",
+      "root_cause": "Code path had no error handling — exceptions would propagate uncaught",
+      "fix": "Added try/catch block",
+      "tags": [
+        "auto-detected",
+        "error-handling",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-09T02:03:38.771Z"
     }
   ]
 }
