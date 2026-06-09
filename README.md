@@ -188,9 +188,22 @@ JWT_SECRET=your_jwt_secret
 # Deepgram 实时语音转文字 API
 DEEPGRAM_API_KEY=deepgram-key
 
-# Gemini AI 摘要生成
+# 摘要 LLM 提供商: gemini | openai_compatible
+SUMMARY_PROVIDER=openai_compatible
+
+# Gemini AI 摘要（SUMMARY_PROVIDER=gemini 时使用）
 GEMINI_API_KEY=key
+GEMINI_MODEL=gemini-2.5-flash
 GEMINI_API_URL=url
+
+# OpenAI 兼容摘要（SUMMARY_PROVIDER=openai_compatible 时使用）
+# BASE_URL 按提供商文档填写，不会自动补 /v1；代码在其后拼接 chat/completions
+OPENAI_LLM_API_KEY=sk-xxx
+OPENAI_LLM_BASE_URL=https://api.deepseek.com/v1
+OPENAI_LLM_MODEL=deepseek-chat
+# OPENAI_LLM_COMPLETIONS_PATH=chat/completions
+OPENAI_LLM_MAX_TOKENS=4096
+OPENAI_LLM_TEMPERATURE=0.3
 
 # STT 引擎选择: "deepgram" (默认, 实时流式) 或 "openai_asr" (定时切片伪流式)
 STT_PROVIDER=deepgram

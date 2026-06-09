@@ -1,11 +1,7 @@
 import express from 'express';
 import { prisma } from '../lib/prisma';
 import { verifyUser, AuthenticatedRequest } from '../middleware/authMiddleware';
-import { GoogleGenAI } from "@google/genai";
-
-const genAI = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY!,
-});
+import { generateSummary, getSummaryProviderLabel } from '../lib/summary-llm';
 
 const router = express.Router();
 
@@ -88,16 +84,8 @@ router.post("/:id/summary", verifyUser, async (req: AuthenticatedRequest, res) =
       return res.json({ summary: transcript.summary.text });
     }
 
-    // 3️⃣ Prompt for Gemini
     const prompt = `Summarize the following transcript with all important key points:\n\n${transcript.fullText}`;
-
-    const response = await genAI.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt,
-    });
-
-    
-    const generatedSummary = response.text; // THIS IS THE CORRECT WAY
+    const generatedSummary = await generateSummary(prompt);
 
     // 5️⃣ Validate summary
     if (!generatedSummary || generatedSummary.trim().length < 5) {
@@ -116,7 +104,7 @@ router.post("/:id/summary", verifyUser, async (req: AuthenticatedRequest, res) =
     return res.json({ summary: newSummary.text });
 
   } catch (err) {
-    console.error("GEMINI ERROR:", err);
+    console.error(`[SummaryLLM:${getSummaryProviderLabel()}]`, err);
     return res.status(500).json({ error: "Failed to generate/fetch summary" });
   }
 });

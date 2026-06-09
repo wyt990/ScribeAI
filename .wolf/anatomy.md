@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-06-09T01:25:21.771Z
-> Files: 134 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-06-09T01:44:46.343Z
+> Files: 136 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../root/.claude/plans/
 
@@ -26,8 +26,8 @@
 
 ## ./
 
-- `CLAUDE.md` — CLAUDE.md (~999 tok)
-- `README.md` — Project documentation (~1002 tok)
+- `CLAUDE.md` — CLAUDE.md (~1052 tok)
+- `README.md` — Project documentation (~1114 tok)
 
 ## .claude/
 
@@ -79,12 +79,14 @@
 
 ## backend/src/
 
-- `index.ts` — Declares app (~313 tok)
+- `index.ts` — Declares app (~457 tok)
 
 ## backend/src/lib/
 
+- `openai-api-url.ts` — Join OpenAI-compatible API paths without duplicating slashes. (~239 tok)
 - `prisma.ts` — Declares prisma (~40 tok)
 - `storage-config.ts` — Exports STORAGE_CONFIG (~91 tok)
+- `summary-llm.ts` — Exports SummaryProvider, validateSummaryConfig, getResolvedChatCompletionsUrl, generateSummary, getS (~884 tok)
 
 ## backend/src/middleware/
 
@@ -94,7 +96,7 @@
 
 - `authroutes.ts` — routes/auth.js (~1308 tok)
 - `drafts.ts` — 列表：用户所有未转正的草稿 (~1821 tok)
-- `sessions.ts` — API routes: GET, POST, DELETE (4 endpoints) (~1241 tok)
+- `sessions.ts` — API routes: GET, POST, DELETE (4 endpoints) (~1185 tok)
 - `transcript.ts` — API routes: POST (1 endpoints) (~260 tok)
 
 ## backend/src/socket/

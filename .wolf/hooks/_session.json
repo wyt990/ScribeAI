@@ -53,12 +53,12 @@
       "first_read": "2026-06-08T19:14:16.970Z"
     },
     "/apps/ScribeAI/backend/src/socket/socket.ts": {
-      "count": 13,
+      "count": 14,
       "tokens": 4669,
       "first_read": "2026-06-08T19:17:41.139Z"
     },
     "/apps/ScribeAI/backend/.env": {
-      "count": 4,
+      "count": 7,
       "tokens": 0,
       "first_read": "2026-06-08T19:17:41.309Z"
     },
@@ -103,13 +103,13 @@
       "first_read": "2026-06-08T19:37:47.568Z"
     },
     "/apps/ScribeAI/backend/src/routes/sessions.ts": {
-      "count": 5,
-      "tokens": 1008,
+      "count": 8,
+      "tokens": 1185,
       "first_read": "2026-06-08T19:45:08.167Z"
     },
     "/apps/ScribeAI/backend/prisma/schema.prisma": {
-      "count": 4,
-      "tokens": 331,
+      "count": 5,
+      "tokens": 491,
       "first_read": "2026-06-08T19:45:08.193Z"
     },
     "/apps/ScribeAI/frontend/app/(routes)/layout.tsx": {
@@ -118,8 +118,8 @@
       "first_read": "2026-06-08T19:47:25.863Z"
     },
     "/apps/ScribeAI/frontend/app/(routes)/sessions/page.tsx": {
-      "count": 7,
-      "tokens": 1444,
+      "count": 8,
+      "tokens": 1823,
       "first_read": "2026-06-08T19:47:25.887Z"
     },
     "/apps/ScribeAI/frontend/node_modules/onnxruntime-common/dist/esm/env.d.ts": {
@@ -188,8 +188,8 @@
       "first_read": "2026-06-09T00:48:52.822Z"
     },
     "/apps/ScribeAI/backend/src/index.ts": {
-      "count": 2,
-      "tokens": 270,
+      "count": 5,
+      "tokens": 396,
       "first_read": "2026-06-09T00:55:00.782Z"
     },
     "/apps/ScribeAI/backend/src/lib/prisma.ts": {
@@ -233,9 +233,29 @@
       "first_read": "2026-06-09T00:56:52.279Z"
     },
     "/apps/ScribeAI/README.md": {
-      "count": 3,
-      "tokens": 802,
+      "count": 7,
+      "tokens": 1089,
       "first_read": "2026-06-09T01:13:20.348Z"
+    },
+    "/apps/ScribeAI/backend/package.json": {
+      "count": 1,
+      "tokens": 308,
+      "first_read": "2026-06-09T01:33:34.603Z"
+    },
+    "/apps/ScribeAI/backend/src/lib/summary-llm.ts": {
+      "count": 3,
+      "tokens": 829,
+      "first_read": "2026-06-09T01:42:05.655Z"
+    },
+    "/apps/ScribeAI/CLAUDE.md": {
+      "count": 1,
+      "tokens": 999,
+      "first_read": "2026-06-09T01:42:21.335Z"
+    },
+    "/apps/ScribeAI/backend/src/lib/openai-api-url.ts": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T01:44:41.359Z"
     }
   },
   "files_written": [
@@ -1210,6 +1230,90 @@
       "action": "edit",
       "tokens": 4,
       "at": "2026-06-09T01:25:21.786Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/lib/summary-llm.ts",
+      "action": "create",
+      "tokens": 829,
+      "at": "2026-06-09T01:42:06.303Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/routes/sessions.ts",
+      "action": "create",
+      "tokens": 1186,
+      "at": "2026-06-09T01:42:08.304Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/routes/sessions.ts",
+      "action": "create",
+      "tokens": 1137,
+      "at": "2026-06-09T01:42:10.053Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/index.ts",
+      "action": "create",
+      "tokens": 363,
+      "at": "2026-06-09T01:42:10.100Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/index.ts",
+      "action": "create",
+      "tokens": 382,
+      "at": "2026-06-09T01:42:11.764Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/routes/sessions.ts",
+      "action": "create",
+      "tokens": 1145,
+      "at": "2026-06-09T01:42:11.800Z"
+    },
+    {
+      "file": "/apps/ScribeAI/README.md",
+      "action": "create",
+      "tokens": 1244,
+      "at": "2026-06-09T01:42:22.125Z"
+    },
+    {
+      "file": "/apps/ScribeAI/CLAUDE.md",
+      "action": "create",
+      "tokens": 1203,
+      "at": "2026-06-09T01:42:22.453Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/lib/openai-api-url.ts",
+      "action": "create",
+      "tokens": 239,
+      "at": "2026-06-09T01:44:42.623Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/lib/summary-llm.ts",
+      "action": "create",
+      "tokens": 846,
+      "at": "2026-06-09T01:44:42.679Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/lib/summary-llm.ts",
+      "action": "create",
+      "tokens": 884,
+      "at": "2026-06-09T01:44:44.649Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/index.ts",
+      "action": "create",
+      "tokens": 392,
+      "at": "2026-06-09T01:44:44.698Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/index.ts",
+      "action": "create",
+      "tokens": 441,
+      "at": "2026-06-09T01:44:46.340Z"
+    },
+    {
+      "file": "/apps/ScribeAI/README.md",
+      "action": "create",
+      "tokens": 1274,
+      "at": "2026-06-09T01:44:46.358Z"
     }
   ],
   "edit_counts": {
@@ -1246,17 +1350,20 @@
     "backend/prisma/migrations/20260609100000_add_draft/migration.sql": 1,
     "backend/src/routes/drafts.ts": 1,
     "backend/src/lib/draft-cleanup.ts": 1,
-    "backend/src/index.ts": 3,
+    "backend/src/index.ts": 7,
     "frontend/lib/draft-api.ts": 2,
     "frontend/hooks/use-draft-sync.ts": 1,
     "frontend/components/draft-restore-banner.tsx": 1,
     "frontend/app/(routes)/drafts/page.tsx": 2,
-    "backend/src/routes/sessions.ts": 1,
-    "README.md": 4
+    "backend/src/routes/sessions.ts": 4,
+    "README.md": 6,
+    "backend/src/lib/summary-llm.ts": 3,
+    "CLAUDE.md": 1,
+    "backend/src/lib/openai-api-url.ts": 1
   },
-  "anatomy_hits": 23,
-  "anatomy_misses": 24,
-  "repeated_reads_warned": 107,
+  "anatomy_hits": 25,
+  "anatomy_misses": 26,
+  "repeated_reads_warned": 125,
   "cerebrum_warnings": 0,
-  "stop_count": 58
+  "stop_count": 62
 }

@@ -36,8 +36,15 @@ npx ts-node src/index.ts  # 开发时直接运行 TS (需确保依赖已安装)
 DEEPGRAM_API_KEY=deepgram-key
 DATABASE_URL=postgresql://...
 JWT_SECRET=your_jwt_secret
+SUMMARY_PROVIDER=gemini
 GEMINI_API_KEY=gemini-key
+GEMINI_MODEL=gemini-2.5-flash
 GEMINI_API_URL=gemini-url
+OPENAI_LLM_API_KEY=sk-xxx
+OPENAI_LLM_BASE_URL=https://api.deepseek.com/v1
+OPENAI_LLM_MODEL=deepseek-chat
+OPENAI_LLM_MAX_TOKENS=4096
+OPENAI_LLM_TEMPERATURE=0.3
 ```
 
 ### 测试

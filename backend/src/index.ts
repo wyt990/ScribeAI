@@ -10,6 +10,18 @@ import sessions from "./routes/sessions"
 import drafts from "./routes/drafts"
 import { createSocketServer, startStaleSessionCleanup } from "./socket/socket";
 import { startDraftCleanup } from "./lib/draft-cleanup";
+import {
+  validateSummaryConfig,
+  getSummaryProviderLabel,
+  getResolvedChatCompletionsUrl,
+} from "./lib/summary-llm";
+
+try {
+  validateSummaryConfig();
+} catch (err) {
+  console.error("[SummaryLLM] Config error:", err);
+  process.exit(1);
+}
 
 const app = express();
 const server = http.createServer(app);
@@ -34,4 +46,9 @@ const PORT = 4000;
 server.listen(PORT, () => {
   console.log(`HTTP server running at http://localhost:${PORT}`);
   console.log(`Socket.io running at ws://localhost:${PORT}`);
+  const summaryProvider = getSummaryProviderLabel();
+  console.log(`Summary LLM provider: ${summaryProvider}`);
+  if (summaryProvider === "openai_compatible") {
+    console.log(`Summary LLM endpoint: ${getResolvedChatCompletionsUrl()}`);
+  }
 });
