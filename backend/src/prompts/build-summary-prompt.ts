@@ -9,6 +9,8 @@ import {
 export type SummaryPromptMeta = {
   title: string;
   createdAt: Date;
+  /** 本系统登录用户姓名，作为会议纪要「记录人」 */
+  recorderName?: string;
 };
 
 export function buildSummaryPrompt(

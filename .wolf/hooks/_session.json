@@ -143,12 +143,12 @@
       "first_read": "2026-06-09T08:04:52.880Z"
     },
     "/apps/ScribeAI/backend/prisma/schema.prisma": {
-      "count": 1,
+      "count": 2,
       "tokens": 534,
       "first_read": "2026-06-09T08:05:10.091Z"
     },
     "/apps/ScribeAI/backend/src/middleware/authMiddleware.ts": {
-      "count": 1,
+      "count": 2,
       "tokens": 364,
       "first_read": "2026-06-09T08:05:10.162Z"
     },
@@ -238,7 +238,7 @@
       "first_read": "2026-06-09T08:38:19.205Z"
     },
     "/apps/ScribeAI/backend/src/prompts/summary-brief.ts": {
-      "count": 1,
+      "count": 3,
       "tokens": 91,
       "first_read": "2026-06-09T09:46:20.741Z"
     },
@@ -253,8 +253,8 @@
       "first_read": "2026-06-09T09:46:29.223Z"
     },
     "/apps/ScribeAI/backend/src/prompts/summary-meeting-notes.ts": {
-      "count": 4,
-      "tokens": 504,
+      "count": 6,
+      "tokens": 518,
       "first_read": "2026-06-09T09:46:34.203Z"
     },
     "/apps/ScribeAI/backend/src/prompts/types.ts": {
@@ -273,7 +273,7 @@
       "first_read": "2026-06-09T10:16:48.083Z"
     },
     "/apps/ScribeAI/backend/src/routes/sessions.ts": {
-      "count": 1,
+      "count": 4,
       "tokens": 3102,
       "first_read": "2026-06-09T10:24:50.308Z"
     },
@@ -316,6 +316,16 @@
       "count": 1,
       "tokens": 128,
       "first_read": "2026-06-09T10:26:45.816Z"
+    },
+    "/apps/ScribeAI/backend/src/prompts/build-summary-prompt.ts": {
+      "count": 2,
+      "tokens": 269,
+      "first_read": "2026-06-09T10:45:48.364Z"
+    },
+    "/apps/ScribeAI/backend/scripts/test-summary-prompt.ts": {
+      "count": 1,
+      "tokens": 525,
+      "first_read": "2026-06-09T10:46:00.488Z"
     }
   },
   "files_written": [
@@ -1080,6 +1090,36 @@
       "action": "create",
       "tokens": 199,
       "at": "2026-06-09T10:38:43.172Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/prompts/build-summary-prompt.ts",
+      "action": "create",
+      "tokens": 285,
+      "at": "2026-06-09T10:46:13.406Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/prompts/summary-meeting-notes.ts",
+      "action": "create",
+      "tokens": 531,
+      "at": "2026-06-09T10:46:17.935Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/prompts/summary-brief.ts",
+      "action": "create",
+      "tokens": 144,
+      "at": "2026-06-09T10:46:24.011Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/routes/sessions.ts",
+      "action": "create",
+      "tokens": 3045,
+      "at": "2026-06-09T10:46:25.369Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/prompts/summary-meeting-notes.ts",
+      "action": "create",
+      "tokens": 596,
+      "at": "2026-06-09T10:46:28.431Z"
     }
   ],
   "edit_counts": {
@@ -1110,7 +1150,7 @@
     "../../root/.cursor/projects/apps-ScribeAI/assets/c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-cda7c170-809f-441e-90e8-1e79fdbf5ad4.png": 1,
     "backend/skills/transcript-to-meeting-notes/templates.md": 2,
     "backend/skills/transcript-to-meeting-notes/SKILL.md": 2,
-    "backend/src/prompts/summary-meeting-notes.ts": 3,
+    "backend/src/prompts/summary-meeting-notes.ts": 5,
     "backend/skills/transcript-to-meeting-notes/SOURCE.md": 1,
     "../../root/.cursor/projects/apps-ScribeAI/assets/c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-4c02e8b9-cf66-426a-95c2-5901c8acdc09.png": 1,
     "frontend/components/summary-markdown.tsx": 2,
@@ -1123,11 +1163,14 @@
     "frontend/lib/promote-and-summarize.ts": 1,
     "frontend/components/dashboard-draft-actions.tsx": 4,
     "frontend/components/generate-meeting-summary-button.tsx": 1,
-    "frontend/app/(routes)/sessions/page.tsx": 2
+    "frontend/app/(routes)/sessions/page.tsx": 2,
+    "backend/src/prompts/build-summary-prompt.ts": 1,
+    "backend/src/prompts/summary-brief.ts": 1,
+    "backend/src/routes/sessions.ts": 1
   },
-  "anatomy_hits": 45,
+  "anatomy_hits": 46,
   "anatomy_misses": 17,
-  "repeated_reads_warned": 102,
+  "repeated_reads_warned": 112,
   "cerebrum_warnings": 0,
-  "stop_count": 27
+  "stop_count": 28
 }

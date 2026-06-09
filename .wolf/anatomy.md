@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-06-09T10:38:43.157Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-06-09T10:46:28.416Z
 > Files: 204 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../root/.claude/plans/
@@ -179,10 +179,10 @@
 
 ## backend/src/prompts/
 
-- `build-summary-prompt.ts` — Exports SummaryPromptMeta, buildSummaryPrompt (~269 tok)
+- `build-summary-prompt.ts` — 本系统登录用户姓名，作为会议纪要「记录人」 (~285 tok)
 - `suggest-session-title.ts` — 根据转录正文生成简短会议标题 (~107 tok)
-- `summary-brief.ts` — 保留的简要摘要模式（旧版单行 prompt 等价） (~91 tok)
-- `summary-meeting-notes.ts` — Prompt rules derived from backend/skills/transcript-to-meeting-notes/ (~518 tok)
+- `summary-brief.ts` — 保留的简要纪要模式（旧版单行 prompt 等价） (~144 tok)
+- `summary-meeting-notes.ts` — Prompt rules derived from backend/skills/transcript-to-meeting-notes/ (~531 tok)
 - `types.ts` — Exports SUMMARY_TYPES, SummaryType, DEFAULT_SUMMARY_TYPE, parseSummaryType, SUMMARY_TYPE_LABELS (~152 tok)
 
 ## backend/src/routes/
@@ -190,7 +190,7 @@
 - `authroutes.ts` — routes/auth.js (~1360 tok)
 - `downloads.ts` — API routes: GET (2 endpoints) (~346 tok)
 - `drafts.ts` — 列表：用户所有未转正的草稿 (~2154 tok)
-- `sessions.ts` — API routes: GET, POST, DELETE (7 endpoints) (~3102 tok)
+- `sessions.ts` — API routes: GET, POST, DELETE (7 endpoints) (~3156 tok)
 - `transcript.ts` — API routes: POST (1 endpoints) (~260 tok)
 
 ## backend/src/socket/

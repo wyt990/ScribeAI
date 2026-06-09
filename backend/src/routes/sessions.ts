@@ -269,12 +269,18 @@ router.post("/:id/summary", verifyUser, async (req: AuthenticatedRequest, res) =
   req.socket?.setTimeout(SUMMARY_ROUTE_TIMEOUT_MS);
 
   try {
-    const transcript = await prisma.transcript.findUnique({
-      where: { id },
-      include: {
-        summaries: { where: { summaryType } },
-      },
-    });
+    const [transcript, user] = await Promise.all([
+      prisma.transcript.findUnique({
+        where: { id },
+        include: {
+          summaries: { where: { summaryType } },
+        },
+      }),
+      prisma.user.findUnique({
+        where: { id: userId },
+        select: { name: true },
+      }),
+    ]);
 
     if (!transcript || transcript.userId !== userId) {
       return res.status(404).json({ error: "Transcript not found" });
@@ -292,6 +298,7 @@ router.post("/:id/summary", verifyUser, async (req: AuthenticatedRequest, res) =
     const { prompt } = buildSummaryPrompt(summaryType, transcript.fullText, {
       title: transcript.title,
       createdAt: transcript.createdAt,
+      recorderName: user?.name,
     });
 
     const generatedSummary = await generateSummary(prompt);
