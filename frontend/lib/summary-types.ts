@@ -6,7 +6,7 @@ export const DEFAULT_SUMMARY_TYPE: SummaryType = "meeting-notes";
 
 export const SUMMARY_TYPE_LABELS: Record<SummaryType, string> = {
   "meeting-notes": "会议纪要（结构化）",
-  brief: "简要摘要",
+  brief: "简要纪要",
 };
 
 export function isSummaryType(value: string): value is SummaryType {

@@ -14,5 +14,5 @@
     "sourceMap": true
   },
   "include": ["src", "lib"],       // Only compile files in src
-  "exclude": ["node_modules", "dist", "prisma.config.js"] // ignore Prisma config
+  "exclude": ["node_modules", "dist", "prisma.config.js", "src/generated"]
 }

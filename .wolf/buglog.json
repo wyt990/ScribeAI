@@ -769,6 +769,86 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-06-09T02:03:38.771Z"
+    },
+    {
+      "id": "bug-049",
+      "timestamp": "2026-06-09T03:49:45.807Z",
+      "error_message": "Incorrect value in code",
+      "file": "frontend/package.json",
+      "root_cause": "Had \"next start\"",
+      "fix": "Changed to \"next start -p 3001\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "json"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-09T03:49:45.807Z"
+    },
+    {
+      "id": "bug-050",
+      "timestamp": "2026-06-09T07:40:41.760Z",
+      "error_message": "CSS fix: sm, lg",
+      "file": "frontend/app/(routes)/dashboard/page.tsx",
+      "root_cause": "sm: flex-row sm:items-center sm:justify-between gap-2\"> → flex-row sm:items-center sm:justify-between gap-2 shrink-0\">; lg: col-span-2 h-[calc(100vh-12rem)]\"> → col-span-2 flex-1 min-h-0\">",
+      "fix": "Changed sm: flex-row sm:items-center sm:justify-between gap-2\"> → flex-row sm:items-center sm:justify-between gap-2 shrink-0\">; lg: col-span-2 h-[calc(100vh-12rem)]\"> → col-span-2 flex-1 min-h-0\">",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-09T07:40:41.760Z"
+    },
+    {
+      "id": "bug-051",
+      "timestamp": "2026-06-09T07:40:44.990Z",
+      "error_message": "Incorrect value in code",
+      "file": "frontend/components/transcript-feed.tsx",
+      "root_cause": "Had \"flex flex-col h-full\"",
+      "fix": "Changed to \"flex flex-col flex-1 min-h-0\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-09T07:40:44.990Z"
+    },
+    {
+      "id": "bug-052",
+      "timestamp": "2026-06-09T07:44:36.017Z",
+      "error_message": "Incorrect value in code",
+      "file": "frontend/app/(routes)/dashboard/page.tsx",
+      "root_cause": "Had \"h-full px-6 py-2 flex flex-col space-y-6\"",
+      "fix": "Changed to \"h-[calc(100dvh-4rem)] px-6 py-2 flex flex-col spa",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-09T07:44:36.017Z"
+    },
+    {
+      "id": "bug-053",
+      "timestamp": "2026-06-09T07:44:46.040Z",
+      "error_message": "Wrong reference: 100dvh should be 100vh",
+      "file": "frontend/app/(routes)/dashboard/page.tsx",
+      "root_cause": "Used \"100dvh\" instead of \"100vh\"",
+      "fix": "Changed 100dvh → 100vh",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-09T07:44:46.040Z"
     }
   ]
 }

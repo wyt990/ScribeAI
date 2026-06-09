@@ -84,7 +84,7 @@ function SummaryPreviewContent() {
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || '加载摘要失败');
+        throw new Error(err.error || '加载纪要失败');
       }
       setData(await res.json());
     } catch (err) {
@@ -117,7 +117,7 @@ function SummaryPreviewContent() {
       },
       body: JSON.stringify({ summaryType }),
     });
-    if (!res.ok) throw new Error('生成分享链接失败');
+    if (!res.ok) throw new Error('生成分享纪要链接失败');
     const json = await res.json();
     return `${window.location.origin}${json.previewPath}` as string;
   }, [sessionId, shareToken, summaryType]);
@@ -196,7 +196,7 @@ function SummaryPreviewContent() {
     return (
       <div className="flex h-[60vh] items-center justify-center text-muted-foreground">
         <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-        加载摘要...
+        加载纪要...
       </div>
     );
   }
@@ -204,7 +204,7 @@ function SummaryPreviewContent() {
   if (error || !data) {
     return (
       <div className="p-6 space-y-4">
-        <p className="text-destructive">{error || '摘要不存在'}</p>
+        <p className="text-destructive">{error || '纪要不存在'}</p>
         {loggedIn && (
           <Button variant="outline" asChild>
             <Link href="/sessions">返回会议记录</Link>
@@ -215,7 +215,7 @@ function SummaryPreviewContent() {
   }
 
   const typeLabel =
-    SUMMARY_TYPE_LABELS[summaryType] || data.summaryTypeLabel || '摘要';
+    SUMMARY_TYPE_LABELS[summaryType] || data.summaryTypeLabel || '纪要';
 
   return (
     <div className="summary-preview-page min-h-full bg-muted/30 print:bg-white">
@@ -284,7 +284,7 @@ function SummaryPreviewContent() {
       <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>
         <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>分享链接</DialogTitle>
+            <DialogTitle>分享纪要链接</DialogTitle>
             <DialogDescription>
               当前浏览器无法自动复制，请长按下方链接手动复制。
             </DialogDescription>

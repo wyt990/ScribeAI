@@ -11,20 +11,46 @@ dotenv_1.default.config();
 const authroutes_1 = __importDefault(require("./routes/authroutes"));
 const transcript_1 = __importDefault(require("./routes/transcript"));
 const sessions_1 = __importDefault(require("./routes/sessions"));
+const drafts_1 = __importDefault(require("./routes/drafts"));
+const downloads_1 = __importDefault(require("./routes/downloads"));
 const socket_1 = require("./socket/socket");
+const draft_cleanup_1 = require("./lib/draft-cleanup");
+const summary_llm_1 = require("./lib/summary-llm");
+try {
+    (0, summary_llm_1.validateSummaryConfig)();
+}
+catch (err) {
+    console.error("[SummaryLLM] Config error:", err);
+    process.exit(1);
+}
 const app = (0, express_1.default)();
 const server = http_1.default.createServer(app);
+// 允许长耗时请求（如 LLM 结构化摘要），避免代理/连接提前断开
+const LONG_REQUEST_MS = Number(process.env.HTTP_LONG_REQUEST_MS || "300000");
+server.requestTimeout = LONG_REQUEST_MS;
+server.headersTimeout = LONG_REQUEST_MS + 10000;
+server.keepAliveTimeout = 65000;
 // Initialize socket server
 (0, socket_1.createSocketServer)(server);
+// Start stale session cleanup timer (safety net for orphaned uploads)
+(0, socket_1.startStaleSessionCleanup)();
+(0, draft_cleanup_1.startDraftCleanup)();
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 // REST Routes
 app.use("/api/auth", authroutes_1.default);
 app.use('/api/transcript', transcript_1.default);
 app.use('/api/sessions', sessions_1.default);
+app.use('/api/drafts', drafts_1.default);
+app.use('/api/downloads', downloads_1.default);
 const PORT = 4000;
 server.listen(PORT, () => {
     console.log(`HTTP server running at http://localhost:${PORT}`);
     console.log(`Socket.io running at ws://localhost:${PORT}`);
+    const summaryProvider = (0, summary_llm_1.getSummaryProviderLabel)();
+    console.log(`Summary LLM provider: ${summaryProvider}`);
+    if (summaryProvider === "openai_compatible") {
+        console.log(`Summary LLM endpoint: ${(0, summary_llm_1.getResolvedChatCompletionsUrl)()}`);
+    }
 });
 //# sourceMappingURL=index.js.map

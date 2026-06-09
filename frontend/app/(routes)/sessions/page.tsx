@@ -157,7 +157,7 @@ export default function SessionsPage() {
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || "生成摘要失败");
+        throw new Error(err.error || "生成纪要失败");
       }
       const data = await res.json();
       setActiveSummaryType(summaryType);
@@ -190,7 +190,7 @@ export default function SessionsPage() {
       goToSummaryPreview(currentSession.id, summaryType);
     } catch (err) {
       console.error(err);
-      alert(err instanceof Error ? err.message : "生成摘要失败");
+      alert(err instanceof Error ? err.message : "生成纪要失败");
     } finally {
       setLoadingSummary(false);
     }
@@ -226,7 +226,7 @@ export default function SessionsPage() {
                   <span className="truncate">{session.title}</span>
                   {session.hasSummary && (
                     <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-normal text-primary">
-                      已有摘要
+                      已有纪要
                     </span>
                   )}
                 </CardTitle>
@@ -247,7 +247,7 @@ export default function SessionsPage() {
                     disabled={!session.hasSummary}
                     onClick={() => openSummaryFromCard(session)}
                   >
-                    查看摘要
+                    查看纪要
                   </Button>
                   <Button className="flex-1" onClick={() => openSession(session.id)}>
                     查看转录
@@ -304,18 +304,18 @@ export default function SessionsPage() {
                       onClick={() => void fetchSummary(true)}
                       disabled={loadingSummary}
                     >
-                      {loadingSummary ? "生成中（约 1–3 分钟）..." : "重新生成摘要"}
+                      {loadingSummary ? "生成中（约 1–3 分钟）..." : "重新生成纪要"}
                     </Button>
                     <Button
                       onClick={() => goToSummaryPreview(currentSession.id, summaryType)}
                       disabled={loadingSummary}
                     >
-                      查看摘要
+                      查看纪要
                     </Button>
                   </>
                 ) : (
                   <Button onClick={() => void fetchSummary()} disabled={loadingSummary}>
-                    {loadingSummary ? "生成中（约 1–3 分钟）..." : "生成摘要"}
+                    {loadingSummary ? "生成中（约 1–3 分钟）..." : "生成纪要"}
                   </Button>
                 )}
                 <Button

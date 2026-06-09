@@ -71,7 +71,7 @@ export function TranscriptFeed() {
 
   return (
     <div className="flex flex-col h-full space-y-4">
-      <Card className="flex flex-col h-full">
+      <Card className="flex flex-col flex-1 min-h-0">
         <CardHeader>
           <div className="flex items-center justify-between w-full gap-2">
             <div className="min-w-0">

@@ -8,6 +8,7 @@ import authRoutes from "./routes/authroutes";
 import transcript from "./routes/transcript"
 import sessions from "./routes/sessions"
 import drafts from "./routes/drafts"
+import downloads from "./routes/downloads"
 import { createSocketServer, startStaleSessionCleanup } from "./socket/socket";
 import { startDraftCleanup } from "./lib/draft-cleanup";
 import {
@@ -47,6 +48,7 @@ app.use("/api/auth", authRoutes);
 app.use('/api/transcript', transcript);
 app.use('/api/sessions', sessions);
 app.use('/api/drafts', drafts);
+app.use('/api/downloads', downloads);
 
 const PORT = 4000;
 server.listen(PORT, () => {

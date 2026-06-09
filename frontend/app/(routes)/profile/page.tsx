@@ -7,7 +7,13 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useRouter } from "next/navigation";
-import { Loader2 } from 'lucide-react';
+import { Download, Loader2, Smartphone } from 'lucide-react';
+import {
+  fetchAndroidApkInfo,
+  downloadAndroidApk,
+  formatApkSize,
+  type AndroidApkInfo,
+} from '@/lib/android-download';
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState<any>(null);
@@ -17,6 +23,9 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [apkInfo, setApkInfo] = useState<AndroidApkInfo | null>(null);
+  const [apkLoading, setApkLoading] = useState(true);
+  const [apkDownloading, setApkDownloading] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -53,6 +62,14 @@ export default function ProfilePage() {
 
     fetchProfile();
   }, [router]);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    void fetchAndroidApkInfo(token)
+      .then(setApkInfo)
+      .finally(() => setApkLoading(false));
+  }, []);
 
   const handleSave = async () => {
     setError('');
@@ -116,8 +133,24 @@ export default function ProfilePage() {
 
   const hasChanges = name !== profile.name || email !== profile.email;
 
+  const handleDownloadApk = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      router.replace('/login');
+      return;
+    }
+    setApkDownloading(true);
+    try {
+      await downloadAndroidApk(token);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : '下载失败');
+    } finally {
+      setApkDownloading(false);
+    }
+  };
+
   return (
-    <div className="p-6 max-w-2xl">
+    <div className="p-6 max-w-2xl space-y-6">
       <Card>
         <CardHeader>
           <CardTitle>账户信息</CardTitle>
@@ -179,6 +212,49 @@ export default function ProfilePage() {
               取消
             </Button>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Smartphone className="h-5 w-5" />
+            Android 客户端
+          </CardTitle>
+          <CardDescription>
+            安装 ScribeAI 手机应用，在移动端使用会议录音与转录
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {apkLoading ? (
+            <p className="text-sm text-muted-foreground">检查安装包...</p>
+          ) : apkInfo?.available ? (
+            <>
+              <p className="text-sm text-muted-foreground">
+                版本文件：{apkInfo.fileName}
+                {apkInfo.size ? ` · ${formatApkSize(apkInfo.size)}` : ''}
+                {apkInfo.updatedAt
+                  ? ` · 更新于 ${new Date(apkInfo.updatedAt).toLocaleString('zh-CN')}`
+                  : ''}
+              </p>
+              <Button
+                variant="outline"
+                onClick={() => void handleDownloadApk()}
+                disabled={apkDownloading}
+              >
+                {apkDownloading ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Download className="mr-2 h-4 w-4" />
+                )}
+                下载 Android 安装包
+              </Button>
+            </>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              暂无可下载的 Android 安装包，请联系管理员发布。
+            </p>
+          )}
         </CardContent>
       </Card>
     </div>

@@ -1,1 +1,15 @@
 docs/
+
+# Android 发布包（由 assembleRelease 后手动复制）
+backend/downloads/*.apk
+
+# Android Client 编译产物与缓存
+Android-Client/.gradle/
+Android-Client/**/build/
+Android-Client/local.properties
+Android-Client/key.md
+Android-Client/.android-sdk/
+Android-Client/.idea/
+Android-Client/*.iml
+Android-Client/**/*.apk
+Android-Client/**/*.aab

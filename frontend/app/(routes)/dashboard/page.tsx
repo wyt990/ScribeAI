@@ -183,7 +183,7 @@ function DashboardContent() {
   }
 
   return (
-    <div className="h-full px-6 py-2 space-y-6">
+    <div className="h-[calc(100vh-4rem)] px-6 py-2 flex flex-col space-y-6">
       {error && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
@@ -202,7 +202,7 @@ function DashboardContent() {
         />
       )}
 
-      <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+      <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 shrink-0">
         <h2 className="text-xl font-semibold">欢迎回来，{user?.name}</h2>
         {draftId && status !== 'recording' && (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -214,13 +214,13 @@ function DashboardContent() {
         )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1 space-y-6">
+      <div className="flex-1 min-h-0 flex flex-col lg:grid lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-1 space-y-6 shrink-0">
           <AudioModeSelector />
           <RecordingControls ensureDraft={ensureDraft} flushDraft={flushDraft} />
         </div>
 
-        <div className="lg:col-span-2 h-[calc(100vh-12rem)]">
+        <div className="lg:col-span-2 flex-1 min-h-0">
           <TranscriptFeed />
         </div>
       </div>

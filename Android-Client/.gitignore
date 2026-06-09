@@ -1,0 +1,35 @@
+# IDE
+*.iml
+.idea/
+.DS_Store
+
+# 本地配置（含 SDK 路径，每人不同）
+local.properties
+.android-sdk/
+
+# Gradle 缓存与临时文件
+.gradle/
+**/.gradle/
+
+# 编译输出目录
+build/
+**/build/
+app/build/
+captures/
+.externalNativeBuild/
+.cxx/
+.kotlin/
+
+# 打包产物
+*.apk
+*.ap_
+*.aab
+*.dex
+*.class
+*.hprof
+output.json
+output-metadata.json
+
+# 签名密钥（勿提交）
+*.jks
+*.keystore
