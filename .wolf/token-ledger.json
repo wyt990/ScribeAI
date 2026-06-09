@@ -2,14 +2,14 @@
   "version": 1,
   "created_at": "2026-06-08T14:29:30.868Z",
   "lifetime": {
-    "total_tokens_estimated": 17872414,
-    "total_reads": 4053,
-    "total_writes": 7508,
-    "total_sessions": 7,
-    "anatomy_hits": 2011,
+    "total_tokens_estimated": 17873778,
+    "total_reads": 4054,
+    "total_writes": 7511,
+    "total_sessions": 8,
+    "anatomy_hits": 2012,
     "anatomy_misses": 1374,
-    "repeated_reads_blocked": 4757,
-    "estimated_savings_vs_bare_cli": 9941510
+    "repeated_reads_blocked": 4760,
+    "estimated_savings_vs_bare_cli": 9945127
   },
   "sessions": [
     {
@@ -64276,6 +64276,44 @@
         "writes_count": 189,
         "repeated_reads_blocked": 130,
         "anatomy_lookups": 25
+      }
+    },
+    {
+      "id": "session-2026-06-09-0959",
+      "started": "2026-06-09T01:59:23.606Z",
+      "ended": "2026-06-09T01:59:48.131Z",
+      "reads": [
+        {
+          "file": "/apps/ScribeAI/README.md",
+          "tokens_estimated": 1139,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/apps/ScribeAI/README.md",
+          "tokens_estimated": 47,
+          "action": "edit"
+        },
+        {
+          "file": "/apps/ScribeAI/README.md",
+          "tokens_estimated": 20,
+          "action": "edit"
+        },
+        {
+          "file": "/apps/ScribeAI/README.md",
+          "tokens_estimated": 158,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 1139,
+        "output_tokens_estimated": 225,
+        "reads_count": 1,
+        "writes_count": 3,
+        "repeated_reads_blocked": 3,
+        "anatomy_lookups": 1
       }
     }
   ],
