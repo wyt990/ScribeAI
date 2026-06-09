@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { DASHBOARD_NAV_ITEMS } from '@/lib/dashboard-nav';
+import { isAndroidWebView, withCacheBust } from '@/lib/navigation';
 
 type DashboardNavLinksProps = {
   onNavigate?: () => void;
@@ -22,7 +23,13 @@ export function DashboardNavLinks({ onNavigate }: DashboardNavLinksProps) {
           <Link
             key={item.href}
             href={item.href}
-            onClick={onNavigate}
+            onClick={(e) => {
+              if (isAndroidWebView()) {
+                e.preventDefault();
+                window.location.assign(withCacheBust(item.href));
+              }
+              onNavigate?.();
+            }}
             className={cn(
               'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
               isActive

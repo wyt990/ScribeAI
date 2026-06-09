@@ -16,6 +16,8 @@ import {
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Mic } from "lucide-react";
+import { clearAuthSession, validateAuthToken } from "@/lib/auth-session";
+import { navigatePush, navigateReplace } from "@/lib/navigation";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -32,14 +34,15 @@ export default function LoginPage() {
       setCheckingSession(false);
       return;
     }
-    void fetch('/api/auth/me', {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => {
-        if (res.ok) router.replace('/dashboard');
-        else localStorage.removeItem('token');
+    void validateAuthToken(token)
+      .then((valid) => {
+        if (valid) {
+          navigateReplace(router, '/dashboard');
+        } else {
+          clearAuthSession();
+        }
       })
-      .catch(() => localStorage.removeItem('token'))
+      .catch(() => clearAuthSession())
       .finally(() => setCheckingSession(false));
   }, [router]);
 
@@ -57,6 +60,12 @@ export default function LoginPage() {
         body: JSON.stringify({ email, password }),
       });
 
+      const contentType = res.headers.get('content-type') ?? '';
+      if (!contentType.includes('application/json')) {
+        setError('服务器响应异常，请稍后重试或联系管理员');
+        return;
+      }
+
       const data = await res.json();
 
       if (!res.ok) {
@@ -64,12 +73,18 @@ export default function LoginPage() {
         return;
       }
 
-      // 将 JWT 保存到 localStorage
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", data.user.name);
+      if (!data.token) {
+        setError('登录响应无效，请重试');
+        return;
+      }
 
-      // Redirect to protected dashboard
-      router.push("/dashboard");
+      clearAuthSession();
+      localStorage.setItem("token", data.token);
+      if (data.user?.name) {
+        localStorage.setItem("user", data.user.name);
+      }
+
+      navigatePush(router, "/dashboard");
     } catch (err) {
       console.error(err);
       setError("登录失败，请重试。");

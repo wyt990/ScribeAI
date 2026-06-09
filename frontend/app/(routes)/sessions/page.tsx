@@ -138,7 +138,7 @@ export default function SessionsPage() {
     if (
       regenerate &&
       !confirm(
-        `确定重新生成「${SUMMARY_TYPE_LABELS[summaryType]}」？将覆盖当前已保存的摘要。`
+        `确定重新生成「${SUMMARY_TYPE_LABELS[summaryType]}」？将覆盖当前已保存的纪要。`
       )
     ) {
       return;
@@ -277,7 +277,7 @@ export default function SessionsPage() {
 
             <div className="mt-4 space-y-3">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="text-sm text-muted-foreground shrink-0">摘要模式</span>
+                <span className="text-sm text-muted-foreground shrink-0">纪要模式</span>
                 <Select
                   value={summaryType}
                   onValueChange={(v) => void switchCachedSummaryType(v as SummaryType)}

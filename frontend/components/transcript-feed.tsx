@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useRef } from "react";
 import { useRecordingStore } from "@/lib/store";
 import {
   Card,
@@ -11,27 +10,11 @@ import {
 } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { promoteDraft } from "@/lib/draft-api";
+import { PromoteDraftButton } from "@/components/promote-draft-button";
 
 export function TranscriptFeed() {
-  const router = useRouter();
-  const { transcript, status, draftId, draftTitle, clearTranscript, clearDraft } =
-    useRecordingStore();
+  const { transcript, status, draftId, draftTitle } = useRecordingStore();
   const scrollRef = useRef<HTMLDivElement>(null);
-
-  const [saving, setSaving] = useState(false);
-  const [openTitleDialog, setOpenTitleDialog] = useState(false);
-  const [title, setTitle] = useState("");
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -42,37 +25,10 @@ export function TranscriptFeed() {
   const hasContent =
     (Array.isArray(transcript) ? transcript.join(" ") : transcript || "").trim().length > 0;
 
-  const canPromote =
-    !!draftId && hasContent && (status === "idle" || status === "paused" || status === "completed");
-
-  const openSaveDialog = () => {
-    setTitle(draftTitle?.startsWith("草稿") ? "" : draftTitle || "");
-    setOpenTitleDialog(true);
-  };
-
-  const handlePromote = async () => {
-    if (!draftId || !hasContent) return;
-    if (!title.trim()) return alert("请输入会话标题");
-
-    setSaving(true);
-    try {
-      await promoteDraft(draftId, title.trim());
-      setOpenTitleDialog(false);
-      clearTranscript();
-      clearDraft();
-      router.replace("/sessions");
-    } catch (err) {
-      console.error(err);
-      alert(err instanceof Error ? err.message : "保存失败");
-    } finally {
-      setSaving(false);
-    }
-  };
-
   return (
-    <div className="flex flex-col h-full space-y-4">
-      <Card className="flex flex-col flex-1 min-h-0">
-        <CardHeader>
+    <div className="h-full min-h-0 flex flex-col overflow-hidden">
+      <Card className="flex flex-col flex-1 min-h-0 overflow-hidden py-0 gap-0">
+        <CardHeader className="shrink-0 py-3 px-4 md:px-6">
           <div className="flex items-center justify-between w-full gap-2">
             <div className="min-w-0">
               <CardTitle>实时转录</CardTitle>
@@ -92,11 +48,11 @@ export function TranscriptFeed() {
           </div>
         </CardHeader>
 
-        <CardContent className="flex-1 min-h-0">
-          <ScrollArea className="h-full pr-4" ref={scrollRef}>
+        <CardContent className="flex-1 min-h-0 px-4 pb-3 md:px-6 md:pb-4">
+          <ScrollArea className="h-full pr-3 md:pr-4" ref={scrollRef}>
             {!hasContent ? (
-              <div className="flex items-center justify-center h-full text-muted-foreground">
-                <p className="text-center">
+              <div className="flex items-center justify-center min-h-[4rem] h-full text-muted-foreground">
+                <p className="text-center text-sm">
                   {status === "idle"
                     ? "开始录音以查看实时转录"
                     : "等待转录中..."}
@@ -115,34 +71,10 @@ export function TranscriptFeed() {
         </CardContent>
       </Card>
 
-      <div className="flex justify-end">
-        <Button onClick={openSaveDialog} disabled={!canPromote}>
-          保存为正式会话
-        </Button>
+      {/* 桌面端：按钮在转录卡片下方；移动端由 MobilePromoteBar 负责 */}
+      <div className="hidden md:flex shrink-0 justify-end pt-2">
+        <PromoteDraftButton />
       </div>
-
-      <Dialog open={openTitleDialog} onOpenChange={setOpenTitleDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>保存为正式会话</DialogTitle>
-          </DialogHeader>
-
-          <Input
-            placeholder="例如：团队会议、机器学习讲座、讨论..."
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setOpenTitleDialog(false)}>
-              取消
-            </Button>
-            <Button onClick={handlePromote} disabled={saving}>
-              {saving ? "保存中..." : "保存"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

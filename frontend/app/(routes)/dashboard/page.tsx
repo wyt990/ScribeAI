@@ -14,6 +14,8 @@ import { AlertCircle } from "lucide-react";
 import { useDraftSync } from "@/hooks/use-draft-sync";
 import { fetchActiveDraft, fetchDraft, deleteDraft, type Draft } from "@/lib/draft-api";
 import { Button } from "@/components/ui/button";
+import { clearAuthSession } from "@/lib/auth-session";
+import { navigateReplace } from "@/lib/navigation";
 
 function DashboardContent() {
   const router = useRouter();
@@ -61,7 +63,7 @@ function DashboardContent() {
   // --- Verify user ---
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (!token) return router.replace("/login");
+    if (!token) return navigateReplace(router, "/login");
 
     const verifyUser = async () => {
       try {
@@ -71,8 +73,8 @@ function DashboardContent() {
         });
 
         if (!res.ok) {
-          localStorage.removeItem("token");
-          return router.replace("/login");
+          clearAuthSession();
+          return navigateReplace(router, "/login");
         }
 
         const data = await res.json();
@@ -80,8 +82,8 @@ function DashboardContent() {
         setUserId(data.user.id);
       } catch (err) {
         console.error(err);
-        localStorage.removeItem("token");
-        router.replace("/login");
+        clearAuthSession();
+        navigateReplace(router, "/login");
       } finally {
         setLoading(false);
       }
@@ -102,7 +104,7 @@ function DashboardContent() {
 
           const draft = await fetchDraft(draftIdParam);
           if (!draft) {
-            router.replace('/dashboard');
+            navigateReplace(router, '/dashboard');
             return;
           }
           applyDraft(draft);
@@ -182,10 +184,12 @@ function DashboardContent() {
     );
   }
 
+  const showDraftBar = !!draftId && status !== 'recording';
+
   return (
-    <div className="h-[calc(100vh-4rem)] px-6 py-2 flex flex-col space-y-6">
+    <div className="h-full min-h-0 overflow-hidden flex flex-col gap-2 md:gap-6 px-4 md:px-6 pt-0 pb-2 md:py-2">
       {error && (
-        <Alert variant="destructive">
+        <Alert variant="destructive" className="shrink-0">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>{error}</AlertDescription>
         </Alert>
@@ -202,10 +206,19 @@ function DashboardContent() {
         />
       )}
 
-      <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 shrink-0">
-        <h2 className="text-xl font-semibold">欢迎回来，{user?.name}</h2>
-        {draftId && status !== 'recording' && (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+      {/* 移动端隐藏「欢迎回来」以腾出顶栏下方空间；桌面端保留 */}
+      <div
+        className={
+          showDraftBar
+            ? 'shrink-0 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 md:gap-2'
+            : 'hidden md:flex md:items-center md:justify-between shrink-0'
+        }
+      >
+        <h2 className="hidden md:block text-xl font-semibold truncate">
+          欢迎回来，{user?.name}
+        </h2>
+        {showDraftBar && (
+          <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
             <span className="truncate">当前草稿：{draftTitle}</span>
             <Button variant="outline" size="sm" onClick={handleDiscardDraft}>
               放弃草稿
@@ -214,13 +227,14 @@ function DashboardContent() {
         )}
       </div>
 
-      <div className="flex-1 min-h-0 flex flex-col lg:grid lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1 space-y-6 shrink-0">
+      {/* 移动端：录音控件固定高度 + 实时转录弹性占满剩余空间 */}
+      <div className="flex-1 min-h-0 overflow-hidden grid grid-rows-[auto_minmax(0,1fr)] lg:grid-rows-1 lg:grid-cols-3 gap-2 md:gap-6">
+        <div className="lg:col-span-1 flex flex-col gap-2 md:gap-6 shrink-0 min-h-0">
           <AudioModeSelector />
           <RecordingControls ensureDraft={ensureDraft} flushDraft={flushDraft} />
         </div>
 
-        <div className="lg:col-span-2 flex-1 min-h-0">
+        <div className="min-h-0 h-full overflow-hidden flex flex-col lg:col-span-2">
           <TranscriptFeed />
         </div>
       </div>

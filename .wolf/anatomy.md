@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-06-09T07:44:46.023Z
-> Files: 186 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-06-09T08:41:51.247Z
+> Files: 194 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../root/.claude/plans/
 
@@ -29,6 +29,7 @@
 
 ## ../../root/.cursor/projects/apps-ScribeAI/assets/
 
+- `c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_12d9ad4864617a6acf9b7a6aff0dc44-18ba5176-b2f7-46b1-8575-dc2ceb9388df.png` (~6488 tok)
 - `c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-54026190-d945-4ddf-9bae-1ba519897844.png` (~19552 tok)
 - `c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-76e820c6-7462-46fd-b194-183bc411cfdd.png` (~11832 tok)
 
@@ -57,7 +58,7 @@
 
 ## Android-Client/app/
 
-- `build.gradle.kts` (~381 tok)
+- `build.gradle.kts` (~395 tok)
 - `proguard-rules.pro` — ScribeAI WebView client — 默认无混淆规则 (~10 tok)
 
 ## Android-Client/app/src/main/
@@ -66,8 +67,8 @@
 
 ## Android-Client/app/src/main/java/com/scribeai/client/
 
-- `AuthSessionStore.kt` — 将 Web 端 JWT 备份到原生存储，避免 WebView 重启后 localStorage 丢失 (~243 tok)
-- `MainActivity.kt` — 从原生备份恢复 token 到网页 localStorage，并在登录页自动跳转 (~2827 tok)
+- `AuthSessionStore.kt` — 将 Web 端 JWT 备份到原生存储，避免 WebView 重启后 localStorage 丢失 (~306 tok)
+- `MainActivity.kt` — 页面加载完成后：必要时从原生恢复 token，校验有效性，无效则双向清除； (~3205 tok)
 
 ## Android-Client/app/src/main/res/drawable/
 
@@ -180,7 +181,7 @@
 
 ## backend/src/routes/
 
-- `authroutes.ts` — routes/auth.js (~1308 tok)
+- `authroutes.ts` — routes/auth.js (~1360 tok)
 - `downloads.ts` — API routes: GET (2 endpoints) (~346 tok)
 - `drafts.ts` — 列表：用户所有未转正的草稿 (~1821 tok)
 - `sessions.ts` — API routes: GET, POST, DELETE (7 endpoints) (~3102 tok)
@@ -205,9 +206,9 @@
 - `.gitignore` — Git ignore rules (~128 tok)
 - `components.json` (~128 tok)
 - `eslint.config.mjs` — ESLint flat configuration (~124 tok)
-- `next.config.ts` — Declares nextConfig (~323 tok)
+- `next.config.ts` — Declares buildId (~456 tok)
 - `package-lock.json` — npm lock file (~97635 tok)
-- `package.json` — Node.js package manifest (~719 tok)
+- `package.json` — Node.js package manifest (~707 tok)
 - `postcss.config.mjs` — Declares config (~26 tok)
 - `README.md` — Project documentation (~363 tok)
 - `tsconfig.json` — TypeScript configuration (~191 tok)
@@ -215,8 +216,8 @@
 ## frontend/app/
 
 - `globals.css` — Styles: 8 rules, 103 vars (~1096 tok)
-- `layout.tsx` — inter (~407 tok)
-- `page.tsx` — 根路径：有 token 则进仪表板，否则去登录（WebView 重启后保持登录态） (~139 tok)
+- `layout.tsx` — inter (~396 tok)
+- `page.tsx` — 根路径：有 token 则进仪表板，否则去登录（WebView 重启后保持登录态） (~156 tok)
 
 ## frontend/app/(routes)/
 
@@ -224,7 +225,7 @@
 
 ## frontend/app/(routes)/dashboard/
 
-- `page.tsx` — DashboardContent (~2039 tok)
+- `page.tsx` — DashboardContent (~2206 tok)
 
 ## frontend/app/(routes)/drafts/
 
@@ -244,7 +245,7 @@
 
 ## frontend/app/login/
 
-- `page.tsx` — LoginPage — renders form (~1409 tok)
+- `page.tsx` — LoginPage — renders form (~1518 tok)
 
 ## frontend/app/signup/
 
@@ -253,15 +254,18 @@
 ## frontend/components/
 
 - `audio-mode-selector.tsx` — AudioModeSelector (~792 tok)
-- `dashboard-nav-links.tsx` — DashboardNavLinks (~322 tok)
-- `dashboard-shell.tsx` — DashboardShell (~206 tok)
+- `build-stamp.tsx` — 移动端右下角版本戳，便于确认 WebView 是否加载到最新构建 (~139 tok)
+- `dashboard-nav-links.tsx` — DashboardNavLinks (~398 tok)
+- `dashboard-shell.tsx` — 会议录音页需要锁高度、内部弹性布局；其余页面允许纵向滚动 (~369 tok)
 - `draft-restore-banner.tsx` — DraftRestoreBanner (~333 tok)
-- `navbar.tsx` — Navbar (~1655 tok)
+- `mobile-promote-bar.tsx` — 移动端底栏：作为 shell 的 flex 子项，避免 WebView 裁切 fixed/portal (~273 tok)
+- `navbar.tsx` — Navbar (~1658 tok)
+- `promote-draft-button.tsx` — PromoteDraftButton — renders modal (~685 tok)
 - `recording-controls.tsx` — VAD 状态指示器：显示一个小圆点 + 文字 (~1532 tok)
 - `sidebar.tsx` — Sidebar (~611 tok)
 - `summary-markdown.tsx` — SummaryMarkdown (~173 tok)
 - `theme-provider.tsx` — ThemeProvider (~87 tok)
-- `transcript-feed.tsx` — TranscriptFeed — renders modal (~1374 tok)
+- `transcript-feed.tsx` — TranscriptFeed (~855 tok)
 
 ## frontend/components/ui/
 
@@ -322,6 +326,7 @@
 ## frontend/hooks/
 
 - `use-audio-recorder.ts` — 跨页面导航缓存服务端下发的 VAD 配置（socket 已连接时不会重发 vad-config） (~6542 tok)
+- `use-can-promote.ts` — Exports useCanPromote (~155 tok)
 - `use-draft-sync.ts` — 草稿自动保存：转录追加防抖写入，状态变更立即写入，离开页面时刷盘 (~1194 tok)
 - `use-is-logged-in.ts` — 客户端检测是否已登录（localStorage 中有 token） (~83 tok)
 - `use-mobile.ts` — Exports useIsMobile (~162 tok)
@@ -331,10 +336,13 @@
 - `android-download.ts` — API routes: GET (1 endpoints) (~359 tok)
 - `api.ts` — Exports api (~134 tok)
 - `app-config.ts` — 是否显示音频源选择器（麦克风/标签页切换） (~98 tok)
+- `app-version.ts` — 构建时注入，用于确认前端是否已部署到最新版本 (~29 tok)
 - `audio-utils.ts` — 将 Float32 PCM（-1~1）编码为 16-bit mono WAV (~358 tok)
+- `auth-session.ts` — 清除网页端登录态 (~128 tok)
 - `copy-to-clipboard.ts` — 复制文本；移动端在异步操作后 clipboard API 常因失去用户手势而失败，提供 textarea 回退 (~243 tok)
 - `dashboard-nav.ts` — Exports DashboardNavItem, DASHBOARD_NAV_ITEMS (~127 tok)
 - `draft-api.ts` — Exports DraftStatus, Draft, fetchDrafts, fetchActiveDraft + 7 more (~861 tok)
+- `navigation.ts` — Android WebView 壳应用（MainActivity 自定义 UA） (~358 tok)
 - `pcm-capture.ts` — Target frame size in samples (at 16kHz) (~1350 tok)
 - `session-storage.ts` — Exports Session, useSessionStore (~223 tok)
 - `socket.ts` — Flush buffered segment results in seq order; returns texts ready to display (~1371 tok)

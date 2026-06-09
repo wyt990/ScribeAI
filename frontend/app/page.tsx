@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { navigateReplace } from '@/lib/navigation';
 
 /** 根路径：有 token 则进仪表板，否则去登录（WebView 重启后保持登录态） */
 export default function HomePage() {
@@ -9,7 +10,7 @@ export default function HomePage() {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    router.replace(token ? '/dashboard' : '/login');
+    navigateReplace(router, token ? '/dashboard' : '/login');
   }, [router]);
 
   return (

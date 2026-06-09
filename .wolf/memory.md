@@ -842,3 +842,98 @@
 | 15:44 | Edited frontend/app/(routes)/dashboard/page.tsx | "h-full px-6 py-2 flex fle" → "h-[calc(100dvh-4rem)] px-" | ~22 |
 | 15:44 | Edited frontend/app/(routes)/dashboard/page.tsx | inline fix | ~6 |
 | 15:45 | Session end: 13 writes across 6 files (build.gradle.kts, page.tsx, AuthSessionStore.kt, MainActivity.kt, README.md) | 15 reads | ~29136 tok |
+| 15:49 | Created frontend/components/dashboard-shell.tsx | — | ~212 |
+| 15:49 | Created frontend/app/(routes)/dashboard/page.tsx | — | ~2041 |
+| 15:49 | Created frontend/components/transcript-feed.tsx | — | ~1333 |
+| 15:49 | Created frontend/app/(routes)/dashboard/page.tsx | — | ~2045 |
+| 15:49 | Created frontend/app/(routes)/dashboard/page.tsx | — | ~2051 |
+| 15:49 | Created frontend/components/transcript-feed.tsx | — | ~1486 |
+| 15:49 | Created frontend/components/navbar.tsx | — | ~1609 |
+| 15:50 | Session end: 20 writes across 8 files (build.gradle.kts, page.tsx, AuthSessionStore.kt, MainActivity.kt, README.md) | 16 reads | ~41009 tok |
+| 15:54 | Created frontend/components/dashboard-shell.tsx | — | ~212 |
+| 15:54 | Created frontend/app/(routes)/dashboard/page.tsx | — | ~2173 |
+| 15:54 | Created frontend/components/transcript-feed.tsx | — | ~1444 |
+| 15:54 | Created frontend/app/layout.tsx | — | ~396 |
+| 15:55 | Session end: 24 writes across 9 files (build.gradle.kts, page.tsx, AuthSessionStore.kt, MainActivity.kt, README.md) | 21 reads | ~47736 tok |
+| 15:57 | Created frontend/lib/navigation.ts | — | ~387 |
+| 15:57 | Created frontend/lib/app-version.ts | — | ~29 |
+| 15:57 | Created frontend/components/build-stamp.tsx | — | ~139 |
+| 15:57 | Created frontend/next.config.ts | — | ~358 |
+| 15:57 | Created frontend/next.config.ts | — | ~456 |
+| 15:57 | Created frontend/components/dashboard-shell.tsx | — | ~227 |
+| 15:58 | Created frontend/app/(routes)/dashboard/page.tsx | — | ~2188 |
+| 15:58 | Created frontend/components/dashboard-nav-links.tsx | — | ~341 |
+| 15:58 | Created frontend/app/page.tsx | — | ~154 |
+| 15:58 | Created frontend/app/login/page.tsx | — | ~1381 |
+| 15:58 | Created frontend/components/dashboard-shell.tsx | — | ~234 |
+| 15:58 | Created frontend/components/dashboard-nav-links.tsx | — | ~398 |
+| 15:58 | Created frontend/app/page.tsx | — | ~156 |
+| 15:58 | Created frontend/app/login/page.tsx | — | ~1383 |
+| 15:58 | Created frontend/app/login/page.tsx | — | ~1386 |
+| 15:58 | Created frontend/app/(routes)/dashboard/page.tsx | — | ~2190 |
+| 15:58 | Created frontend/app/(routes)/dashboard/page.tsx | — | ~2193 |
+| 15:58 | Created frontend/app/(routes)/dashboard/page.tsx | — | ~2195 |
+| 15:58 | Created frontend/app/(routes)/dashboard/page.tsx | — | ~2198 |
+| 15:58 | Created Android-Client/app/src/main/java/com/scribeai/client/MainActivity.kt | — | ~2845 |
+| 15:58 | Created Android-Client/app/src/main/java/com/scribeai/client/AuthSessionStore.kt | — | ~306 |
+| 15:58 | Created Android-Client/app/src/main/java/com/scribeai/client/MainActivity.kt | — | ~2845 |
+| 15:58 | Created Android-Client/app/src/main/java/com/scribeai/client/MainActivity.kt | — | ~2850 |
+| 15:58 | Created Android-Client/app/src/main/java/com/scribeai/client/MainActivity.kt | — | ~2933 |
+| 15:58 | Created frontend/lib/navigation.ts | — | ~385 |
+| 15:58 | Created frontend/lib/navigation.ts | — | ~382 |
+| 15:58 | Created frontend/lib/navigation.ts | — | ~380 |
+| 15:59 | Session end: 51 writes across 14 files (build.gradle.kts, page.tsx, AuthSessionStore.kt, MainActivity.kt, README.md) | 27 reads | ~81970 tok |
+| 16:00 | Created Android-Client/app/src/main/java/com/scribeai/client/MainActivity.kt | — | ~2943 |
+| 16:00 | Created Android-Client/app/build.gradle.kts | — | ~395 |
+| 16:01 | Session end: 53 writes across 14 files (build.gradle.kts, page.tsx, AuthSessionStore.kt, MainActivity.kt, README.md) | 27 reads | ~85647 tok |
+| 16:03 | Session end: 53 writes across 14 files (build.gradle.kts, page.tsx, AuthSessionStore.kt, MainActivity.kt, README.md) | 27 reads | ~85647 tok |
+| 16:06 | Created frontend/lib/auth-session.ts | — | ~128 |
+| 16:06 | Created frontend/lib/navigation.ts | — | ~380 |
+| 16:06 | Created frontend/app/login/page.tsx | — | ~1407 |
+| 16:06 | Created frontend/app/login/page.tsx | — | ~1393 |
+| 16:06 | Created frontend/app/login/page.tsx | — | ~1467 |
+| 16:06 | Created Android-Client/app/src/main/java/com/scribeai/client/MainActivity.kt | — | ~2931 |
+| 16:06 | Created Android-Client/app/src/main/java/com/scribeai/client/MainActivity.kt | — | ~3205 |
+| 16:07 | Created backend/src/routes/authroutes.ts | — | ~1284 |
+| 16:07 | Created frontend/app/(routes)/dashboard/page.tsx | — | ~2214 |
+| 16:07 | Created backend/src/routes/authroutes.ts | — | ~1309 |
+| 16:07 | Created frontend/app/(routes)/dashboard/page.tsx | — | ~2210 |
+| 16:07 | Created frontend/app/(routes)/dashboard/page.tsx | — | ~2206 |
+| 16:08 | Session end: 65 writes across 16 files (build.gradle.kts, page.tsx, AuthSessionStore.kt, MainActivity.kt, README.md) | 33 reads | ~110641 tok |
+| 16:13 | Session end: 65 writes across 16 files (build.gradle.kts, page.tsx, AuthSessionStore.kt, MainActivity.kt, README.md) | 37 reads | ~110641 tok |
+| 16:15 | Session end: 65 writes across 16 files (build.gradle.kts, page.tsx, AuthSessionStore.kt, MainActivity.kt, README.md) | 39 reads | ~113331 tok |
+| 16:18 | Created frontend/components/transcript-feed.tsx | — | ~1453 |
+| 16:18 | Created frontend/app/(routes)/dashboard/page.tsx | — | ~2212 |
+| 16:18 | Created frontend/components/transcript-feed.tsx | — | ~1464 |
+| 16:18 | Created frontend/components/build-stamp.tsx | — | ~139 |
+| 16:18 | Created frontend/components/transcript-feed.tsx | — | ~1584 |
+| 16:18 | Created frontend/components/transcript-feed.tsx | — | ~1576 |
+| 16:19 | Session end: 70 writes across 16 files (build.gradle.kts, page.tsx, AuthSessionStore.kt, MainActivity.kt, README.md) | 39 reads | ~120413 tok |
+| 16:21 | Created frontend/components/transcript-feed.tsx | — | ~1588 |
+| 16:21 | Created frontend/components/transcript-feed.tsx | — | ~1698 |
+| 16:21 | Created frontend/components/transcript-feed.tsx | — | ~1853 |
+| 16:21 | Created frontend/components/transcript-feed.tsx | — | ~1749 |
+| 16:22 | Created frontend/components/transcript-feed.tsx | — | ~1748 |
+| 16:22 | Session end: 75 writes across 16 files (build.gradle.kts, page.tsx, AuthSessionStore.kt, MainActivity.kt, README.md) | 39 reads | ~129311 tok |
+| 16:25 | Created ../../root/.cursor/projects/apps-ScribeAI/assets/c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_12d9ad4864617a6acf9b7a6aff0dc44-18ba5176-b2f7-46b1-8575-dc2ceb9388df.png | — | ~0 |
+| 16:26 | Created frontend/components/transcript-feed.tsx | — | ~832 |
+| 16:26 | Created frontend/hooks/use-can-promote.ts | — | ~155 |
+| 16:26 | Created frontend/components/promote-draft-button.tsx | — | ~695 |
+| 16:26 | Created frontend/components/mobile-promote-bar.tsx | — | ~276 |
+| 16:26 | Created frontend/components/dashboard-shell.tsx | — | ~253 |
+| 16:26 | Created frontend/components/dashboard-shell.tsx | — | ~262 |
+| 16:26 | Created frontend/components/promote-draft-button.tsx | — | ~685 |
+| 16:26 | Created frontend/components/mobile-promote-bar.tsx | — | ~273 |
+| 16:28 | Session end: 84 writes across 20 files (build.gradle.kts, page.tsx, AuthSessionStore.kt, MainActivity.kt, README.md) | 45 reads | ~141131 tok |
+| 16:30 | Created frontend/components/dashboard-shell.tsx | — | ~246 |
+| 16:30 | Created frontend/next.config.ts | — | ~421 |
+| 16:30 | Created frontend/lib/navigation.ts | — | ~366 |
+| 16:30 | Created frontend/components/dashboard-shell.tsx | — | ~239 |
+| 16:30 | Created frontend/lib/navigation.ts | — | ~358 |
+| 16:31 | Session end: 89 writes across 20 files (build.gradle.kts, page.tsx, AuthSessionStore.kt, MainActivity.kt, README.md) | 45 reads | ~142922 tok |
+| 16:33 | Created frontend/components/dashboard-shell.tsx | — | ~369 |
+| 16:34 | Session end: 90 writes across 20 files (build.gradle.kts, page.tsx, AuthSessionStore.kt, MainActivity.kt, README.md) | 45 reads | ~143291 tok |
+| 16:41 | Created frontend/package.json | — | ~719 |
+| 16:41 | Created frontend/package.json | — | ~707 |
+| 16:43 | Session end: 92 writes across 21 files (build.gradle.kts, page.tsx, AuthSessionStore.kt, MainActivity.kt, README.md) | 47 reads | ~147292 tok |
+| 16:49 | Session end: 92 writes across 21 files (build.gradle.kts, page.tsx, AuthSessionStore.kt, MainActivity.kt, README.md) | 47 reads | ~147292 tok |

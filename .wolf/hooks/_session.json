@@ -3,8 +3,8 @@
   "started": "2026-06-09T07:18:52.736Z",
   "files_read": {
     "/apps/ScribeAI/Android-Client/app/build.gradle.kts": {
-      "count": 1,
-      "tokens": 282,
+      "count": 3,
+      "tokens": 381,
       "first_read": "2026-06-09T07:18:56.828Z"
     },
     "/apps/ScribeAI/Android-Client/.gitignore": {
@@ -13,48 +13,48 @@
       "first_read": "2026-06-09T07:23:20.834Z"
     },
     "/apps/ScribeAI/Android-Client/app/src/main/java/com/scribeai/client/MainActivity.kt": {
-      "count": 3,
-      "tokens": 2066,
+      "count": 8,
+      "tokens": 3205,
       "first_read": "2026-06-09T07:30:34.808Z"
     },
     "/apps/ScribeAI/frontend/app/login/page.tsx": {
-      "count": 3,
-      "tokens": 1194,
+      "count": 7,
+      "tokens": 1433,
       "first_read": "2026-06-09T07:30:34.839Z"
     },
     "/apps/ScribeAI/frontend/app/page.tsx": {
-      "count": 3,
+      "count": 4,
       "tokens": 139,
       "first_read": "2026-06-09T07:30:45.018Z"
     },
     "/apps/ScribeAI/frontend/app/(routes)/dashboard/page.tsx": {
-      "count": 5,
-      "tokens": 2039,
+      "count": 11,
+      "tokens": 2206,
       "first_read": "2026-06-09T07:30:45.075Z"
     },
     "/apps/ScribeAI/Android-Client/app/src/main/java/com/scribeai/client/AuthSessionStore.kt": {
-      "count": 1,
-      "tokens": 0,
+      "count": 3,
+      "tokens": 243,
       "first_read": "2026-06-09T07:35:40.771Z"
     },
     "/apps/ScribeAI/frontend/components/transcript-feed.tsx": {
-      "count": 2,
-      "tokens": 1374,
+      "count": 8,
+      "tokens": 1489,
       "first_read": "2026-06-09T07:39:59.702Z"
     },
     "/apps/ScribeAI/frontend/components/recording-controls.tsx": {
-      "count": 1,
+      "count": 4,
       "tokens": 1532,
       "first_read": "2026-06-09T07:39:59.722Z"
     },
     "/apps/ScribeAI/frontend/app/(routes)/layout.tsx": {
-      "count": 1,
+      "count": 2,
       "tokens": 64,
       "first_read": "2026-06-09T07:40:06.595Z"
     },
     "/apps/ScribeAI/frontend/components/dashboard-shell.tsx": {
-      "count": 2,
-      "tokens": 206,
+      "count": 9,
+      "tokens": 262,
       "first_read": "2026-06-09T07:40:12.877Z"
     },
     "/apps/ScribeAI/frontend/app/(routes)/sessions/page.tsx": {
@@ -63,19 +63,179 @@
       "first_read": "2026-06-09T07:44:00.052Z"
     },
     "/apps/ScribeAI/frontend/app/(routes)/profile/page.tsx": {
-      "count": 1,
+      "count": 3,
       "tokens": 2042,
       "first_read": "2026-06-09T07:44:17.270Z"
     },
     "/apps/ScribeAI/frontend/app/(routes)/drafts/page.tsx": {
-      "count": 1,
+      "count": 3,
       "tokens": 1597,
       "first_read": "2026-06-09T07:44:17.286Z"
     },
     "/apps/ScribeAI/frontend/components/navbar.tsx": {
-      "count": 1,
-      "tokens": 1655,
+      "count": 4,
+      "tokens": 1658,
       "first_read": "2026-06-09T07:44:26.981Z"
+    },
+    "/apps/ScribeAI/frontend/app/globals.css": {
+      "count": 2,
+      "tokens": 1096,
+      "first_read": "2026-06-09T07:49:13.706Z"
+    },
+    "/apps/ScribeAI/frontend/components/audio-mode-selector.tsx": {
+      "count": 1,
+      "tokens": 792,
+      "first_read": "2026-06-09T07:54:06.495Z"
+    },
+    "/apps/ScribeAI/frontend/lib/app-config.ts": {
+      "count": 1,
+      "tokens": 98,
+      "first_read": "2026-06-09T07:54:19.249Z"
+    },
+    "/apps/ScribeAI/frontend/components/ui/scroll-area.tsx": {
+      "count": 1,
+      "tokens": 470,
+      "first_read": "2026-06-09T07:54:19.606Z"
+    },
+    "/apps/ScribeAI/frontend/app/layout.tsx": {
+      "count": 2,
+      "tokens": 407,
+      "first_read": "2026-06-09T07:54:33.708Z"
+    },
+    "/apps/ScribeAI/frontend/components/ui/card.tsx": {
+      "count": 1,
+      "tokens": 568,
+      "first_read": "2026-06-09T07:54:33.731Z"
+    },
+    "/apps/ScribeAI/frontend/next.config.ts": {
+      "count": 3,
+      "tokens": 456,
+      "first_read": "2026-06-09T07:57:23.348Z"
+    },
+    "/apps/ScribeAI/frontend/components/dashboard-nav-links.tsx": {
+      "count": 2,
+      "tokens": 322,
+      "first_read": "2026-06-09T07:57:23.377Z"
+    },
+    "/apps/ScribeAI/frontend/components/sidebar.tsx": {
+      "count": 1,
+      "tokens": 611,
+      "first_read": "2026-06-09T07:57:36.938Z"
+    },
+    "/apps/ScribeAI/frontend/lib/navigation.ts": {
+      "count": 5,
+      "tokens": 380,
+      "first_read": "2026-06-09T07:57:47.122Z"
+    },
+    "/apps/ScribeAI/frontend/lib/app-version.ts": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T07:57:47.155Z"
+    },
+    "/apps/ScribeAI/frontend/components/build-stamp.tsx": {
+      "count": 3,
+      "tokens": 139,
+      "first_read": "2026-06-09T07:57:50.431Z"
+    },
+    "/apps/ScribeAI/backend/src/routes/authroutes.ts": {
+      "count": 2,
+      "tokens": 1308,
+      "first_read": "2026-06-09T08:04:52.880Z"
+    },
+    "/apps/ScribeAI/backend/prisma/schema.prisma": {
+      "count": 1,
+      "tokens": 534,
+      "first_read": "2026-06-09T08:05:10.091Z"
+    },
+    "/apps/ScribeAI/backend/src/middleware/authMiddleware.ts": {
+      "count": 1,
+      "tokens": 364,
+      "first_read": "2026-06-09T08:05:10.162Z"
+    },
+    "/apps/ScribeAI/frontend/hooks/use-is-logged-in.ts": {
+      "count": 1,
+      "tokens": 83,
+      "first_read": "2026-06-09T08:05:42.984Z"
+    },
+    "/apps/ScribeAI/frontend/app/signup/page.tsx": {
+      "count": 1,
+      "tokens": 1453,
+      "first_read": "2026-06-09T08:06:25.735Z"
+    },
+    "/apps/ScribeAI/frontend/lib/auth-session.ts": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T08:06:41.564Z"
+    },
+    "/apps/ScribeAI/docs/宝塔面板运行项目的方法.md": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T08:11:36.459Z"
+    },
+    "/www/server/panel/vhost/nginx/meeting.ryledu.cn.conf": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T08:11:40.225Z"
+    },
+    "/www/server/panel/vhost/nginx/extension/meeting.ryledu.cn/site_total.conf": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T08:11:44.370Z"
+    },
+    "/www/server/panel/vhost/nginx/10.100.0.116.conf": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T08:12:30.264Z"
+    },
+    "/apps/ScribeAI/frontend/lib/draft-api.ts": {
+      "count": 1,
+      "tokens": 861,
+      "first_read": "2026-06-09T08:14:28.464Z"
+    },
+    "/apps/ScribeAI/backend/src/routes/drafts.ts": {
+      "count": 1,
+      "tokens": 1821,
+      "first_read": "2026-06-09T08:14:32.006Z"
+    },
+    "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts": {
+      "count": 2,
+      "tokens": 6542,
+      "first_read": "2026-06-09T08:25:53.861Z"
+    },
+    "/apps/ScribeAI/frontend/hooks/use-draft-sync.ts": {
+      "count": 1,
+      "tokens": 1194,
+      "first_read": "2026-06-09T08:25:53.879Z"
+    },
+    "/apps/ScribeAI/frontend/lib/store.ts": {
+      "count": 1,
+      "tokens": 653,
+      "first_read": "2026-06-09T08:26:05.095Z"
+    },
+    "/apps/ScribeAI/frontend/hooks/use-can-promote.ts": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T08:26:37.354Z"
+    },
+    "/apps/ScribeAI/frontend/components/promote-draft-button.tsx": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T08:26:37.515Z"
+    },
+    "/apps/ScribeAI/frontend/components/mobile-promote-bar.tsx": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-09T08:26:37.559Z"
+    },
+    "/apps/ScribeAI/frontend/package.json": {
+      "count": 2,
+      "tokens": 719,
+      "first_read": "2026-06-09T08:37:30.647Z"
+    },
+    "/apps/ScribeAI/frontend/node_modules/baseline-browser-mapping/README.md": {
+      "count": 1,
+      "tokens": 1856,
+      "first_read": "2026-06-09T08:38:19.205Z"
     }
   },
   "files_written": [
@@ -156,21 +316,510 @@
       "action": "edit",
       "tokens": 6,
       "at": "2026-06-09T07:44:46.037Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/dashboard-shell.tsx",
+      "action": "create",
+      "tokens": 212,
+      "at": "2026-06-09T07:49:29.080Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/app/(routes)/dashboard/page.tsx",
+      "action": "create",
+      "tokens": 2041,
+      "at": "2026-06-09T07:49:29.946Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/transcript-feed.tsx",
+      "action": "create",
+      "tokens": 1333,
+      "at": "2026-06-09T07:49:31.924Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/app/(routes)/dashboard/page.tsx",
+      "action": "create",
+      "tokens": 2045,
+      "at": "2026-06-09T07:49:33.026Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/app/(routes)/dashboard/page.tsx",
+      "action": "create",
+      "tokens": 2051,
+      "at": "2026-06-09T07:49:35.610Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/transcript-feed.tsx",
+      "action": "create",
+      "tokens": 1486,
+      "at": "2026-06-09T07:49:35.635Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/navbar.tsx",
+      "action": "create",
+      "tokens": 1609,
+      "at": "2026-06-09T07:49:53.285Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/dashboard-shell.tsx",
+      "action": "create",
+      "tokens": 212,
+      "at": "2026-06-09T07:54:44.159Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/app/(routes)/dashboard/page.tsx",
+      "action": "create",
+      "tokens": 2173,
+      "at": "2026-06-09T07:54:47.446Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/transcript-feed.tsx",
+      "action": "create",
+      "tokens": 1444,
+      "at": "2026-06-09T07:54:53.791Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/app/layout.tsx",
+      "action": "create",
+      "tokens": 396,
+      "at": "2026-06-09T07:54:53.814Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/lib/navigation.ts",
+      "action": "create",
+      "tokens": 387,
+      "at": "2026-06-09T07:57:47.648Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/lib/app-version.ts",
+      "action": "create",
+      "tokens": 29,
+      "at": "2026-06-09T07:57:47.685Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/build-stamp.tsx",
+      "action": "create",
+      "tokens": 139,
+      "at": "2026-06-09T07:57:51.003Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/next.config.ts",
+      "action": "create",
+      "tokens": 358,
+      "at": "2026-06-09T07:57:51.247Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/next.config.ts",
+      "action": "create",
+      "tokens": 456,
+      "at": "2026-06-09T07:57:53.372Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/dashboard-shell.tsx",
+      "action": "create",
+      "tokens": 227,
+      "at": "2026-06-09T07:57:59.327Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/app/(routes)/dashboard/page.tsx",
+      "action": "create",
+      "tokens": 2188,
+      "at": "2026-06-09T07:58:00.313Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/dashboard-nav-links.tsx",
+      "action": "create",
+      "tokens": 341,
+      "at": "2026-06-09T07:58:03.339Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/app/page.tsx",
+      "action": "create",
+      "tokens": 154,
+      "at": "2026-06-09T07:58:04.022Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/app/login/page.tsx",
+      "action": "create",
+      "tokens": 1381,
+      "at": "2026-06-09T07:58:04.369Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/dashboard-shell.tsx",
+      "action": "create",
+      "tokens": 234,
+      "at": "2026-06-09T07:58:04.399Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/dashboard-nav-links.tsx",
+      "action": "create",
+      "tokens": 398,
+      "at": "2026-06-09T07:58:04.490Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/app/page.tsx",
+      "action": "create",
+      "tokens": 156,
+      "at": "2026-06-09T07:58:07.943Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/app/login/page.tsx",
+      "action": "create",
+      "tokens": 1383,
+      "at": "2026-06-09T07:58:08.696Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/app/login/page.tsx",
+      "action": "create",
+      "tokens": 1386,
+      "at": "2026-06-09T07:58:11.356Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/app/(routes)/dashboard/page.tsx",
+      "action": "create",
+      "tokens": 2190,
+      "at": "2026-06-09T07:58:11.531Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/app/(routes)/dashboard/page.tsx",
+      "action": "create",
+      "tokens": 2193,
+      "at": "2026-06-09T07:58:15.256Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/app/(routes)/dashboard/page.tsx",
+      "action": "create",
+      "tokens": 2195,
+      "at": "2026-06-09T07:58:17.550Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/app/(routes)/dashboard/page.tsx",
+      "action": "create",
+      "tokens": 2198,
+      "at": "2026-06-09T07:58:20.723Z"
+    },
+    {
+      "file": "/apps/ScribeAI/Android-Client/app/src/main/java/com/scribeai/client/MainActivity.kt",
+      "action": "create",
+      "tokens": 3048,
+      "at": "2026-06-09T07:58:25.158Z"
+    },
+    {
+      "file": "/apps/ScribeAI/Android-Client/app/src/main/java/com/scribeai/client/AuthSessionStore.kt",
+      "action": "create",
+      "tokens": 327,
+      "at": "2026-06-09T07:58:25.188Z"
+    },
+    {
+      "file": "/apps/ScribeAI/Android-Client/app/src/main/java/com/scribeai/client/MainActivity.kt",
+      "action": "create",
+      "tokens": 3048,
+      "at": "2026-06-09T07:58:28.508Z"
+    },
+    {
+      "file": "/apps/ScribeAI/Android-Client/app/src/main/java/com/scribeai/client/MainActivity.kt",
+      "action": "create",
+      "tokens": 3054,
+      "at": "2026-06-09T07:58:33.489Z"
+    },
+    {
+      "file": "/apps/ScribeAI/Android-Client/app/src/main/java/com/scribeai/client/MainActivity.kt",
+      "action": "create",
+      "tokens": 3142,
+      "at": "2026-06-09T07:58:36.752Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/lib/navigation.ts",
+      "action": "create",
+      "tokens": 385,
+      "at": "2026-06-09T07:58:42.190Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/lib/navigation.ts",
+      "action": "create",
+      "tokens": 382,
+      "at": "2026-06-09T07:58:46.287Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/lib/navigation.ts",
+      "action": "create",
+      "tokens": 380,
+      "at": "2026-06-09T07:58:48.823Z"
+    },
+    {
+      "file": "/apps/ScribeAI/Android-Client/app/src/main/java/com/scribeai/client/MainActivity.kt",
+      "action": "create",
+      "tokens": 3154,
+      "at": "2026-06-09T08:00:20.682Z"
+    },
+    {
+      "file": "/apps/ScribeAI/Android-Client/app/build.gradle.kts",
+      "action": "create",
+      "tokens": 424,
+      "at": "2026-06-09T08:00:21.109Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/lib/auth-session.ts",
+      "action": "create",
+      "tokens": 128,
+      "at": "2026-06-09T08:06:44.403Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/lib/navigation.ts",
+      "action": "create",
+      "tokens": 380,
+      "at": "2026-06-09T08:06:44.556Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/app/login/page.tsx",
+      "action": "create",
+      "tokens": 1407,
+      "at": "2026-06-09T08:06:45.396Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/app/login/page.tsx",
+      "action": "create",
+      "tokens": 1393,
+      "at": "2026-06-09T08:06:46.990Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/app/login/page.tsx",
+      "action": "create",
+      "tokens": 1467,
+      "at": "2026-06-09T08:06:49.584Z"
+    },
+    {
+      "file": "/apps/ScribeAI/Android-Client/app/src/main/java/com/scribeai/client/MainActivity.kt",
+      "action": "create",
+      "tokens": 3141,
+      "at": "2026-06-09T08:06:53.331Z"
+    },
+    {
+      "file": "/apps/ScribeAI/Android-Client/app/src/main/java/com/scribeai/client/MainActivity.kt",
+      "action": "create",
+      "tokens": 3434,
+      "at": "2026-06-09T08:06:57.080Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/routes/authroutes.ts",
+      "action": "create",
+      "tokens": 1284,
+      "at": "2026-06-09T08:07:02.470Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/app/(routes)/dashboard/page.tsx",
+      "action": "create",
+      "tokens": 2214,
+      "at": "2026-06-09T08:07:04.402Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/routes/authroutes.ts",
+      "action": "create",
+      "tokens": 1309,
+      "at": "2026-06-09T08:07:07.306Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/app/(routes)/dashboard/page.tsx",
+      "action": "create",
+      "tokens": 2210,
+      "at": "2026-06-09T08:07:15.379Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/app/(routes)/dashboard/page.tsx",
+      "action": "create",
+      "tokens": 2206,
+      "at": "2026-06-09T08:07:17.687Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/transcript-feed.tsx",
+      "action": "create",
+      "tokens": 1453,
+      "at": "2026-06-09T08:18:21.817Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/app/(routes)/dashboard/page.tsx",
+      "action": "create",
+      "tokens": 2212,
+      "at": "2026-06-09T08:18:24.439Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/build-stamp.tsx",
+      "action": "create",
+      "tokens": 139,
+      "at": "2026-06-09T08:18:24.485Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/transcript-feed.tsx",
+      "action": "create",
+      "tokens": 1584,
+      "at": "2026-06-09T08:18:27.657Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/transcript-feed.tsx",
+      "action": "create",
+      "tokens": 1576,
+      "at": "2026-06-09T08:18:38.300Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/transcript-feed.tsx",
+      "action": "create",
+      "tokens": 1588,
+      "at": "2026-06-09T08:21:49.100Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/transcript-feed.tsx",
+      "action": "create",
+      "tokens": 1698,
+      "at": "2026-06-09T08:21:51.047Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/transcript-feed.tsx",
+      "action": "create",
+      "tokens": 1853,
+      "at": "2026-06-09T08:21:53.201Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/transcript-feed.tsx",
+      "action": "create",
+      "tokens": 1749,
+      "at": "2026-06-09T08:21:56.122Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/transcript-feed.tsx",
+      "action": "create",
+      "tokens": 1748,
+      "at": "2026-06-09T08:22:00.885Z"
+    },
+    {
+      "file": "/root/.cursor/projects/apps-ScribeAI/assets/c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_12d9ad4864617a6acf9b7a6aff0dc44-18ba5176-b2f7-46b1-8575-dc2ceb9388df.png",
+      "action": "create",
+      "tokens": 0,
+      "at": "2026-06-09T08:25:26.545Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/transcript-feed.tsx",
+      "action": "create",
+      "tokens": 832,
+      "at": "2026-06-09T08:26:37.980Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/hooks/use-can-promote.ts",
+      "action": "create",
+      "tokens": 155,
+      "at": "2026-06-09T08:26:40.905Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/promote-draft-button.tsx",
+      "action": "create",
+      "tokens": 695,
+      "at": "2026-06-09T08:26:40.927Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/mobile-promote-bar.tsx",
+      "action": "create",
+      "tokens": 276,
+      "at": "2026-06-09T08:26:43.432Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/dashboard-shell.tsx",
+      "action": "create",
+      "tokens": 253,
+      "at": "2026-06-09T08:26:43.454Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/dashboard-shell.tsx",
+      "action": "create",
+      "tokens": 262,
+      "at": "2026-06-09T08:26:44.584Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/promote-draft-button.tsx",
+      "action": "create",
+      "tokens": 685,
+      "at": "2026-06-09T08:26:57.583Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/mobile-promote-bar.tsx",
+      "action": "create",
+      "tokens": 273,
+      "at": "2026-06-09T08:26:57.607Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/dashboard-shell.tsx",
+      "action": "create",
+      "tokens": 246,
+      "at": "2026-06-09T08:30:37.441Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/next.config.ts",
+      "action": "create",
+      "tokens": 421,
+      "at": "2026-06-09T08:30:38.505Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/lib/navigation.ts",
+      "action": "create",
+      "tokens": 366,
+      "at": "2026-06-09T08:30:38.509Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/dashboard-shell.tsx",
+      "action": "create",
+      "tokens": 239,
+      "at": "2026-06-09T08:30:38.803Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/lib/navigation.ts",
+      "action": "create",
+      "tokens": 358,
+      "at": "2026-06-09T08:30:41.840Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/dashboard-shell.tsx",
+      "action": "create",
+      "tokens": 369,
+      "at": "2026-06-09T08:33:22.175Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/package.json",
+      "action": "create",
+      "tokens": 719,
+      "at": "2026-06-09T08:41:48.304Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/package.json",
+      "action": "create",
+      "tokens": 707,
+      "at": "2026-06-09T08:41:51.262Z"
     }
   ],
   "edit_counts": {
-    "Android-Client/app/build.gradle.kts": 1,
-    "frontend/app/page.tsx": 1,
-    "frontend/app/login/page.tsx": 3,
-    "Android-Client/app/src/main/java/com/scribeai/client/AuthSessionStore.kt": 1,
-    "Android-Client/app/src/main/java/com/scribeai/client/MainActivity.kt": 2,
+    "Android-Client/app/build.gradle.kts": 2,
+    "frontend/app/page.tsx": 3,
+    "frontend/app/login/page.tsx": 9,
+    "Android-Client/app/src/main/java/com/scribeai/client/AuthSessionStore.kt": 2,
+    "Android-Client/app/src/main/java/com/scribeai/client/MainActivity.kt": 9,
     "Android-Client/README.md": 1,
-    "frontend/app/(routes)/dashboard/page.tsx": 3,
-    "frontend/components/transcript-feed.tsx": 1
+    "frontend/app/(routes)/dashboard/page.tsx": 16,
+    "frontend/components/transcript-feed.tsx": 13,
+    "frontend/components/dashboard-shell.tsx": 9,
+    "frontend/components/navbar.tsx": 1,
+    "frontend/app/layout.tsx": 1,
+    "frontend/lib/navigation.ts": 7,
+    "frontend/lib/app-version.ts": 1,
+    "frontend/components/build-stamp.tsx": 2,
+    "frontend/next.config.ts": 3,
+    "frontend/components/dashboard-nav-links.tsx": 2,
+    "frontend/lib/auth-session.ts": 1,
+    "backend/src/routes/authroutes.ts": 2,
+    "../../root/.cursor/projects/apps-ScribeAI/assets/c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_12d9ad4864617a6acf9b7a6aff0dc44-18ba5176-b2f7-46b1-8575-dc2ceb9388df.png": 1,
+    "frontend/hooks/use-can-promote.ts": 1,
+    "frontend/components/promote-draft-button.tsx": 2,
+    "frontend/components/mobile-promote-bar.tsx": 2,
+    "frontend/package.json": 2
   },
-  "anatomy_hits": 14,
-  "anatomy_misses": 1,
-  "repeated_reads_warned": 13,
+  "anatomy_hits": 34,
+  "anatomy_misses": 12,
+  "repeated_reads_warned": 71,
   "cerebrum_warnings": 0,
-  "stop_count": 7
+  "stop_count": 22
 }
