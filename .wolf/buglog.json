@@ -721,6 +721,38 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-06-09T00:25:10.916Z"
+    },
+    {
+      "id": "bug-046",
+      "timestamp": "2026-06-09T01:25:17.406Z",
+      "error_message": "Significant refactor of ",
+      "file": "README.md",
+      "root_cause": "12 lines replaced/restructured",
+      "fix": "Rewrote 27→43 lines (12 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "md"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-09T01:25:17.406Z"
+    },
+    {
+      "id": "bug-047",
+      "timestamp": "2026-06-09T01:25:21.791Z",
+      "error_message": "Wrong reference: Ritik should be MIT",
+      "file": "README.md",
+      "root_cause": "Used \"Ritik\" instead of \"MIT\"",
+      "fix": "Changed Ritik → MIT",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "md"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-09T01:25:21.791Z"
     }
   ]
 }

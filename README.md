@@ -82,7 +82,7 @@ https://drive.google.com/file/d/1mDDs-MrjtbcsTMtQ6CqwvGPlGaqI3eyQ/view?usp=shari
 # 📁 文件夹结构
 
 ```
-ScribeAI/
+frontend/
 ├── app/
 │   ├── login/
 │   ├── signup/
@@ -91,22 +91,38 @@ ScribeAI/
 │   └── profile/
 │
 ├── components/
-│   ├── AudioModeSelector.tsx
-│   ├── RecordingControls.tsx
-│   ├── TranscriptFeed.tsx
-│   ├── Sidebar.tsx
-│   └── Navbar.tsx
+│   ├── audio-mode-selector.tsx
+│   ├── recording-controls.tsx
+│   ├── transcript-feed.tsx
+│   ├── sidebar.tsx
+│   └── navbar.tsx
 │
 ├── hooks/
-│   └── useAudioRecorder.ts
+│   └── use-audio-recorder.ts
 │
-├── lib/
-│   ├── socket.ts
-│   ├── utils.ts
-│   └── store.ts
-│
-└── styles/
-    └── globals.css
+└── lib/
+    ├── socket.ts
+    ├── utils.ts
+    ├── store.ts
+    ├── app-config.ts
+    ├── draft-api.ts
+    └── vad.ts (Silero VAD integration)
+
+backend/
+├── prisma/
+│   └── schema.prisma
+└── src/
+    ├── index.ts
+    ├── routes/
+    │   ├── authroutes.ts
+    │   ├── transcript.ts
+    │   └── sessions.ts
+    ├── middleware/
+    │   └── authMiddleware.ts
+    ├── lib/
+    │   └── prisma.ts
+    └── socket/
+        └── socket.ts
 ```
 
 ---
@@ -140,6 +156,22 @@ socket.emit("audio-chunk", blob)
 
 * 转录内容实时更新
 
+### 🧠 语音活动检测（VAD）
+
+* 基于 Silero VAD 模型（@ricky0123/vad-web）的浏览器端语音检测
+* ONNX Runtime Web WASM 在浏览器本地运行模型
+* 检测到语音开始/结束时，通知后端按语义边界发送 ASR 请求
+* 后端根据 VAD 段号（seq）重排序，保证文字顺序正确
+* 兜底安全定时器（10 秒），VAD 异常时自动刷新
+* VAD 状态在界面实时显示（就绪/加载中/不可用）
+
+### 📝 草稿箱机制
+
+* 录音过程中自动创建草稿，实时保存转录内容
+* 停止录音后，可在"实时转录"面板中查看草稿
+* 点击"保存为正式会话"将草稿转为永久会话
+* 草稿仅在当前页面有效，刷新或关闭页面后丢弃
+
 ---
 
 # 📦 环境变量
@@ -169,8 +201,18 @@ OPENAI_ASR_BASE_URL=http://your-server:8000/v1
 OPENAI_ASR_MODEL=funasr-nano
 OPENAI_ASR_LANGUAGE=zh
 
-# 伪流式切片间隔 (秒)，每 N 秒发送一段音频进行转写
+# 伪流式切片间隔 (秒)，每 N 秒发送一段音频进行转写 (VAD 禁用时生效)
 ASR_SLICE_INTERVAL=5
+
+# VAD 配置（Silero VAD 模型参数）
+VAD_ENABLED=true
+VAD_PROB_THRESHOLD=0.5
+VAD_NEGATIVE_THRESHOLD=0.35
+VAD_REDEMPTION_FRAMES=35
+VAD_FRAME_SAMPLES=1536
+VAD_PRE_SPEECH_PAD_FRAMES=20
+VAD_MIN_SPEECH_FRAMES=5
+VAD_MODEL=v5
 ```
 
 ---
@@ -208,6 +250,6 @@ npx ts-node src/index.ts
 
 ---
 
-## 🙌 由 Ritik Jain 用心制作
+## 📄 许可证
 
-🔗 [LinkedIn](https://www.linkedin.com/in/ritikjain00/) | ✉️ ritikjain6673@gmail.com
+MIT

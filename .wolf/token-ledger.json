@@ -2,14 +2,14 @@
   "version": 1,
   "created_at": "2026-06-08T14:29:30.868Z",
   "lifetime": {
-    "total_tokens_estimated": 14453429,
-    "total_reads": 3708,
-    "total_writes": 6302,
+    "total_tokens_estimated": 14927959,
+    "total_reads": 3755,
+    "total_writes": 6464,
     "total_sessions": 7,
-    "anatomy_hits": 1841,
-    "anatomy_misses": 1199,
-    "repeated_reads_blocked": 3931,
-    "estimated_savings_vs_bare_cli": 8097367
+    "anatomy_hits": 1864,
+    "anatomy_misses": 1223,
+    "repeated_reads_blocked": 4038,
+    "estimated_savings_vs_bare_cli": 8347162
   },
   "sessions": [
     {
@@ -56056,6 +56056,1115 @@
         "reads_count": 47,
         "writes_count": 158,
         "repeated_reads_blocked": 105,
+        "anatomy_lookups": 23
+      }
+    },
+    {
+      "id": "session-2026-06-08-0246",
+      "started": "2026-06-08T18:46:37.909Z",
+      "ended": "2026-06-09T01:25:25.644Z",
+      "reads": [
+        {
+          "file": "/apps/ScribeAI/frontend/next.config.ts",
+          "tokens_estimated": 290,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 5724,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/lib/socket.ts",
+          "tokens_estimated": 1371,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/root/.claude/projects/-apps-ScribeAI/memory/MEMORY.md",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/root/.cursor/plugins/cache/cursor-public/superpowers/b7a8f76985f1e93e75dd2f2a3b424dc731bd9d37/skills/using-superpowers/SKILL.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/package.json",
+          "tokens_estimated": 655,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/node_modules/@ricky0123/vad-web/dist/real-time-vad.js",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/node_modules/@ricky0123/vad-web/dist/models/index.js",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/node_modules/@ricky0123/vad-web/dist/models/v5.js",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/node_modules/onnxruntime-web/lib/wasm/session-options.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/backend/src/socket/socket.ts",
+          "tokens_estimated": 4669,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/backend/.env",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/node_modules/@ricky0123/vad-web/dist/frame-processor.d.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/node_modules/@ricky0123/vad-web/dist/real-time-vad.d.ts",
+          "tokens_estimated": 0,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/node_modules/@ricky0123/vad-web/dist/frame-processor.js",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/components/recording-controls.tsx",
+          "tokens_estimated": 1475,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/app/(routes)/dashboard/page.tsx",
+          "tokens_estimated": 1085,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/lib/store.ts",
+          "tokens_estimated": 532,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/components/transcript-feed.tsx",
+          "tokens_estimated": 1424,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/lib/audio-utils.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/backend/src/routes/sessions.ts",
+          "tokens_estimated": 1008,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/backend/prisma/schema.prisma",
+          "tokens_estimated": 331,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/app/(routes)/layout.tsx",
+          "tokens_estimated": 164,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/app/(routes)/sessions/page.tsx",
+          "tokens_estimated": 1444,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/node_modules/onnxruntime-common/dist/esm/env.d.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/node_modules/@ricky0123/vad-web/dist/real-time-vad.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/root/.cursor/projects/apps-ScribeAI/agent-transcripts/d435ae8f-c58f-4b88-b02f-35ddc1b004f1/d435ae8f-c58f-4b88-b02f-35ddc1b004f1.jsonl",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/docs/会话纪要-Skills分析与集成建议.md",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/components/audio-mode-selector.tsx",
+          "tokens_estimated": 764,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/components/ui/card.tsx",
+          "tokens_estimated": 568,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/components/navbar.tsx",
+          "tokens_estimated": 1639,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/components/sidebar.tsx",
+          "tokens_estimated": 886,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/components/ui/sheet.tsx",
+          "tokens_estimated": 1169,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/lib/dashboard-nav.ts",
+          "tokens_estimated": 108,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/components/dashboard-nav-links.tsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/app/globals.css",
+          "tokens_estimated": 1047,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/backend/src/routes/transcript.ts",
+          "tokens_estimated": 260,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/backend/src/index.ts",
+          "tokens_estimated": 270,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/backend/src/lib/prisma.ts",
+          "tokens_estimated": 40,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/backend/prisma/migrations/20260609100000_add_draft/migration.sql",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/backend/src/routes/drafts.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/backend/src/lib/draft-cleanup.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/lib/draft-api.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-draft-sync.ts",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/components/draft-restore-banner.tsx",
+          "tokens_estimated": 0,
+          "was_repeated": false,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/app/(routes)/drafts/page.tsx",
+          "tokens_estimated": 1597,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        },
+        {
+          "file": "/apps/ScribeAI/README.md",
+          "tokens_estimated": 802,
+          "was_repeated": true,
+          "anatomy_had_description": false
+        }
+      ],
+      "writes": [
+        {
+          "file": "/apps/ScribeAI/frontend/next.config.ts",
+          "tokens_estimated": 250,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 41,
+          "action": "edit"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/next.config.ts",
+          "tokens_estimated": 95,
+          "action": "edit"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 66,
+          "action": "edit"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 196,
+          "action": "edit"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 18,
+          "action": "edit"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/lib/vad.ts",
+          "tokens_estimated": 1815,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/lib/pcm-capture.ts",
+          "tokens_estimated": 1350,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 3529,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/lib/socket.ts",
+          "tokens_estimated": 166,
+          "action": "edit"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/next.config.ts",
+          "tokens_estimated": 22,
+          "action": "edit"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/next.config.ts",
+          "tokens_estimated": 95,
+          "action": "edit"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 4014,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/lib/socket.ts",
+          "tokens_estimated": 131,
+          "action": "edit"
+        },
+        {
+          "file": "/root/.claude/projects/-apps-ScribeAI/memory/constraint_vad_only.md",
+          "tokens_estimated": 167,
+          "action": "create"
+        },
+        {
+          "file": "/root/.claude/projects/-apps-ScribeAI/memory/MEMORY.md",
+          "tokens_estimated": 42,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 4360,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 4380,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 4380,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/backend/src/socket/socket.ts",
+          "tokens_estimated": 4209,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/lib/socket.ts",
+          "tokens_estimated": 1013,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 4361,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 4653,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/components/recording-controls.tsx",
+          "tokens_estimated": 1199,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/components/recording-controls.tsx",
+          "tokens_estimated": 1204,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/components/recording-controls.tsx",
+          "tokens_estimated": 1271,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 4658,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 4660,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/backend/src/socket/socket.ts",
+          "tokens_estimated": 4251,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/backend/src/socket/socket.ts",
+          "tokens_estimated": 4395,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/backend/src/socket/socket.ts",
+          "tokens_estimated": 4410,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/backend/src/socket/socket.ts",
+          "tokens_estimated": 4453,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/backend/src/socket/socket.ts",
+          "tokens_estimated": 4444,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/backend/src/socket/socket.ts",
+          "tokens_estimated": 4493,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/lib/socket.ts",
+          "tokens_estimated": 1234,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 4666,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/lib/socket.ts",
+          "tokens_estimated": 1255,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/app/(routes)/dashboard/page.tsx",
+          "tokens_estimated": 1188,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 4674,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/app/(routes)/dashboard/page.tsx",
+          "tokens_estimated": 1114,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/app/(routes)/dashboard/page.tsx",
+          "tokens_estimated": 1106,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 4690,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/lib/audio-utils.ts",
+          "tokens_estimated": 358,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/lib/socket.ts",
+          "tokens_estimated": 1268,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/lib/socket.ts",
+          "tokens_estimated": 1320,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 4691,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/backend/src/socket/socket.ts",
+          "tokens_estimated": 4487,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/backend/src/socket/socket.ts",
+          "tokens_estimated": 4690,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/backend/src/socket/socket.ts",
+          "tokens_estimated": 4693,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/backend/src/socket/socket.ts",
+          "tokens_estimated": 4669,
+          "action": "create"
+        },
+        {
+          "file": "/root/.cursor/projects/apps-ScribeAI/agent-tools/e7420b87-3e70-4bd3-a26c-72867a19fa36.txt",
+          "tokens_estimated": 8797,
+          "action": "create"
+        },
+        {
+          "file": "/root/.cursor/projects/apps-ScribeAI/agent-tools/28f00ecf-78f3-405b-b1c9-a27f433f69f9.txt",
+          "tokens_estimated": 11364,
+          "action": "create"
+        },
+        {
+          "file": "/root/.cursor/projects/apps-ScribeAI/agent-tools/98523a23-7366-4678-b9b0-61565f304a9d.txt",
+          "tokens_estimated": 11318,
+          "action": "create"
+        },
+        {
+          "file": "/root/.cursor/projects/apps-ScribeAI/agent-tools/67a15260-99bf-45a8-8a74-fbaa1ddd0f06.txt",
+          "tokens_estimated": 7745,
+          "action": "create"
+        },
+        {
+          "file": "/root/.cursor/projects/apps-ScribeAI/agent-tools/51fcb130-51a6-40b3-8482-daa977721c1e.txt",
+          "tokens_estimated": 9443,
+          "action": "create"
+        },
+        {
+          "file": "/root/.cursor/projects/apps-ScribeAI/agent-tools/d4dbccee-6f82-422e-af30-1c9736653053.txt",
+          "tokens_estimated": 11913,
+          "action": "create"
+        },
+        {
+          "file": "/root/.cursor/projects/apps-ScribeAI/agent-tools/5d5e746b-aa2e-4ae2-a2ff-13bece07f457.txt",
+          "tokens_estimated": 6889,
+          "action": "create"
+        },
+        {
+          "file": "/root/.cursor/projects/apps-ScribeAI/agent-tools/67145384-edf8-4cd6-bc29-f8e9d5132897.txt",
+          "tokens_estimated": 8830,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 4710,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 4854,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 5014,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 5015,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 5019,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 5030,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/docs/会话纪要-Skills分析与集成建议.md",
+          "tokens_estimated": 2086,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/components/recording-controls.tsx",
+          "tokens_estimated": 0,
+          "action": "edit"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/components/recording-controls.tsx",
+          "tokens_estimated": 24,
+          "action": "edit"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/components/recording-controls.tsx",
+          "tokens_estimated": 23,
+          "action": "edit"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/components/recording-controls.tsx",
+          "tokens_estimated": 12,
+          "action": "edit"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/components/recording-controls.tsx",
+          "tokens_estimated": 55,
+          "action": "edit"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/components/recording-controls.tsx",
+          "tokens_estimated": 14,
+          "action": "edit"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/components/recording-controls.tsx",
+          "tokens_estimated": 64,
+          "action": "edit"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/lib/app-config.ts",
+          "tokens_estimated": 98,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/lib/store.ts",
+          "tokens_estimated": 22,
+          "action": "edit"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/lib/store.ts",
+          "tokens_estimated": 13,
+          "action": "edit"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/components/audio-mode-selector.tsx",
+          "tokens_estimated": 150,
+          "action": "edit"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 5132,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 5566,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 5580,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 5592,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 5597,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 5605,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 5609,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 5650,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 5654,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 5672,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 5677,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 5694,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 5699,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 5706,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 5711,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 5716,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/components/recording-controls.tsx",
+          "tokens_estimated": 1123,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/components/recording-controls.tsx",
+          "tokens_estimated": 1391,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/components/recording-controls.tsx",
+          "tokens_estimated": 1396,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/components/recording-controls.tsx",
+          "tokens_estimated": 1429,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 5719,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 5724,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/app/(routes)/dashboard/page.tsx",
+          "tokens_estimated": 24,
+          "action": "edit"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/components/transcript-feed.tsx",
+          "tokens_estimated": 23,
+          "action": "edit"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/components/transcript-feed.tsx",
+          "tokens_estimated": 8,
+          "action": "edit"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/lib/dashboard-nav.ts",
+          "tokens_estimated": 108,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/components/dashboard-nav-links.tsx",
+          "tokens_estimated": 322,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/components/sidebar.tsx",
+          "tokens_estimated": 843,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/components/navbar.tsx",
+          "tokens_estimated": 946,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/components/sidebar.tsx",
+          "tokens_estimated": 788,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/components/navbar.tsx",
+          "tokens_estimated": 998,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/components/sidebar.tsx",
+          "tokens_estimated": 595,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/components/navbar.tsx",
+          "tokens_estimated": 1015,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/components/navbar.tsx",
+          "tokens_estimated": 1574,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/components/navbar.tsx",
+          "tokens_estimated": 1591,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/components/sidebar.tsx",
+          "tokens_estimated": 592,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/app/(routes)/sessions/page.tsx",
+          "tokens_estimated": 53,
+          "action": "edit"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/app/(routes)/sessions/page.tsx",
+          "tokens_estimated": 32,
+          "action": "edit"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/app/(routes)/sessions/page.tsx",
+          "tokens_estimated": 245,
+          "action": "edit"
+        },
+        {
+          "file": "/apps/ScribeAI/backend/prisma/schema.prisma",
+          "tokens_estimated": 526,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/backend/prisma/migrations/20260609100000_add_draft/migration.sql",
+          "tokens_estimated": 263,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/backend/src/routes/drafts.ts",
+          "tokens_estimated": 1821,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/backend/src/lib/draft-cleanup.ts",
+          "tokens_estimated": 292,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/backend/src/index.ts",
+          "tokens_estimated": 287,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/backend/src/index.ts",
+          "tokens_estimated": 293,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/backend/src/index.ts",
+          "tokens_estimated": 302,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/lib/draft-api.ts",
+          "tokens_estimated": 848,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/lib/store.ts",
+          "tokens_estimated": 530,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/lib/store.ts",
+          "tokens_estimated": 564,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/lib/store.ts",
+          "tokens_estimated": 574,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-draft-sync.ts",
+          "tokens_estimated": 1194,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/lib/store.ts",
+          "tokens_estimated": 632,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 5764,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 5776,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/components/recording-controls.tsx",
+          "tokens_estimated": 1485,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 5790,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/components/transcript-feed.tsx",
+          "tokens_estimated": 1329,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 5793,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 5804,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 5807,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/components/draft-restore-banner.tsx",
+          "tokens_estimated": 333,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/app/(routes)/drafts/page.tsx",
+          "tokens_estimated": 1604,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/lib/dashboard-nav.ts",
+          "tokens_estimated": 111,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/components/navbar.tsx",
+          "tokens_estimated": 1606,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/lib/dashboard-nav.ts",
+          "tokens_estimated": 126,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/app/(routes)/dashboard/page.tsx",
+          "tokens_estimated": 1994,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/app/(routes)/dashboard/page.tsx",
+          "tokens_estimated": 1970,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/app/(routes)/drafts/page.tsx",
+          "tokens_estimated": 1597,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 5838,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 5875,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/app/(routes)/dashboard/page.tsx",
+          "tokens_estimated": 1952,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 5943,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+          "tokens_estimated": 5947,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/lib/draft-api.ts",
+          "tokens_estimated": 861,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/app/(routes)/dashboard/page.tsx",
+          "tokens_estimated": 2020,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/components/transcript-feed.tsx",
+          "tokens_estimated": 1330,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/app/(routes)/dashboard/page.tsx",
+          "tokens_estimated": 2022,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/app/(routes)/sessions/page.tsx",
+          "tokens_estimated": 1639,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/backend/src/routes/sessions.ts",
+          "tokens_estimated": 1198,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/app/(routes)/sessions/page.tsx",
+          "tokens_estimated": 1724,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/app/(routes)/sessions/page.tsx",
+          "tokens_estimated": 1804,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/frontend/app/(routes)/sessions/page.tsx",
+          "tokens_estimated": 1823,
+          "action": "create"
+        },
+        {
+          "file": "/apps/ScribeAI/README.md",
+          "tokens_estimated": 129,
+          "action": "edit"
+        },
+        {
+          "file": "/apps/ScribeAI/README.md",
+          "tokens_estimated": 79,
+          "action": "edit"
+        },
+        {
+          "file": "/apps/ScribeAI/README.md",
+          "tokens_estimated": 210,
+          "action": "edit"
+        },
+        {
+          "file": "/apps/ScribeAI/README.md",
+          "tokens_estimated": 4,
+          "action": "edit"
+        }
+      ],
+      "totals": {
+        "input_tokens_estimated": 29322,
+        "output_tokens_estimated": 445208,
+        "reads_count": 47,
+        "writes_count": 162,
+        "repeated_reads_blocked": 107,
         "anatomy_lookups": 23
       }
     }

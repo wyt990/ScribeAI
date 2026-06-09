@@ -233,7 +233,7 @@
       "first_read": "2026-06-09T00:56:52.279Z"
     },
     "/apps/ScribeAI/README.md": {
-      "count": 1,
+      "count": 3,
       "tokens": 802,
       "first_read": "2026-06-09T01:13:20.348Z"
     }
@@ -1186,6 +1186,30 @@
       "action": "create",
       "tokens": 1823,
       "at": "2026-06-09T01:10:07.290Z"
+    },
+    {
+      "file": "/apps/ScribeAI/README.md",
+      "action": "edit",
+      "tokens": 129,
+      "at": "2026-06-09T01:25:04.756Z"
+    },
+    {
+      "file": "/apps/ScribeAI/README.md",
+      "action": "edit",
+      "tokens": 79,
+      "at": "2026-06-09T01:25:11.898Z"
+    },
+    {
+      "file": "/apps/ScribeAI/README.md",
+      "action": "edit",
+      "tokens": 210,
+      "at": "2026-06-09T01:25:17.401Z"
+    },
+    {
+      "file": "/apps/ScribeAI/README.md",
+      "action": "edit",
+      "tokens": 4,
+      "at": "2026-06-09T01:25:21.786Z"
     }
   ],
   "edit_counts": {
@@ -1227,11 +1251,12 @@
     "frontend/hooks/use-draft-sync.ts": 1,
     "frontend/components/draft-restore-banner.tsx": 1,
     "frontend/app/(routes)/drafts/page.tsx": 2,
-    "backend/src/routes/sessions.ts": 1
+    "backend/src/routes/sessions.ts": 1,
+    "README.md": 4
   },
   "anatomy_hits": 23,
   "anatomy_misses": 24,
-  "repeated_reads_warned": 105,
+  "repeated_reads_warned": 107,
   "cerebrum_warnings": 0,
-  "stop_count": 57
+  "stop_count": 58
 }

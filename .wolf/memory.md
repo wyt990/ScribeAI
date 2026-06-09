@@ -558,3 +558,8 @@
 | 09:13 | Session end: 158 writes across 36 files (next.config.ts, use-audio-recorder.ts, vad.ts, pcm-capture.ts, socket.ts) | 47 reads | ~474108 tok |
 | 09:17 | Session end: 158 writes across 36 files (next.config.ts, use-audio-recorder.ts, vad.ts, pcm-capture.ts, socket.ts) | 47 reads | ~474108 tok |
 | 09:18 | Session end: 158 writes across 36 files (next.config.ts, use-audio-recorder.ts, vad.ts, pcm-capture.ts, socket.ts) | 47 reads | ~474108 tok |
+| 09:25 | Edited README.md | expanded (+16 lines) | ~121 |
+| 09:25 | Edited README.md | expanded (+10 lines) | ~74 |
+| 09:25 | Edited README.md | expanded (+16 lines) | ~196 |
+| 09:25 | Edited README.md | removed 3 lines | ~4 |
+| 09:25 | Session end: 162 writes across 37 files (next.config.ts, use-audio-recorder.ts, vad.ts, pcm-capture.ts, socket.ts) | 47 reads | ~474530 tok |
