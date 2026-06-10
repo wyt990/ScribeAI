@@ -977,6 +977,22 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-06-10T02:47:14.658Z"
+    },
+    {
+      "id": "bug-062",
+      "timestamp": "2026-06-10T05:18:31.028Z",
+      "error_message": "Significant refactor of ",
+      "file": "README.md",
+      "root_cause": "14 lines replaced/restructured",
+      "fix": "Rewrote 50→78 lines (14 removed) | Also: ### 📋 Agent Skills 结构化纪要; * Skill 原文保存在 `backend/skills/transcript-to-meetin",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "md"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-06-10T05:18:42.604Z"
     }
   ]
 }

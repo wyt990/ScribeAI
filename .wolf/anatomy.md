@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-06-10T03:16:17.533Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-06-10T05:18:42.586Z
 > Files: 254 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../root/.claude/plans/
@@ -41,7 +41,7 @@
 
 - `.gitignore` — Git ignore rules (~79 tok)
 - `CLAUDE.md` — CLAUDE.md (~1052 tok)
-- `README.md` — Project documentation (~1856 tok)
+- `README.md` — Project documentation (~2600 tok)
 
 ## .claude/
 

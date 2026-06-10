@@ -83,7 +83,7 @@ https://drive.google.com/file/d/1mDDs-MrjtbcsTMtQ6CqwvGPlGaqI3eyQ/view?usp=shari
 | **前端**             | Next.js 14（App Router），TypeScript |
 | **UI/样式**          | Tailwind CSS，shadcn/ui             |
 | **AI**               | Gemini / OpenAI 兼容 LLM，Agent Skills 纪要模板，Deepgram / OpenAI 兼容 ASR |
-| **Skills**           | transcript-to-meeting-notes（本地 skill + prompt 模块） |
+| **Skills**           | 双层级模板体系（SummarySkill + SummaryTemplate），AI 生成/编辑/预览/导入导出模板 |
 | **实时通信**         | Socket.io Client                    |
 | **状态管理**         | Zustand                             |
 | **录制**             | MediaRecorder API                   |
@@ -100,47 +100,75 @@ frontend/
 │   ├── signup/
 │   ├── dashboard/
 │   ├── sessions/
-│   └── profile/
+│   ├── drafts/
+│   ├── profile/
+│   ├── manager/                     # 管理后台
+│   └── settings/summary-templates/  # 个性化纪要模板管理
+│       ├── new/                     #   AI 生成模板
+│       └── [id]/                    #   编辑/预览/导出模板
 │
 ├── components/
 │   ├── audio-mode-selector.tsx
 │   ├── recording-controls.tsx
 │   ├── transcript-feed.tsx
 │   ├── sidebar.tsx
-│   └── navbar.tsx
+│   ├── navbar.tsx
+│   ├── summary-template-select.tsx  # 纪要模板选择器
+│   ├── template-select-modal.tsx    # 多模板弹窗选择
+│   ├── dashboard-draft-actions.tsx  # 录音页模板+纪要按钮组
+│   ├── generate-meeting-summary-button.tsx
+│   ├── promote-draft-button.tsx
+│   └── draft-restore-banner.tsx
 │
 ├── hooks/
-│   └── use-audio-recorder.ts
+│   ├── use-audio-recorder.ts
+│   ├── use-draft-sync.ts
+│   └── use-can-promote.ts
 │
 └── lib/
     ├── socket.ts
-    ├── utils.ts
-    ├── store.ts
-    ├── app-config.ts
+    ├── store.ts                     # Zustand 录音状态
+    ├── session-storage.ts           # Zustand 会话状态
+    ├── summary-templates.ts         # 模板 CRUD API
+    ├── resolve-summary-template.ts  # 模板解析规则逻辑
+    ├── promote-and-summarize.ts     # 转正+纪要生成
     ├── draft-api.ts
-    └── vad.ts (Silero VAD integration)
+    ├── vad.ts                       # Silero VAD 集成
+    ├── app-config.ts
+    └── utils.ts
 
 backend/
-├── skills/                          # Agent Skill 原文（SKILL.md、模板）
+├── skills/                          # Agent Skill 原文（已迁移至 DB）
 │   └── transcript-to-meeting-notes/
 ├── prisma/
 │   └── schema.prisma
 └── src/
     ├── index.ts
-    ├── prompts/                     # 可执行 prompt 构建（引用 skills）
-    │   ├── build-summary-prompt.ts
-    │   ├── summary-meeting-notes.ts
-    │   └── summary-brief.ts
+    ├── prompts/                     # 可执行 prompt 构建
+    │   ├── build-summary-prompt.ts   #   传统 prompt 构建（旧版）
+    │   ├── summary-meeting-notes.ts  #   system rules + output 常量
+    │   ├── summary-brief.ts
+    │   └── template-generate-draft.ts # AI 生成模板草稿 prompt
     ├── routes/
     │   ├── authroutes.ts
     │   ├── transcript.ts
     │   ├── sessions.ts
-    │   └── drafts.ts
+    │   ├── drafts.ts
+    │   ├── templates.ts             # 模板 CRUD + fork + preview + export/import
+    │   └── downloads.ts
     ├── middleware/
-    │   └── authMiddleware.ts
+    │   ├── authMiddleware.ts
+    │   └── managerMiddleware.ts
     ├── lib/
     │   ├── prisma.ts
-    │   ├── summary-llm.ts
+    │   ├── summary-llm.ts           # LLM 调用统一入口
+    │   ├── summary-template-service.ts  # 模板解析/服务
+    │   ├── summary-template-seed.ts     # 系统模板种子数据
+    │   ├── summary-template-constants.ts# 系统模板 ID 常量
+    │   ├── summary-prompt-builder.ts    # 模板→LLM prompt 构建
+    │   ├── summary-export-docx.ts
+    │   ├── summary-export-pdf.ts
+    │   ├── summary-share-token.ts
     │   └── openai-api-url.ts
     └── socket/
         └── socket.ts
@@ -201,13 +229,71 @@ socket.emit("audio-chunk", blob)
 * 浏览器不支持或未授权时静默降级，不影响录音流程
 * **说明**：唤醒锁仅防止锁屏，无法阻止用户切换到其他 App；切到其他 App 时录音行为取决于浏览器与系统策略
 
-### 📋 Agent Skills 结构化纪要
+### 📋 Agent Skills 个性化纪要模板
 
-* Skill 原文保存在 `backend/skills/transcript-to-meeting-notes/`（`SKILL.md`、`templates.md`）
-* 运行时由 `backend/src/prompts/summary-meeting-notes.ts` 引用模板规则，经 `generateSummary()` 调用 LLM（与提供商无关）
-* 默认摘要类型 `meeting-notes`：输出决策表、分议题、已知/未知、假设、开放问题、下一步行动等 Markdown 结构
-* API：`POST /api/sessions/:id/summary`，请求体 `{ "summaryType": "meeting-notes" | "brief", "regenerate": true }`
-* `regenerate: true` 时覆盖同类型已缓存摘要；结构化生成通常需 1–3 分钟
+每用户可拥有自己的纪要模板库，系统内置模板可 fork 为个人副本，无限制自定义版式。
+
+#### 双层级模板体系
+
+```
+SummarySkill（定义规则 + 步骤 + 输出结构）
+    └── SummaryTemplate（用户可见的模板实例，引用一个 Skill）
+            └── Summary（每次生成的纪要结果，记录 templateId + version）
+```
+
+- **SummarySkill**：`rulesMd`（整理规则）+ `stepsMd`（工作流步骤）+ `outputMd`（输出版式），可 fork 衍生
+- **SummaryTemplate**：用户面对的具体模板，关联一个 Skill，可设默认、提交公共、导入/导出
+- **Summary**：纪要生成结果，缓存时按 `(transcriptId, templateId)` 去重，互不干扰
+
+#### 模板解析层级（按优先级）
+
+```
+用户指定 templateId → legacy summaryType（meeting-notes/brief）→ 用户默认模板 → 系统默认模板
+```
+
+#### 核心功能
+
+- **Fork（复制系统模板）**：从系统模板或他人共享模板复制为自己的副本，编辑 rules/steps/output
+- **AI 生成模板**：输入文字描述或粘贴范例纪要，AI 自动生成模板草稿，可修改后保存
+- **预览**：保存前用样例文本试跑 LLM，预览效果
+- **导入/导出**：`.skill.json` 格式，跨实例迁移
+- **公开共享**：用户可将模板提交公开审核，管理员审核后成为公共模板
+- **多模板选择**：有 2+ 自定义模板时，生成纪要前弹出选择对话框
+
+#### 前端页面
+
+| 路由 | 说明 |
+|------|------|
+| `/settings/summary-templates` | 模板列表，分类展示系统模板与我的模板 |
+| `/settings/summary-templates/new` | AI 生成新模板（描述需求或贴范例） |
+| `/settings/summary-templates/[id]` | 编辑/预览/导出/设为默认/申请公开 |
+
+#### API 端点
+
+| 方法 | 端点 | 认证 | 说明 |
+|------|------|------|------|
+| GET | `/api/templates` | Bearer | 列出系统 + 我的 + 已审核公共模板 |
+| POST | `/api/templates` | Bearer | 从草稿创建用户模板 |
+| POST | `/api/templates/generate-draft` | Bearer | AI 根据描述生成模板草稿 |
+| POST | `/api/templates/import` | Bearer | 导入 `.skill.json` |
+| GET | `/api/templates/:id` | Bearer | 查看模板详情（含 Skill） |
+| PUT | `/api/templates/:id` | Bearer | 编辑模板名称/描述/rules/steps/output |
+| DELETE | `/api/templates/:id` | Bearer | 删除模板（需无引用） |
+| POST | `/api/templates/:id/fork` | Bearer | 复制为我的模板 |
+| POST | `/api/templates/:id/default` | Bearer | 设为默认（非自有时自动 fork） |
+| POST | `/api/templates/:id/preview` | Bearer | 试跑 LLM 预览效果 |
+| GET | `/api/templates/:id/export` | Bearer | 导出 `.skill.json` |
+| POST | `/api/templates/:id/submit-public` | Bearer | 提交公共审核 |
+
+#### 摘要生成 API
+
+| 方法 | 端点 | 说明 |
+|------|------|------|
+| POST | `/api/sessions/:id/summary` | 生成摘要，请求体 `{ "templateId"?: string, "regenerate"?: boolean }` |
+
+- 省略 `templateId` 时按「模板解析层级」自动选择模板
+- `regenerate: true` 时覆盖同模板已缓存摘要
+- 结构化生成通常需 1–3 分钟
 
 ### 📄 摘要预览 / 导出 / 分享 API
 

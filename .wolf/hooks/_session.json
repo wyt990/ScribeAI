@@ -1,165 +1,79 @@
 {
-  "session_id": "session-2026-06-10-1047",
-  "started": "2026-06-10T02:47:01.196Z",
+  "session_id": "session-2026-06-10-1317",
+  "started": "2026-06-10T05:17:47.345Z",
   "files_read": {
-    "/apps/ScribeAI/frontend/app/(routes)/sessions/page.tsx": {
+    "/apps/ScribeAI/frontend/app/(routes)/settings/summary-templates/page.tsx": {
       "count": 1,
-      "tokens": 3487,
-      "first_read": "2026-06-10T02:47:04.207Z"
+      "tokens": 1664,
+      "first_read": "2026-06-10T05:17:59.841Z"
     },
-    "/apps/ScribeAI/backend/src/lib/summary-prompt-builder.ts": {
-      "count": 2,
-      "tokens": 444,
-      "first_read": "2026-06-10T03:04:50.106Z"
-    },
-    "/apps/ScribeAI/backend/prisma/schema.prisma": {
+    "/apps/ScribeAI/frontend/app/(routes)/settings/summary-templates/new/page.tsx": {
       "count": 1,
-      "tokens": 1239,
-      "first_read": "2026-06-10T03:05:12.455Z"
+      "tokens": 1298,
+      "first_read": "2026-06-10T05:17:59.857Z"
     },
-    "/apps/ScribeAI/backend/src/routes/sessions.ts": {
-      "count": 4,
-      "tokens": 3954,
-      "first_read": "2026-06-10T03:05:12.510Z"
-    },
-    "/apps/ScribeAI/backend/src/prompts/summary-meeting-notes.ts": {
-      "count": 3,
-      "tokens": 531,
-      "first_read": "2026-06-10T03:05:21.884Z"
-    },
-    "/apps/ScribeAI/backend/src/routes/drafts.ts": {
+    "/apps/ScribeAI/frontend/app/(routes)/settings/summary-templates/[id]/page.tsx": {
       "count": 1,
-      "tokens": 2165,
-      "first_read": "2026-06-10T03:05:33.718Z"
+      "tokens": 2488,
+      "first_read": "2026-06-10T05:18:00.005Z"
     },
-    "/apps/ScribeAI/backend/skills/transcript-to-meeting-notes/templates.md": {
+    "/apps/ScribeAI/backend/src/lib/summary-template-constants.ts": {
       "count": 1,
-      "tokens": 277,
-      "first_read": "2026-06-10T03:05:45.136Z"
+      "tokens": 243,
+      "first_read": "2026-06-10T05:18:03.821Z"
     },
-    "/apps/ScribeAI/backend/scripts/test-summary-prompt.ts": {
-      "count": 3,
-      "tokens": 458,
-      "first_read": "2026-06-10T03:05:52.875Z"
-    },
-    "/apps/ScribeAI/backend/src/lib/summary-template-seed.ts": {
-      "count": 2,
-      "tokens": 0,
-      "first_read": "2026-06-10T03:05:58.082Z"
-    },
-    "/apps/ScribeAI/frontend/lib/promote-and-summarize.ts": {
+    "/apps/ScribeAI/frontend/components/dashboard-draft-actions.tsx": {
       "count": 1,
-      "tokens": 367,
-      "first_read": "2026-06-10T03:13:44.184Z"
+      "tokens": 412,
+      "first_read": "2026-06-10T05:18:03.840Z"
     },
     "/apps/ScribeAI/backend/src/routes/templates.ts": {
-      "count": 2,
-      "tokens": 3211,
-      "first_read": "2026-06-10T03:13:53.000Z"
-    },
-    "/apps/ScribeAI/backend/src/routes/transcript.ts": {
       "count": 1,
-      "tokens": 260,
-      "first_read": "2026-06-10T03:14:06.078Z"
+      "tokens": 3250,
+      "first_read": "2026-06-10T05:18:07.040Z"
     },
-    "/apps/ScribeAI/backend/src/prompts/build-summary-prompt.ts": {
+    "/apps/ScribeAI/backend/src/lib/summary-prompt-builder.ts": {
       "count": 1,
-      "tokens": 234,
-      "first_read": "2026-06-10T03:14:16.447Z"
+      "tokens": 1118,
+      "first_read": "2026-06-10T05:18:07.062Z"
+    },
+    "/apps/ScribeAI/backend/src/lib/summary-template-seed.ts": {
+      "count": 1,
+      "tokens": 783,
+      "first_read": "2026-06-10T05:18:15.186Z"
+    },
+    "/apps/ScribeAI/README.md": {
+      "count": 3,
+      "tokens": 2600,
+      "first_read": "2026-06-10T05:18:47.462Z"
     }
   },
   "files_written": [
     {
-      "file": "/apps/ScribeAI/frontend/app/(routes)/sessions/page.tsx",
+      "file": "/apps/ScribeAI/README.md",
       "action": "edit",
-      "tokens": 163,
-      "at": "2026-06-10T02:47:14.656Z"
+      "tokens": 51,
+      "at": "2026-06-10T05:18:20.289Z"
     },
     {
-      "file": "/apps/ScribeAI/backend/src/lib/summary-prompt-builder.ts",
-      "action": "create",
-      "tokens": 481,
-      "at": "2026-06-10T03:06:27.093Z"
+      "file": "/apps/ScribeAI/README.md",
+      "action": "edit",
+      "tokens": 691,
+      "at": "2026-06-10T05:18:31.026Z"
     },
     {
-      "file": "/apps/ScribeAI/backend/src/prompts/summary-meeting-notes.ts",
-      "action": "create",
-      "tokens": 608,
-      "at": "2026-06-10T03:06:27.152Z"
-    },
-    {
-      "file": "/apps/ScribeAI/backend/src/lib/summary-template-seed.ts",
-      "action": "create",
-      "tokens": 783,
-      "at": "2026-06-10T03:06:27.187Z"
-    },
-    {
-      "file": "/apps/ScribeAI/backend/src/prompts/summary-meeting-notes.ts",
-      "action": "create",
-      "tokens": 613,
-      "at": "2026-06-10T03:06:36.668Z"
-    },
-    {
-      "file": "/apps/ScribeAI/backend/src/lib/summary-prompt-builder.ts",
-      "action": "create",
-      "tokens": 620,
-      "at": "2026-06-10T03:14:48.411Z"
-    },
-    {
-      "file": "/apps/ScribeAI/backend/src/routes/sessions.ts",
-      "action": "create",
-      "tokens": 3852,
-      "at": "2026-06-10T03:15:01.495Z"
-    },
-    {
-      "file": "/apps/ScribeAI/backend/src/routes/templates.ts",
-      "action": "create",
-      "tokens": 3250,
-      "at": "2026-06-10T03:15:04.614Z"
-    },
-    {
-      "file": "/apps/ScribeAI/backend/scripts/test-summary-prompt.ts",
-      "action": "create",
-      "tokens": 472,
-      "at": "2026-06-10T03:15:05.987Z"
-    },
-    {
-      "file": "/apps/ScribeAI/backend/src/lib/summary-prompt-builder.ts",
-      "action": "create",
-      "tokens": 1004,
-      "at": "2026-06-10T03:15:06.648Z"
-    },
-    {
-      "file": "/apps/ScribeAI/backend/src/routes/sessions.ts",
-      "action": "create",
-      "tokens": 3836,
-      "at": "2026-06-10T03:15:09.780Z"
-    },
-    {
-      "file": "/apps/ScribeAI/backend/src/lib/summary-prompt-builder.ts",
-      "action": "create",
-      "tokens": 993,
-      "at": "2026-06-10T03:15:53.881Z"
-    },
-    {
-      "file": "/apps/ScribeAI/backend/src/lib/summary-prompt-builder.ts",
-      "action": "create",
-      "tokens": 1118,
-      "at": "2026-06-10T03:16:17.549Z"
+      "file": "/apps/ScribeAI/README.md",
+      "action": "edit",
+      "tokens": 590,
+      "at": "2026-06-10T05:18:42.602Z"
     }
   ],
   "edit_counts": {
-    "frontend/app/(routes)/sessions/page.tsx": 1,
-    "backend/src/lib/summary-prompt-builder.ts": 5,
-    "backend/src/prompts/summary-meeting-notes.ts": 2,
-    "backend/src/lib/summary-template-seed.ts": 1,
-    "backend/src/routes/sessions.ts": 2,
-    "backend/src/routes/templates.ts": 1,
-    "backend/scripts/test-summary-prompt.ts": 1
+    "README.md": 3
   },
-  "anatomy_hits": 12,
-  "anatomy_misses": 1,
-  "repeated_reads_warned": 10,
+  "anatomy_hits": 8,
+  "anatomy_misses": 0,
+  "repeated_reads_warned": 2,
   "cerebrum_warnings": 0,
-  "stop_count": 4
+  "stop_count": 1
 }

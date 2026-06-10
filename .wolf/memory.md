@@ -1157,3 +1157,17 @@
 | 11:15 | Created backend/src/lib/summary-prompt-builder.ts | — | ~993 |
 | 11:16 | Created backend/src/lib/summary-prompt-builder.ts | — | ~1118 |
 | 11:17 | Session end: 13 writes across 7 files (page.tsx, summary-prompt-builder.ts, summary-meeting-notes.ts, summary-template-seed.ts, sessions.ts) | 13 reads | ~34420 tok |
+
+## Session: 2026-06-10 12:48
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+
+## Session: 2026-06-10 13:17
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 13:18 | Edited README.md | 2→2 lines | ~48 |
+| 13:18 | Edited README.md | expanded (+28 lines) | ~645 |
+| 13:18 | Edited README.md | expanded (+58 lines) | ~551 |
+| 13:18 | Session end: 3 writes across 1 files (README.md) | 9 reads | ~15188 tok |
