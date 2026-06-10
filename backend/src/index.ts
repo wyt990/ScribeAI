@@ -9,8 +9,10 @@ import transcript from "./routes/transcript"
 import sessions from "./routes/sessions"
 import drafts from "./routes/drafts"
 import templates from "./routes/templates"
+import manager from "./routes/manager"
 import downloads from "./routes/downloads"
 import { ensureSystemSummaryTemplates } from "./lib/summary-template-seed";
+import { ensureSystemSettingsSeeded, applySettingsToEnv } from "./lib/system-settings";
 import { createSocketServer, startStaleSessionCleanup } from "./socket/socket";
 import { startDraftCleanup } from "./lib/draft-cleanup";
 import {
@@ -51,13 +53,20 @@ app.use('/api/transcript', transcript);
 app.use('/api/sessions', sessions);
 app.use('/api/drafts', drafts);
 app.use('/api/templates', templates);
+app.use('/api/manager', manager);
 app.use('/api/downloads', downloads);
 
 const PORT = 4000;
 
-void ensureSystemSummaryTemplates().catch((err) => {
-  console.error('[SummaryTemplates] seed failed:', err);
-});
+void (async () => {
+  try {
+    await ensureSystemSummaryTemplates();
+    await ensureSystemSettingsSeeded();
+    await applySettingsToEnv();
+  } catch (err) {
+    console.error('[Startup seed] failed:', err);
+  }
+})();
 
 server.listen(PORT, () => {
   console.log(`HTTP server running at http://localhost:${PORT}`);

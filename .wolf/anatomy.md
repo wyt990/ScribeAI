@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-06-09T15:05:23.307Z
-> Files: 219 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-06-10T02:47:14.636Z
+> Files: 253 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../root/.claude/plans/
 
@@ -110,7 +110,7 @@
 
 ## backend/prisma/
 
-- `schema.prisma` (~1043 tok)
+- `schema.prisma` (~1239 tok)
 
 ## backend/prisma/migrations/
 
@@ -148,8 +148,17 @@
 
 - `migration.sql` — SummarySkill + SummaryTemplate + Summary.templateId (~1290 tok)
 
+## backend/prisma/migrations/20260610150000_add_transcript_recordedat/
+
+- `migration.sql` — Add recordedAt column to Transcript table (stores the original recording start time from Draft.start (~50 tok)
+
+## backend/prisma/migrations/20260610230000_manager_settings/
+
+- `migration.sql` — Manager 系统设置：User.isActive、SystemSetting、AuditLog (~296 tok)
+
 ## backend/scripts/
 
+- `migrate-manager-settings.sh` (~226 tok)
 - `migrate-summary-templates.sh` — 宝塔/MySQL 默认 socket 在 /tmp/mysql.sock，直接 mysql 命令会连错路径，请用 -h 127.0.0.1 (~428 tok)
 - `test-summary-prompt.ts` — 本地测试：模板 prompt 构建 +（可选）真实 LLM 调用 (~458 tok)
 
@@ -165,10 +174,11 @@
 
 ## backend/src/
 
-- `index.ts` — Declares app (~631 tok)
+- `index.ts` — Declares app (~710 tok)
 
 ## backend/src/lib/
 
+- `audit-log.ts` — Exports writeAuditLog (~141 tok)
 - `openai-api-url.ts` — Join OpenAI-compatible API paths without duplicating slashes. (~239 tok)
 - `prisma.ts` — Declares prisma (~40 tok)
 - `storage-config.ts` — Exports STORAGE_CONFIG (~91 tok)
@@ -176,15 +186,17 @@
 - `summary-export-pdf.ts` — Exports markdownToPdfBuffer (~1040 tok)
 - `summary-guardrails.ts` — 每次生成纪要时追加的系统级护栏（用户模板不可覆盖） (~74 tok)
 - `summary-llm.ts` — Exports SummaryProvider, validateSummaryConfig, getResolvedChatCompletionsUrl, generateSummary, getS (~884 tok)
-- `summary-prompt-builder.ts` — 从 Skill 配置组装完整 LLM prompt (~351 tok)
+- `summary-prompt-builder.ts` — 从 Skill 配置组装完整 LLM prompt (~444 tok)
 - `summary-share-token.ts` — Exports SummarySharePayload, createSummaryShareToken, verifySummaryShareToken (~296 tok)
 - `summary-template-constants.ts` — 系统内置模板固定 ID（与 migration seed 一致） (~243 tok)
 - `summary-template-service.ts` — 解析生成纪要所用模板：templateId 优先，其次 legacy summaryType，最后用户默认或系统默认 (~2799 tok)
+- `system-settings.ts` — 启动时从 DB 覆盖 process.env（在 ensure 之后调用） (~1997 tok)
 
 ## backend/src/middleware/
 
 - `adminMiddleware.ts` — Exports requireAdmin (~187 tok)
-- `authMiddleware.ts` — Exports AuthenticatedRequest, verifyUser (~364 tok)
+- `authMiddleware.ts` — Exports AuthenticatedRequest, verifyUser (~389 tok)
+- `managerMiddleware.ts` — Exports requireManager (~199 tok)
 - `summaryShareAuth.ts` — Bearer JWT 或 ?shareToken= 分享令牌 (~386 tok)
 
 ## backend/src/prompts/
@@ -198,12 +210,21 @@
 
 ## backend/src/routes/
 
-- `authroutes.ts` — routes/auth.js (~1360 tok)
+- `authroutes.ts` — routes/auth.js (~1393 tok)
 - `downloads.ts` — API routes: GET (2 endpoints) (~346 tok)
-- `drafts.ts` — 列表：用户所有未转正的草稿 (~2154 tok)
-- `sessions.ts` — API routes: GET, POST (6 endpoints) (~3947 tok)
-- `templates.ts` — 列出可用模板（系统 + 我的 + 已审核公共） (~3614 tok)
+- `drafts.ts` — 列表：用户所有未转正的草稿 (~2165 tok)
+- `sessions.ts` — API routes: GET, POST (6 endpoints) (~3954 tok)
+- `templates.ts` — 列出可用模板（系统 + 我的 + 已审核公共） (~3211 tok)
 - `transcript.ts` — API routes: POST (1 endpoints) (~260 tok)
+
+## backend/src/routes/manager/
+
+- `audit.ts` — API routes: GET (1 endpoints) (~194 tok)
+- `content.ts` — API routes: GET, DELETE (4 endpoints) (~742 tok)
+- `settings.ts` — API routes: GET, PATCH, POST (3 endpoints) (~593 tok)
+- `stats.ts` — API routes: GET (1 endpoints) (~478 tok)
+- `templates.ts` — API routes: GET, PUT, POST (4 endpoints) (~1069 tok)
+- `users.ts` — API routes: GET, POST, PUT, DELETE (6 endpoints) (~1574 tok)
 
 ## backend/src/socket/
 
@@ -221,6 +242,7 @@
 
 ## docs/superpowers/plans/
 
+- `2026-06-10-manager-settings.md` — Manager 系统设置 Implementation Plan (~231 tok)
 - `2026-06-10-summary-templates.md` — 用户自定义纪要模板 Implementation Plan (~241 tok)
 
 ## frontend/
@@ -251,7 +273,60 @@
 
 ## frontend/app/(routes)/drafts/
 
-- `page.tsx` — STATUS_VARIANT — renders modal (~1597 tok)
+- `page.tsx` — STATUS_VARIANT — renders modal (~1599 tok)
+
+## frontend/app/(routes)/manager/
+
+- `layout.tsx` — ManagerLayout (~399 tok)
+- `page.tsx` — formatBytes (~508 tok)
+
+## frontend/app/(routes)/manager/audit/
+
+- `page.tsx` — ManagerAuditPage — renders table (~410 tok)
+
+## frontend/app/(routes)/manager/content/
+
+- `page.tsx` — ManagerContentPage (~746 tok)
+
+## frontend/app/(routes)/manager/mobile/
+
+- `page.tsx` — ManagerMobilePage (~327 tok)
+
+## frontend/app/(routes)/manager/settings/llm/
+
+- `page.tsx` — ManagerLlmSettingsPage (~336 tok)
+
+## frontend/app/(routes)/manager/settings/security/
+
+- `page.tsx` — ManagerSecuritySettingsPage (~118 tok)
+
+## frontend/app/(routes)/manager/settings/storage/
+
+- `page.tsx` — ManagerStorageSettingsPage (~88 tok)
+
+## frontend/app/(routes)/manager/settings/stt/
+
+- `page.tsx` — ManagerSttSettingsPage (~113 tok)
+
+## frontend/app/(routes)/manager/templates/
+
+- `page.tsx` — ManagerTemplatesPage — renders table (~840 tok)
+
+## frontend/app/(routes)/manager/templates/[id]/
+
+- `page.tsx` — ManagerTemplateSkillPage (~660 tok)
+
+## frontend/app/(routes)/manager/users/
+
+- `page.tsx` — ManagerUsersPage — renders table (~604 tok)
+
+## frontend/app/(routes)/manager/users/[id]/
+
+- `page.tsx` — ManagerUserDetailPage (~1246 tok)
+
+## frontend/app/(routes)/manager/users/new/
+
+- `page.tsx` — ManagerNewUserPage — renders form (~676 tok)
 
 ## frontend/app/(routes)/profile/
 
@@ -259,7 +334,7 @@
 
 ## frontend/app/(routes)/sessions/
 
-- `page.tsx` — SessionsPage — renders modal (~3070 tok)
+- `page.tsx` — 执行实际的生成逻辑（模板已确定后调用） (~3598 tok)
 
 ## frontend/app/(routes)/sessions/[id]/summary/
 
@@ -293,14 +368,18 @@
 - `dashboard-nav-links.tsx` — DashboardNavLinks (~423 tok)
 - `dashboard-shell.tsx` — 会议录音页需要锁高度、内部弹性布局；其余页面允许纵向滚动 (~369 tok)
 - `draft-restore-banner.tsx` — DraftRestoreBanner (~333 tok)
-- `generate-meeting-summary-button.tsx` — GenerateMeetingSummaryButton (~432 tok)
+- `generate-meeting-summary-button.tsx` — 执行生成流程（模板已确定后） (~928 tok)
+- `manager-nav.tsx` — NAV (~390 tok)
+- `manager-settings-form.tsx` — ManagerSettingsForm (~812 tok)
+- `manager-sidebar-link.tsx` — 侧栏/抽屉底部：系统设置入口（仅 manager） (~234 tok)
 - `mobile-promote-bar.tsx` — 移动端底栏：作为 shell 的 flex 子项，避免 WebView 裁切 fixed/portal (~278 tok)
-- `navbar.tsx` — Navbar (~1679 tok)
-- `promote-draft-button.tsx` — PromoteDraftButton — renders modal (~685 tok)
+- `navbar.tsx` — Navbar (~1605 tok)
+- `promote-draft-button.tsx` — PromoteDraftButton — renders modal (~693 tok)
 - `recording-controls.tsx` — VAD 状态指示器：显示一个小圆点 + 文字 (~1532 tok)
-- `sidebar.tsx` — Sidebar (~611 tok)
+- `sidebar.tsx` — Sidebar (~442 tok)
 - `summary-markdown.tsx` — SummaryMarkdown (~189 tok)
 - `summary-template-select.tsx` — 标记已有纪要的模板 ID (~639 tok)
+- `template-select-modal.tsx` — TemplateSelectModal — renders modal (~731 tok)
 - `theme-provider.tsx` — ThemeProvider (~87 tok)
 - `transcript-feed.tsx` — TranscriptFeed (~860 tok)
 
@@ -366,6 +445,7 @@
 - `use-can-promote.ts` — Exports useCanPromote (~155 tok)
 - `use-draft-sync.ts` — 草稿自动保存：转录追加防抖写入，状态变更立即写入，离开页面时刷盘 (~1194 tok)
 - `use-is-logged-in.ts` — 客户端检测是否已登录（localStorage 中有 token） (~83 tok)
+- `use-is-manager.ts` — Exports useIsManager (~228 tok)
 - `use-mobile.ts` — Exports useIsMobile (~162 tok)
 
 ## frontend/lib/
@@ -379,9 +459,11 @@
 - `copy-to-clipboard.ts` — 复制文本；移动端在异步操作后 clipboard API 常因失去用户手势而失败，提供 textarea 回退 (~243 tok)
 - `dashboard-nav.ts` — Exports DashboardNavItem, DASHBOARD_NAV_ITEMS (~151 tok)
 - `draft-api.ts` — Exports DraftStatus, Draft, fetchDrafts, fetchActiveDraft + 7 more (~861 tok)
+- `manager-api.ts` — Exports ManagerUser, ManagerSettingItem, managerApi (~905 tok)
 - `navigation.ts` — Android WebView 壳应用（MainActivity 自定义 UA） (~358 tok)
 - `pcm-capture.ts` — Target frame size in samples (at 16kHz) (~1350 tok)
-- `promote-and-summarize.ts` — Exports PromoteAndSummarizeOptions, PromoteAndSummarizeResult, promoteDraftAndGenerateSummary (~356 tok)
+- `promote-and-summarize.ts` — Exports PromoteAndSummarizeOptions, PromoteAndSummarizeResult, promoteDraftAndGenerateSummary (~367 tok)
+- `resolve-summary-template.ts` — 最终确定的 templateId (~314 tok)
 - `session-storage.ts` — Exports Session, useSessionStore (~223 tok)
 - `session-summary.ts` — legacy 兼容 (~785 tok)
 - `socket.ts` — Flush buffered segment results in seq order; returns texts ready to display (~1371 tok)

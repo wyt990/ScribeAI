@@ -12,8 +12,19 @@ export type SkillPromptInput = {
   outputMd: string;
 };
 
+function formatDateTime(date: Date): string {
+  const y = date.getFullYear();
+  const M = date.getMonth() + 1;
+  const d = date.getDate();
+  const h = date.getHours();
+  const m = date.getMinutes();
+  const ampm = h < 12 ? '上午' : '下午';
+  const h12 = h % 12 || 12;
+  return `${y}年${M}月${d}日 ${ampm}${h12}:${String(m).padStart(2, '0')}`;
+}
+
 function buildMetaBlock(meta: SummaryPromptMeta): string {
-  const dateStr = meta.createdAt.toISOString().slice(0, 10);
+  const dateTimeStr = formatDateTime(meta.createdAt);
   const recorderName = meta.recorderName?.trim();
   const recorderLine = recorderName
     ? `- 记录人: ${recorderName}（本系统登录用户，即本次会议记录人，请填入纪要头部「**记录**」字段）`
@@ -22,7 +33,7 @@ function buildMetaBlock(meta: SummaryPromptMeta): string {
   return `## 已知元数据（可填入纪要头部，不足处仍标 TBD）
 
 - 建议标题: ${meta.title}
-- 记录日期（可作会议日期参考）: ${dateStr}
+- 会议开始时间: ${dateTimeStr}
 ${recorderLine ? `${recorderLine}\n` : ''}`;
 }
 

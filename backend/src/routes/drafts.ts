@@ -231,6 +231,7 @@ router.post('/:id/promote', verifyUser, async (req: AuthenticatedRequest, res) =
           userId,
           title: title.trim(),
           fullText,
+          recordedAt: draft.startedAt,
         },
       });
       await tx.draft.delete({ where: { id } });

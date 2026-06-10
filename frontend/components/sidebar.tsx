@@ -1,23 +1,18 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { Mic, LogOut, Moon, Sun } from 'lucide-react';
+import { Mic, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useTheme } from 'next-themes';
-import { useEffect, useState } from 'react';
 import { DashboardNavLinks } from '@/components/dashboard-nav-links';
+import { ManagerSidebarLink } from '@/components/manager-sidebar-link';
 
 export function Sidebar() {
   const router = useRouter();
-  const { theme, setTheme } = useTheme();
-
-
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('userRole');
     router.push('/login');
   };
 
@@ -37,23 +32,7 @@ export function Sidebar() {
       </div>
 
       <div className="p-3 space-y-1 border-t border-sidebar-border">
-       
-        {mounted && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            className="w-full justify-start gap-3 text-sidebar-foreground hover:bg-sidebar-accent"
-          >
-            {theme === 'dark' ? (
-              <Sun className="w-5 h-5" />
-            ) : (
-              <Moon className="w-5 h-5" />
-            )}
-            切换主题
-          </Button>
-        )}
-
+        <ManagerSidebarLink />
         <Button
           variant="ghost"
           size="sm"

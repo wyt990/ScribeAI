@@ -1,5 +1,5 @@
 import { suggestDraftTitle, promoteDraft } from '@/lib/draft-api';
-import { fetchSummaryTemplates } from '@/lib/summary-templates';
+import { resolveSummaryTemplate } from '@/lib/resolve-summary-template';
 import { runGenerateSummaryFlow } from '@/lib/session-summary';
 
 export type PromoteAndSummarizeOptions = {
@@ -32,8 +32,9 @@ export async function promoteDraftAndGenerateSummary(
 
   let templateId = options.templateId;
   if (!templateId) {
-    const { defaultTemplateId } = await fetchSummaryTemplates();
-    templateId = defaultTemplateId;
+    // 调用方未传 templateId 时（安全兜底），走公共解析逻辑
+    const resolved = await resolveSummaryTemplate();
+    templateId = resolved.templateId;
   }
 
   await runGenerateSummaryFlow({

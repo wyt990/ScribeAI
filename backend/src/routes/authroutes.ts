@@ -91,6 +91,10 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ error: "邮箱或密码错误" });
     }
 
+    if (!user.isActive) {
+      return res.status(403).json({ error: "账号已禁用，请联系管理员" });
+    }
+
     // Create JWT
     const token = jwt.sign(
       { id: user.id, email: user.email },
@@ -126,7 +130,7 @@ router.get("/me",verifyUser, async (req: AuthenticatedRequest, res) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, name: true, email: true, role: true },
+      select: { id: true, name: true, email: true, role: true, isActive: true },
     });
 
     if (!user) return res.status(401).json({ error: "用户不存在" });

@@ -849,6 +849,134 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-06-09T07:44:46.040Z"
+    },
+    {
+      "id": "bug-054",
+      "timestamp": "2026-06-10T00:39:57.836Z",
+      "error_message": "Incorrect value in code",
+      "file": "frontend/lib/promote-and-summarize.ts",
+      "root_cause": "Had '@/lib/summary-templates'",
+      "fix": "Changed to '@/lib/resolve-summary-template'",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-10T00:39:57.836Z"
+    },
+    {
+      "id": "bug-055",
+      "timestamp": "2026-06-10T00:40:49.903Z",
+      "error_message": "Type error",
+      "file": "frontend/app/(routes)/sessions/page.tsx",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-10T00:40:49.903Z"
+    },
+    {
+      "id": "bug-056",
+      "timestamp": "2026-06-10T00:41:03.298Z",
+      "error_message": "Significant refactor of ",
+      "file": "frontend/app/(routes)/sessions/page.tsx",
+      "root_cause": "9 lines replaced/restructured",
+      "fix": "Rewrote 11→6 lines (9 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-10T00:41:03.298Z"
+    },
+    {
+      "id": "bug-057",
+      "timestamp": "2026-06-10T00:41:29.017Z",
+      "error_message": "Wrong operator: || should be &&",
+      "file": "frontend/app/(routes)/sessions/page.tsx",
+      "root_cause": "Used \"||\" instead of \"&&\"",
+      "fix": "Changed operator || → &&",
+      "tags": [
+        "auto-detected",
+        "operator-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-10T00:41:29.017Z"
+    },
+    {
+      "id": "bug-058",
+      "timestamp": "2026-06-10T00:41:47.413Z",
+      "error_message": "Null/undefined access in ",
+      "file": "frontend/app/(routes)/sessions/page.tsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-10T00:41:47.413Z"
+    },
+    {
+      "id": "bug-059",
+      "timestamp": "2026-06-10T02:35:56.771Z",
+      "error_message": "Significant refactor of ",
+      "file": "backend/prisma/schema.prisma",
+      "root_cause": "2 lines replaced/restructured",
+      "fix": "Rewrote 4→5 lines (2 removed)",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "prisma"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-10T02:35:56.771Z"
+    },
+    {
+      "id": "bug-060",
+      "timestamp": "2026-06-10T02:37:31.684Z",
+      "error_message": "Null/undefined access in ",
+      "file": "backend/src/routes/sessions.ts",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-10T02:37:31.684Z"
+    },
+    {
+      "id": "bug-061",
+      "timestamp": "2026-06-10T02:47:14.658Z",
+      "error_message": "Missing await",
+      "file": "frontend/app/(routes)/sessions/page.tsx",
+      "root_cause": "Async call without await — returned Promise instead of value",
+      "fix": "Added await to async call",
+      "tags": [
+        "auto-detected",
+        "async-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-10T02:47:14.658Z"
     }
   ]
 }

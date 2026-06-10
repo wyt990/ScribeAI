@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,8 +11,9 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import { SummaryTemplateSelect } from '@/components/summary-template-select';
 import { runGenerateSummaryFlow, buildSummaryPreviewPath } from '@/lib/session-summary';
+import { resolveSummaryTemplate } from '@/lib/resolve-summary-template';
+import { TemplateSelectModal } from '@/components/template-select-modal';
 import type { SummaryTemplateItem } from '@/lib/summary-templates';
 
 interface SessionListItem {
@@ -41,6 +42,12 @@ export default function SessionsPage() {
   const [templateName, setTemplateName] = useState('');
   const [activeTemplateId, setActiveTemplateId] = useState<string | null>(null);
   const [loadingSummary, setLoadingSummary] = useState(false);
+  // 模板选择弹窗状态
+  const [showTemplateModal, setShowTemplateModal] = useState(false);
+  const [pendingTemplates, setPendingTemplates] = useState<SummaryTemplateItem[]>([]);
+  const [pendingDefaultId, setPendingDefaultId] = useState('');
+  // 非 regenerate 模式下，resolve 模板后暂存的 sessionId，modal 确认后继续
+  const [pendingSessionId, setPendingSessionId] = useState<string | null>(null);
 
   const hasCachedSummary = (session: SessionListItem, tid: string) =>
     session.summaryTemplateIds?.includes(tid) ?? false;
@@ -75,16 +82,6 @@ export default function SessionsPage() {
     fetchSessions();
   }, []);
 
-  const handleTemplateChange = useCallback((id: string, t: SummaryTemplateItem) => {
-    setTemplateId(id);
-    setTemplateName(t.name);
-    if (currentSession && hasCachedSummary(currentSession, id)) {
-      setActiveTemplateId(id);
-    } else {
-      setActiveTemplateId(null);
-    }
-  }, [currentSession]);
-
   const openSession = async (id: string) => {
     try {
       const session = sessions.find((s) => s.id === id);
@@ -94,7 +91,19 @@ export default function SessionsPage() {
           : session?.summaryTemplateIds?.[0] ?? templateId;
 
       if (!preferredId) {
-        setCurrentSession({ id, title: session?.title ?? '', createdAt: session?.createdAt ?? '' });
+        const token = localStorage.getItem('token');
+        const res = await fetch(`/api/sessions/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        setCurrentSession({
+          id: data.id,
+          title: data.title,
+          createdAt: data.createdAt,
+          fullText: data.fullText,
+          summaryTemplateIds: data.summaryTemplateIds,
+          summaryTemplates: data.summaryTemplates,
+        });
         setOpenTranscript(true);
         return;
       }
@@ -140,19 +149,13 @@ export default function SessionsPage() {
     goToSummaryPreview(session.id, tid);
   };
 
-  const fetchSummary = async (regenerate = false) => {
-    if (!currentSession || !templateId) return;
-
-    if (regenerate) {
-      const ok = await confirm(`确定重新生成「${templateName}」？将覆盖当前已保存的纪要。`);
-      if (!ok) return;
-    }
-
+  /** 执行实际的生成逻辑（模板已确定后调用） */
+  const doGenerate = async (sessionId: string, tid: string, regenerate: boolean) => {
     setLoadingSummary(true);
     try {
       const data = await runGenerateSummaryFlow({
-        sessionId: currentSession.id,
-        templateId,
+        sessionId,
+        templateId: tid,
         regenerate,
         confirmRegenerate: false,
         navigateToPreview: true,
@@ -160,7 +163,9 @@ export default function SessionsPage() {
       });
       if (!data) return;
 
-      setActiveTemplateId(templateId);
+      setActiveTemplateId(tid);
+      setTemplateId(tid);
+      setTemplateName(data.templateName);
       setCurrentSession((prev) =>
         prev
           ? {
@@ -177,7 +182,7 @@ export default function SessionsPage() {
       );
       setSessions((prev) =>
         prev.map((s) =>
-          s.id === currentSession.id
+          s.id === sessionId
             ? {
                 ...s,
                 hasSummary: true,
@@ -194,6 +199,53 @@ export default function SessionsPage() {
     } finally {
       setLoadingSummary(false);
     }
+  };
+
+  const fetchSummary = async (regenerate = false) => {
+    if (!currentSession) return;
+
+    if (regenerate) {
+      // 重新生成：复用当前 templateId
+      if (!templateId) return;
+      const ok = await confirm(`确定重新生成「${templateName}」？将覆盖当前已保存的纪要。`);
+      if (!ok) return;
+      await doGenerate(currentSession.id, templateId, true);
+      return;
+    }
+
+    // 首次生成：解析模板
+    try {
+      const resolved = await resolveSummaryTemplate();
+
+      if (resolved.needsSelection && resolved.templates) {
+        // 2+ 自定义模板 → 弹窗选择
+        setPendingTemplates(resolved.templates);
+        setPendingDefaultId(resolved.templateId);
+        setPendingSessionId(currentSession.id);
+        setShowTemplateModal(true);
+        return;
+      }
+
+      // 无需选择，直接生成
+      await doGenerate(currentSession.id, resolved.templateId, false);
+    } catch (err) {
+      console.error(err);
+      alert('获取模板信息失败');
+    }
+  };
+
+  const handleTemplateConfirm = async (selectedTemplateId: string) => {
+    setShowTemplateModal(false);
+    const sid = pendingSessionId;
+    setPendingSessionId(null);
+    if (sid) {
+      await doGenerate(sid, selectedTemplateId, false);
+    }
+  };
+
+  const handleTemplateCancel = () => {
+    setShowTemplateModal(false);
+    setPendingSessionId(null);
   };
 
   const hasSummaryForCurrentTemplate =
@@ -267,15 +319,12 @@ export default function SessionsPage() {
             />
 
             <div className="mt-4 space-y-3">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-sm text-muted-foreground shrink-0">纪要模板</span>
-                <SummaryTemplateSelect
-                  value={templateId}
-                  onValueChange={handleTemplateChange}
-                  className="w-[240px]"
-                  generatedTemplateIds={currentSession.summaryTemplateIds ?? []}
-                />
-              </div>
+              {/* 已有纪要模板提示 */}
+              {currentSession.summaryTemplateIds && currentSession.summaryTemplateIds.length > 0 && (
+                <p className="text-xs text-muted-foreground">
+                  已有纪要：{currentSession.summaryTemplates?.map(t => t.name).join('、')}
+                </p>
+              )}
 
               <div className="flex flex-wrap gap-2">
                 {hasSummaryForCurrentTemplate ? (
@@ -297,7 +346,7 @@ export default function SessionsPage() {
                 ) : (
                   <Button
                     onClick={() => void fetchSummary()}
-                    disabled={loadingSummary || !templateId}
+                    disabled={loadingSummary}
                   >
                     {loadingSummary ? '生成中（约 1–3 分钟）...' : '生成纪要'}
                   </Button>
@@ -314,6 +363,14 @@ export default function SessionsPage() {
                 </Button>
               </div>
             </div>
+
+            <TemplateSelectModal
+              open={showTemplateModal}
+              templates={pendingTemplates}
+              defaultTemplateId={pendingDefaultId}
+              onConfirm={(id) => void handleTemplateConfirm(id)}
+              onCancel={handleTemplateCancel}
+            />
           </DialogContent>
         </Dialog>
       )}

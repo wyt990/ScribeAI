@@ -1,6 +1,5 @@
 import express from 'express';
 import { verifyUser, AuthenticatedRequest } from '../middleware/authMiddleware';
-import { requireAdmin } from '../middleware/adminMiddleware';
 import { generateSummary } from '../lib/summary-llm';
 import { buildTemplateGenerateDraftPrompt } from '../prompts/template-generate-draft';
 import {
@@ -205,21 +204,6 @@ router.post('/import', verifyUser, async (req: AuthenticatedRequest, res) => {
   }
 });
 
-router.get('/admin/pending', verifyUser, requireAdmin, async (_req, res) => {
-  try {
-    const { prisma } = await import('../lib/prisma');
-    const pending = await prisma.summaryTemplate.findMany({
-      where: { reviewStatus: 'pending', isPublic: true },
-      include: { skill: { select: { name: true, slug: true } } },
-      orderBy: { updatedAt: 'desc' },
-    });
-    res.json({ templates: pending });
-  } catch (err) {
-    console.error('[Templates] admin pending', err);
-    res.status(500).json({ error: 'Failed to list pending templates' });
-  }
-});
-
 router.get('/:id', verifyUser, async (req: AuthenticatedRequest, res) => {
   try {
     const t = await getTemplateForUser(req.params.id, req.user!.id);
@@ -354,27 +338,6 @@ router.post('/:id/submit-public', verifyUser, async (req: AuthenticatedRequest, 
   } catch (err) {
     console.error('[Templates] submit-public', err);
     res.status(500).json({ error: 'Failed to submit for review' });
-  }
-});
-
-router.post('/admin/:id/review', verifyUser, requireAdmin, async (req, res) => {
-  const action = String(req.body?.action ?? '');
-  if (action !== 'approve' && action !== 'reject') {
-    return res.status(400).json({ error: 'action must be approve or reject' });
-  }
-  try {
-    const { prisma } = await import('../lib/prisma');
-    await prisma.summaryTemplate.update({
-      where: { id: req.params.id },
-      data: {
-        reviewStatus: action === 'approve' ? 'approved' : 'rejected',
-        isPublic: action === 'approve',
-      },
-    });
-    res.json({ success: true, reviewStatus: action === 'approve' ? 'approved' : 'rejected' });
-  } catch (err) {
-    console.error('[Templates] admin review', err);
-    res.status(500).json({ error: 'Failed to review template' });
   }
 });
 

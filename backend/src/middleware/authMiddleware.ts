@@ -27,6 +27,7 @@ export const verifyUser = async (
 
     const user = await prisma.user.findUnique({ where: { id: decoded.id } });
     if (!user) return res.status(401).json({ error: "User not found" });
+    if (!user.isActive) return res.status(403).json({ error: "Account disabled" });
 
     req.user = { id: user.id, email: user.email };
     next();

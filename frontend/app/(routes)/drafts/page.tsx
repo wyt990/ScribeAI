@@ -123,18 +123,18 @@ export default function DraftsPage() {
                 <p className="text-sm text-muted-foreground line-clamp-2">
                   {draftPreviewText(draft.fullText)}
                 </p>
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-row flex-wrap gap-2">
                   {(draft.status === 'recording' || draft.status === 'paused' || draft.status === 'stopped') && (
-                    <Button className="w-full" onClick={() => handleContinue(draft.id)}>
+                    <Button className="flex-1" onClick={() => handleContinue(draft.id)}>
                       继续录音
                     </Button>
                   )}
-                  {draft.status === 'stopped' && draft.fullText?.trim() && (
-                    <Button variant="secondary" className="w-full" onClick={() => openPromote(draft)}>
+                  {draft.fullText?.trim() && (
+                    <Button variant="secondary" className="flex-1" onClick={() => openPromote(draft)}>
                       保存为正式会话
                     </Button>
                   )}
-                  <Button variant="outline" className="w-full" onClick={() => handleDelete(draft.id)}>
+                  <Button variant="outline" className="flex-1" onClick={() => handleDelete(draft.id)}>
                     删除
                   </Button>
                 </div>
@@ -155,7 +155,7 @@ export default function DraftsPage() {
             value={promoteTitle}
             onChange={(e) => setPromoteTitle(e.target.value)}
           />
-          <DialogFooter>
+          <DialogFooter className="flex-row gap-2">
             <Button variant="outline" onClick={() => setPromoteTarget(null)}>
               取消
             </Button>

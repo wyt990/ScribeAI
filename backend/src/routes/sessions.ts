@@ -367,7 +367,7 @@ router.post("/:id/summary", verifyUser, async (req: AuthenticatedRequest, res) =
 
     const prompt = buildPromptForTemplate(template, transcript.fullText, {
       title: transcript.title,
-      createdAt: transcript.createdAt,
+      createdAt: transcript.recordedAt ?? transcript.createdAt,
       recorderName: user?.name,
     });
 

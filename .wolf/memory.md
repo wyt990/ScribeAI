@@ -1040,3 +1040,105 @@
 | 23:05 | Created backend/scripts/migrate-summary-templates.sh | — | ~428 |
 | 23:06 | Session end: 182 writes across 60 files (build.gradle.kts, page.tsx, AuthSessionStore.kt, MainActivity.kt, README.md) | 93 reads | ~253511 tok |
 | 23:10 | Session end: 182 writes across 60 files (build.gradle.kts, page.tsx, AuthSessionStore.kt, MainActivity.kt, README.md) | 93 reads | ~253511 tok |
+| 23:28 | Session end: 182 writes across 60 files (build.gradle.kts, page.tsx, AuthSessionStore.kt, MainActivity.kt, README.md) | 94 reads | ~253511 tok |
+| 23:52 | Session end: 182 writes across 60 files (build.gradle.kts, page.tsx, AuthSessionStore.kt, MainActivity.kt, README.md) | 97 reads | ~260666 tok |
+| 23:56 | Created docs/superpowers/plans/2026-06-10-manager-settings.md | — | ~274 |
+| 23:57 | Created backend/prisma/schema.prisma | — | ~1207 |
+| 23:57 | Created backend/prisma/migrations/20260610230000_manager_settings/migration.sql | — | ~296 |
+| 23:57 | Created backend/src/middleware/managerMiddleware.ts | — | ~199 |
+| 23:57 | Created backend/src/lib/audit-log.ts | — | ~130 |
+| 23:57 | Created backend/src/lib/system-settings.ts | — | ~1997 |
+| 23:57 | Created backend/src/routes/manager/users.ts | — | ~1574 |
+| 23:57 | Created backend/src/routes/manager/settings.ts | — | ~593 |
+| 23:57 | Created backend/src/routes/manager/stats.ts | — | ~478 |
+| 23:57 | Created backend/src/routes/manager/content.ts | — | ~742 |
+| 23:57 | Created backend/src/routes/manager/templates.ts | — | ~1069 |
+| 23:57 | Created backend/src/routes/manager/index.ts | — | ~159 |
+| 23:57 | Created backend/src/routes/manager/audit.ts | — | ~194 |
+| 23:58 | Created backend/src/index.ts | — | ~647 |
+| 23:58 | Created backend/src/routes/templates.ts | — | ~3597 |
+| 23:58 | Created backend/src/index.ts | — | ~657 |
+| 23:58 | Created backend/src/index.ts | — | ~687 |
+| 23:58 | Created backend/src/routes/templates.ts | — | ~3436 |
+| 23:58 | Created backend/src/routes/templates.ts | — | ~3211 |
+| 23:58 | Created backend/src/routes/authroutes.ts | — | ~1336 |
+| 23:58 | Created frontend/hooks/use-is-manager.ts | — | ~217 |
+| 23:58 | Created frontend/lib/manager-api.ts | — | ~905 |
+| 23:58 | Created frontend/components/manager-nav.tsx | — | ~390 |
+| 23:58 | Created frontend/components/manager-settings-form.tsx | — | ~797 |
+| 23:58 | Created frontend/app/(routes)/manager/layout.tsx | — | ~399 |
+| 23:59 | Created frontend/app/(routes)/manager/page.tsx | — | ~508 |
+| 23:59 | Created frontend/app/(routes)/manager/users/page.tsx | — | ~604 |
+| 23:59 | Created frontend/app/(routes)/manager/users/new/page.tsx | — | ~676 |
+| 23:59 | Created frontend/app/(routes)/manager/users/[id]/page.tsx | — | ~1246 |
+| 23:59 | Created frontend/app/(routes)/manager/settings/stt/page.tsx | — | ~113 |
+| 23:59 | Created frontend/app/(routes)/manager/settings/llm/page.tsx | — | ~336 |
+| 23:59 | Created frontend/app/(routes)/manager/settings/storage/page.tsx | — | ~88 |
+| 23:59 | Created frontend/app/(routes)/manager/settings/security/page.tsx | — | ~118 |
+| 23:59 | Created frontend/app/(routes)/manager/templates/page.tsx | — | ~840 |
+| 23:59 | Created frontend/app/(routes)/manager/templates/[id]/page.tsx | — | ~660 |
+| 23:59 | Created frontend/app/(routes)/manager/content/page.tsx | — | ~746 |
+| 23:59 | Created frontend/app/(routes)/manager/audit/page.tsx | — | ~410 |
+| 23:59 | Created frontend/app/(routes)/manager/mobile/page.tsx | — | ~294 |
+| 23:59 | Created frontend/components/manager-sidebar-link.tsx | — | ~234 |
+| 23:59 | Created frontend/components/sidebar.tsx | — | ~429 |
+| 23:59 | Created frontend/components/navbar.tsx | — | ~1651 |
+| 23:59 | Created frontend/components/navbar.tsx | — | ~1667 |
+| 00:00 | Created backend/src/middleware/authMiddleware.ts | — | ~378 |
+| 00:00 | Created frontend/components/navbar.tsx | — | ~1679 |
+| 00:00 | Created frontend/components/navbar.tsx | — | ~1559 |
+| 00:00 | Created frontend/hooks/use-is-manager.ts | — | ~228 |
+| 00:00 | Created backend/src/routes/authroutes.ts | — | ~1344 |
+| 00:00 | Created backend/src/routes/authroutes.ts | — | ~1341 |
+| 00:00 | Created backend/scripts/migrate-manager-settings.sh | — | ~226 |
+| 00:00 | Created backend/src/lib/audit-log.ts | — | ~141 |
+| 00:01 | Created frontend/components/manager-settings-form.tsx | — | ~812 |
+| 00:01 | Created frontend/app/(routes)/manager/mobile/page.tsx | — | ~316 |
+| 00:01 | Created frontend/app/(routes)/manager/mobile/page.tsx | — | ~327 |
+| 00:01 | Created docs/superpowers/plans/2026-06-10-manager-settings.md | — | ~246 |
+| 00:02 | Session end: 235 writes across 77 files (build.gradle.kts, page.tsx, AuthSessionStore.kt, MainActivity.kt, README.md) | 129 reads | ~308358 tok |
+| 07:50 | Session end: 235 writes across 77 files (build.gradle.kts, page.tsx, AuthSessionStore.kt, MainActivity.kt, README.md) | 129 reads | ~310087 tok |
+| 08:30 | Session end: 235 writes across 77 files (build.gradle.kts, page.tsx, AuthSessionStore.kt, MainActivity.kt, README.md) | 129 reads | ~311561 tok |
+| 08:39 | Created frontend/lib/resolve-summary-template.ts | — | ~314 |
+| 08:39 | Created frontend/components/template-select-modal.tsx | — | ~731 |
+| 08:39 | Edited frontend/lib/promote-and-summarize.ts | 3→3 lines | ~58 |
+| 08:40 | Edited frontend/lib/promote-and-summarize.ts | fetchSummaryTemplates() → resolveSummaryTemplate() | ~56 |
+| 08:40 | Created frontend/components/generate-meeting-summary-button.tsx | — | ~928 |
+| 08:40 | Edited frontend/app/(routes)/sessions/page.tsx | added 1 import(s) | ~87 |
+| 08:40 | Edited frontend/app/(routes)/sessions/page.tsx | CSS: resolve | ~122 |
+| 08:40 | Edited frontend/app/(routes)/sessions/page.tsx | inline fix | ~19 |
+| 08:41 | Edited frontend/app/(routes)/sessions/page.tsx | 2→2 lines | ~40 |
+| 08:41 | Edited frontend/app/(routes)/sessions/page.tsx | 11→6 lines | ~62 |
+| 08:41 | Edited frontend/app/(routes)/sessions/page.tsx | removed 6 lines | ~6 |
+| 08:41 | Edited frontend/app/(routes)/sessions/page.tsx | CSS: tid, regenerate, selectedTemplateId | ~770 |
+| 08:41 | Edited frontend/app/(routes)/sessions/page.tsx | added optional chaining | ~611 |
+| 08:42 | Edited frontend/app/(routes)/sessions/page.tsx | 4→4 lines | ~28 |
+| 08:42 | Edited frontend/app/(routes)/sessions/page.tsx | inline fix | ~13 |
+| 08:43 | Session end: 250 writes across 79 files (build.gradle.kts, page.tsx, AuthSessionStore.kt, MainActivity.kt, README.md) | 130 reads | ~316006 tok |
+| 09:16 | Edited frontend/app/(routes)/drafts/page.tsx | 15→15 lines | ~224 |
+| 09:16 | Session end: 251 writes across 79 files (build.gradle.kts, page.tsx, AuthSessionStore.kt, MainActivity.kt, README.md) | 130 reads | ~316230 tok |
+| 09:31 | Edited frontend/app/(routes)/drafts/page.tsx | 5→5 lines | ~66 |
+| 09:31 | Session end: 252 writes across 79 files (build.gradle.kts, page.tsx, AuthSessionStore.kt, MainActivity.kt, README.md) | 130 reads | ~316629 tok |
+| 09:34 | Session end: 252 writes across 79 files (build.gradle.kts, page.tsx, AuthSessionStore.kt, MainActivity.kt, README.md) | 130 reads | ~316629 tok |
+| 09:37 | Session end: 252 writes across 79 files (build.gradle.kts, page.tsx, AuthSessionStore.kt, MainActivity.kt, README.md) | 130 reads | ~316629 tok |
+| 09:47 | Edited backend/src/routes/drafts.ts | 8→9 lines | ~74 |
+| 09:47 | Session end: 253 writes across 79 files (build.gradle.kts, page.tsx, AuthSessionStore.kt, MainActivity.kt, README.md) | 130 reads | ~316703 tok |
+| 09:53 | Edited frontend/app/(routes)/drafts/page.tsx | 8→8 lines | ~100 |
+| 09:53 | Edited frontend/components/promote-draft-button.tsx | 7→7 lines | ~85 |
+| 09:54 | Session end: 255 writes across 79 files (build.gradle.kts, page.tsx, AuthSessionStore.kt, MainActivity.kt, README.md) | 130 reads | ~316882 tok |
+| 10:14 | Session end: 255 writes across 79 files (build.gradle.kts, page.tsx, AuthSessionStore.kt, MainActivity.kt, README.md) | 130 reads | ~316882 tok |
+| 10:35 | Edited backend/prisma/schema.prisma | 7→8 lines | ~73 |
+| 10:35 | Edited backend/prisma/schema.prisma | 4→5 lines | ~37 |
+| 10:37 | Created backend/prisma/migrations/20260610150000_add_transcript_recordedat/migration.sql | — | ~50 |
+| 10:37 | Edited backend/src/routes/drafts.ts | 6→6 lines | ~39 |
+| 10:37 | Edited backend/src/routes/sessions.ts | added nullish coalescing | ~60 |
+| 10:37 | Edited backend/src/lib/summary-prompt-builder.ts | modified formatDateTime() | ~176 |
+| 10:37 | Edited backend/src/lib/summary-prompt-builder.ts | 5→5 lines | ~38 |
+| 10:38 | Session end: 262 writes across 79 files (build.gradle.kts, page.tsx, AuthSessionStore.kt, MainActivity.kt, README.md) | 130 reads | ~320691 tok |
+
+## Session: 2026-06-10 10:47
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 10:47 | Edited frontend/app/(routes)/sessions/page.tsx | modified if() | ~163 |
+| 10:47 | Session end: 1 writes across 1 files (page.tsx) | 1 reads | ~3650 tok |

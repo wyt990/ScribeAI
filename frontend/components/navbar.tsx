@@ -2,6 +2,7 @@
 
 import { useTheme } from 'next-themes';
 import { Menu, Moon, Sun, User, LogOut } from 'lucide-react';
+import { ManagerSidebarLink } from '@/components/manager-sidebar-link';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -44,6 +45,7 @@ export function Navbar() {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('userRole');
     router.push('/login');
   };
 
@@ -59,6 +61,7 @@ export function Navbar() {
     if (pathname.startsWith('/drafts')) return '草稿箱';
     if (pathname.startsWith('/sessions')) return '会议记录';
     if (pathname.startsWith('/settings/summary-templates')) return '纪要模板';
+    if (pathname.startsWith('/manager')) return '系统设置';
     if (pathname.startsWith('/profile')) return '个人资料';
 
     return '会议录音';
@@ -85,17 +88,7 @@ export function Navbar() {
                 <DashboardNavLinks onNavigate={() => setMobileNavOpen(false)} />
               </div>
               <div className="p-3 space-y-1 border-t border-sidebar-border">
-                {mounted && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                    className="w-full justify-start gap-3 text-sidebar-foreground hover:bg-sidebar-accent"
-                  >
-                    {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-                    切换主题
-                  </Button>
-                )}
+                <ManagerSidebarLink onNavigate={() => setMobileNavOpen(false)} />
                 <Button
                   variant="ghost"
                   size="sm"

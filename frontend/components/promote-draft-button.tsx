@@ -74,7 +74,7 @@ export function PromoteDraftButton({ className }: PromoteDraftButtonProps) {
             onChange={(e) => setTitle(e.target.value)}
           />
 
-          <DialogFooter>
+          <DialogFooter className="flex-row gap-2">
             <Button variant="outline" onClick={() => setOpenTitleDialog(false)}>
               取消
             </Button>

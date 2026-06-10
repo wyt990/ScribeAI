@@ -4,8 +4,9 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+  provider          = "mysql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
 model User {
@@ -13,7 +14,8 @@ model User {
   name          String
   email         String   @unique
   password      String
-  role          String   @default("user")
+  role          String   @default("user") // user | manager
+  isActive      Boolean  @default(true)
   avatarUrl     String?
   emailVerified Boolean  @default(false)
   createdAt     DateTime @default(now())
@@ -24,6 +26,33 @@ model User {
   drafts           Draft[]
   summarySkills    SummarySkill[]
   summaryTemplates SummaryTemplate[]
+  auditLogs        AuditLog[]
+}
+
+model SystemSetting {
+  key       String   @id
+  group     String
+  value     String   @db.Text
+  isSecret  Boolean  @default(false)
+  label     String?
+  updatedAt DateTime @updatedAt
+  updatedBy String?
+
+  @@index([group])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String
+  action    String
+  target    String?
+  detail    Json?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt])
 }
 
 model Draft {
@@ -50,6 +79,7 @@ model Transcript {
   userId    String
   title     String
   fullText  String? // store entire transcript here
+  recordedAt DateTime? // 会议录音开始时间（从草稿 startedAt 同步）
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
