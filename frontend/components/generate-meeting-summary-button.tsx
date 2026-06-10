@@ -9,6 +9,7 @@ import { useRecordingStore } from '@/lib/store';
 import { promoteDraftAndGenerateSummary } from '@/lib/promote-and-summarize';
 import { resolveSummaryTemplate } from '@/lib/resolve-summary-template';
 import { TemplateSelectModal } from '@/components/template-select-modal';
+import { OrgIdentityModal, promptOrgIdentityIfNeeded } from '@/components/org-identity-modal';
 import type { SummaryTemplateItem } from '@/lib/summary-templates';
 
 type GenerateMeetingSummaryButtonProps = {
@@ -26,13 +27,15 @@ export function GenerateMeetingSummaryButton({
   const { draftId, clearTranscript, clearDraft } = useRecordingStore();
   const [loading, setLoading] = useState(false);
 
-  // 模板选择弹窗状态
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [pendingTemplates, setPendingTemplates] = useState<SummaryTemplateItem[]>([]);
   const [pendingDefaultId, setPendingDefaultId] = useState('');
 
-  /** 执行生成流程（模板已确定后） */
-  const doGenerate = async (effectiveTemplateId: string) => {
+  const [showOrgModal, setShowOrgModal] = useState(false);
+  const [pendingTemplateId, setPendingTemplateId] = useState('');
+  const [orgDefaultId, setOrgDefaultId] = useState<string | null>(null);
+
+  const doGenerate = async (effectiveTemplateId: string, orgId: string | null) => {
     if (!draftId || !canPromote || loading) return;
 
     setLoading(true);
@@ -41,6 +44,7 @@ export function GenerateMeetingSummaryButton({
         draftId,
         flushDraft,
         templateId: effectiveTemplateId,
+        orgId,
         router,
       });
       clearTranscript();
@@ -53,12 +57,22 @@ export function GenerateMeetingSummaryButton({
     }
   };
 
+  const proceedWithOrgSelection = async (effectiveTemplateId: string) => {
+    const { needed, orgId } = await promptOrgIdentityIfNeeded(null);
+    if (!needed) {
+      await doGenerate(effectiveTemplateId, null);
+      return;
+    }
+    setPendingTemplateId(effectiveTemplateId);
+    setOrgDefaultId(orgId);
+    setShowOrgModal(true);
+  };
+
   const handleClick = async () => {
     if (!draftId || !canPromote || loading) return;
 
-    // 如果外部已指定 templateId，直接使用
     if (externalTemplateId) {
-      await doGenerate(externalTemplateId);
+      await proceedWithOrgSelection(externalTemplateId);
       return;
     }
 
@@ -66,15 +80,13 @@ export function GenerateMeetingSummaryButton({
       const resolved = await resolveSummaryTemplate();
 
       if (resolved.needsSelection && resolved.templates) {
-        // 2+ 自定义模板 → 弹窗让用户选择
         setPendingTemplates(resolved.templates);
         setPendingDefaultId(resolved.templateId);
         setShowTemplateModal(true);
         return;
       }
 
-      // 无需选择，直接使用解析结果
-      await doGenerate(resolved.templateId);
+      await proceedWithOrgSelection(resolved.templateId);
     } catch (err) {
       console.error(err);
       alert('获取模板信息失败');
@@ -83,11 +95,20 @@ export function GenerateMeetingSummaryButton({
 
   const handleTemplateConfirm = async (selectedTemplateId: string) => {
     setShowTemplateModal(false);
-    await doGenerate(selectedTemplateId);
+    await proceedWithOrgSelection(selectedTemplateId);
   };
 
   const handleTemplateCancel = () => {
     setShowTemplateModal(false);
+  };
+
+  const handleOrgConfirm = async (orgId: string | null) => {
+    setShowOrgModal(false);
+    await doGenerate(pendingTemplateId, orgId);
+  };
+
+  const handleOrgCancel = () => {
+    setShowOrgModal(false);
   };
 
   return (
@@ -107,6 +128,13 @@ export function GenerateMeetingSummaryButton({
         defaultTemplateId={pendingDefaultId}
         onConfirm={(id) => void handleTemplateConfirm(id)}
         onCancel={handleTemplateCancel}
+      />
+
+      <OrgIdentityModal
+        open={showOrgModal}
+        defaultOrgId={orgDefaultId}
+        onConfirm={(orgId) => void handleOrgConfirm(orgId)}
+        onCancel={handleOrgCancel}
       />
     </>
   );

@@ -6,6 +6,7 @@ export type PromoteAndSummarizeOptions = {
   draftId: string;
   flushDraft?: () => Promise<void>;
   templateId?: string;
+  orgId?: string | null;
   router: { push: (url: string) => void; replace?: (url: string) => void };
   title?: string;
 };
@@ -40,6 +41,7 @@ export async function promoteDraftAndGenerateSummary(
   await runGenerateSummaryFlow({
     sessionId: transcript.id,
     templateId,
+    orgId: options.orgId,
     regenerate: false,
     navigateToPreview: true,
     router,

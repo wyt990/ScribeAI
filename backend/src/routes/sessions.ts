@@ -143,6 +143,7 @@ router.get("/:id", verifyUser, async (req: AuthenticatedRequest, res) => {
             text: true,
             summaryType: true,
             templateId: true,
+            orgId: true,
             template: { select: { name: true, legacySummaryType: true } },
           },
         },
@@ -171,6 +172,7 @@ router.get("/:id", verifyUser, async (req: AuthenticatedRequest, res) => {
         : null,
       templateId: matched?.templateId ?? template.id,
       templateName: matched?.template.name ?? template.name,
+      summaryOrgId: matched?.orgId ?? null,
       summaryTypes: transcript.summaries.map(
         (s) => s.template.legacySummaryType ?? s.summaryType
       ),
@@ -368,8 +370,17 @@ router.post("/:id/summary", verifyUser, async (req: AuthenticatedRequest, res) =
       return res.json(formatSummaryResponse(existing, template));
     }
 
-    // 确定组织上下文：请求体覆盖 → 转录自带
-    const effectiveOrgId = req.body?.orgId || transcript.orgId || null;
+    // 确定组织上下文：请求体覆盖 → 已有纪要记录 → 转录自带
+    const requestedOrgId =
+      req.body?.orgId === null || req.body?.orgId === ''
+        ? null
+        : typeof req.body?.orgId === 'string'
+          ? req.body.orgId
+          : undefined;
+    const effectiveOrgId =
+      requestedOrgId !== undefined
+        ? requestedOrgId
+        : existing?.orgId ?? transcript.orgId ?? null;
 
     // 查询用户组织上下文
     let userOrgContext: {
@@ -414,25 +425,36 @@ router.post("/:id/summary", verifyUser, async (req: AuthenticatedRequest, res) =
 
     const legacyType = template.legacySummaryType ?? parseSummaryType(lookup.summaryType ?? DEFAULT_SUMMARY_TYPE);
 
-    const savedSummary = existing
-      ? await prisma.summary.update({
-          where: { id: existing.id },
-          data: {
-            text: generatedSummary,
-            templateVersion: template.skill.version,
-            summaryType: legacyType,
-          },
-        })
-      : await prisma.summary.create({
-          data: {
-            userId,
-            transcriptId: transcript.id,
-            templateId: template.id,
-            templateVersion: template.skill.version,
-            summaryType: legacyType,
-            text: generatedSummary,
-          },
-        });
+    const savedSummary = await prisma.$transaction(async (tx) => {
+      const summary = existing
+        ? await tx.summary.update({
+            where: { id: existing.id },
+            data: {
+              text: generatedSummary,
+              templateVersion: template.skill.version,
+              summaryType: legacyType,
+              orgId: effectiveOrgId,
+            },
+          })
+        : await tx.summary.create({
+            data: {
+              userId,
+              transcriptId: transcript.id,
+              templateId: template.id,
+              templateVersion: template.skill.version,
+              summaryType: legacyType,
+              orgId: effectiveOrgId,
+              text: generatedSummary,
+            },
+          });
+
+      await tx.transcript.update({
+        where: { id: transcript.id },
+        data: { orgId: effectiveOrgId },
+      });
+
+      return summary;
+    });
 
     return res.json(formatSummaryResponse(savedSummary, template));
   } catch (err) {

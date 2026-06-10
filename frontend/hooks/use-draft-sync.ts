@@ -8,7 +8,7 @@ const DEBOUNCE_MS = 3000;
 
 /** 草稿自动保存：转录追加防抖写入，状态变更立即写入，离开页面时刷盘 */
 export function useDraftSync() {
-  const { transcript, status, draftId, audioMode, recordingId, activeOrgId, setDraftId, setDraftTitle } =
+  const { transcript, status, draftId, audioMode, recordingId, setDraftId, setDraftTitle } =
     useRecordingStore();
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -68,7 +68,6 @@ export function useDraftSync() {
       const draft = await createDraft({
         audioMode,
         recordingId: recordingId || undefined,
-        orgId: activeOrgId,
       });
       setDraftId(draft.id);
       setDraftTitle(draft.title);
@@ -79,7 +78,7 @@ export function useDraftSync() {
       console.error('[DraftSync] create failed:', err);
       return null;
     }
-  }, [audioMode, recordingId, activeOrgId, setDraftId, setDraftTitle]);
+  }, [audioMode, recordingId, setDraftId, setDraftTitle]);
 
   // 转录变化：防抖保存
   useEffect(() => {

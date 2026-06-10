@@ -6,6 +6,7 @@ export type SummaryGenerateResult = {
   /** legacy 兼容 */
   summaryType?: string;
   summaryTypeLabel: string;
+  orgId?: string | null;
 };
 
 export type GenerateSummaryFlowOptions = {
@@ -13,6 +14,8 @@ export type GenerateSummaryFlowOptions = {
   templateId?: string;
   /** legacy：无 templateId 时后端按 summaryType 解析系统模板 */
   summaryType?: string;
+  /** 生成纪要时选用的组织身份 */
+  orgId?: string | null;
   regenerate?: boolean;
   confirmRegenerate?: boolean;
   navigateToPreview?: boolean;
@@ -46,6 +49,7 @@ export async function generateSessionSummary(
   options: {
     templateId?: string;
     summaryType?: string;
+    orgId?: string | null;
     regenerate?: boolean;
     token?: string | null;
   } = {}
@@ -56,6 +60,7 @@ export async function generateSessionSummary(
   };
   if (options.templateId) body.templateId = options.templateId;
   if (options.summaryType) body.summaryType = options.summaryType;
+  if (options.orgId !== undefined) body.orgId = options.orgId;
 
   const res = await fetch(`/api/sessions/${sessionId}/summary`, {
     method: 'POST',
@@ -86,6 +91,7 @@ export async function runGenerateSummaryFlow(
   const data = await generateSessionSummary(options.sessionId, {
     templateId: options.templateId,
     summaryType: options.summaryType,
+    orgId: options.orgId,
     regenerate: options.regenerate,
     token: options.token,
   });

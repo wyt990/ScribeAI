@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Spinner } from '@/components/ui/spinner';
 import {
   Dialog,
   DialogContent,
@@ -14,6 +15,7 @@ import {
 import { runGenerateSummaryFlow, buildSummaryPreviewPath } from '@/lib/session-summary';
 import { resolveSummaryTemplate } from '@/lib/resolve-summary-template';
 import { TemplateSelectModal } from '@/components/template-select-modal';
+import { OrgIdentityModal, promptOrgIdentityIfNeeded } from '@/components/org-identity-modal';
 import type { SummaryTemplateItem } from '@/lib/summary-templates';
 
 interface SessionListItem {
@@ -30,6 +32,8 @@ interface SessionDetail extends SessionListItem {
   summary?: string | null;
   templateId?: string | null;
   templateName?: string | null;
+  orgId?: string | null;
+  summaryOrgId?: string | null;
 }
 
 export default function SessionsPage() {
@@ -48,6 +52,14 @@ export default function SessionsPage() {
   const [pendingDefaultId, setPendingDefaultId] = useState('');
   // 非 regenerate 模式下，resolve 模板后暂存的 sessionId，modal 确认后继续
   const [pendingSessionId, setPendingSessionId] = useState<string | null>(null);
+  const [pendingRegenerate, setPendingRegenerate] = useState(false);
+  const [showOrgModal, setShowOrgModal] = useState(false);
+  const [orgDefaultId, setOrgDefaultId] = useState<string | null>(null);
+  const [pendingGenerate, setPendingGenerate] = useState<{
+    sessionId: string;
+    templateId: string;
+    regenerate: boolean;
+  } | null>(null);
 
   const hasCachedSummary = (session: SessionListItem, tid: string) =>
     session.summaryTemplateIds?.includes(tid) ?? false;
@@ -149,13 +161,19 @@ export default function SessionsPage() {
     goToSummaryPreview(session.id, tid);
   };
 
-  /** 执行实际的生成逻辑（模板已确定后调用） */
-  const doGenerate = async (sessionId: string, tid: string, regenerate: boolean) => {
+  /** 执行实际的生成逻辑（模板与身份已确定后调用） */
+  const doGenerate = async (
+    sessionId: string,
+    tid: string,
+    regenerate: boolean,
+    orgId: string | null
+  ) => {
     setLoadingSummary(true);
     try {
       const data = await runGenerateSummaryFlow({
         sessionId,
         templateId: tid,
+        orgId,
         regenerate,
         confirmRegenerate: false,
         navigateToPreview: true,
@@ -173,6 +191,8 @@ export default function SessionsPage() {
               summary: data.summary,
               templateId: data.templateId,
               templateName: data.templateName,
+              orgId: data.orgId ?? orgId,
+              summaryOrgId: data.orgId ?? orgId,
               hasSummary: true,
               summaryTemplateIds: Array.from(
                 new Set([...(prev.summaryTemplateIds ?? []), data.templateId])
@@ -201,33 +221,47 @@ export default function SessionsPage() {
     }
   };
 
+  const proceedWithOrgSelection = async (
+    sessionId: string,
+    tid: string,
+    regenerate: boolean,
+    preferredOrgId?: string | null
+  ) => {
+    const { needed, orgId } = await promptOrgIdentityIfNeeded(preferredOrgId);
+    if (!needed) {
+      await doGenerate(sessionId, tid, regenerate, null);
+      return;
+    }
+    setPendingGenerate({ sessionId, templateId: tid, regenerate });
+    setOrgDefaultId(orgId);
+    setShowOrgModal(true);
+  };
+
   const fetchSummary = async (regenerate = false) => {
     if (!currentSession) return;
 
     if (regenerate) {
-      // 重新生成：复用当前 templateId
       if (!templateId) return;
       const ok = await confirm(`确定重新生成「${templateName}」？将覆盖当前已保存的纪要。`);
       if (!ok) return;
-      await doGenerate(currentSession.id, templateId, true);
+      const preferredOrgId = currentSession.summaryOrgId ?? currentSession.orgId ?? null;
+      await proceedWithOrgSelection(currentSession.id, templateId, true, preferredOrgId);
       return;
     }
 
-    // 首次生成：解析模板
     try {
       const resolved = await resolveSummaryTemplate();
 
       if (resolved.needsSelection && resolved.templates) {
-        // 2+ 自定义模板 → 弹窗选择
         setPendingTemplates(resolved.templates);
         setPendingDefaultId(resolved.templateId);
         setPendingSessionId(currentSession.id);
+        setPendingRegenerate(false);
         setShowTemplateModal(true);
         return;
       }
 
-      // 无需选择，直接生成
-      await doGenerate(currentSession.id, resolved.templateId, false);
+      await proceedWithOrgSelection(currentSession.id, resolved.templateId, false);
     } catch (err) {
       console.error(err);
       alert('获取模板信息失败');
@@ -237,15 +271,34 @@ export default function SessionsPage() {
   const handleTemplateConfirm = async (selectedTemplateId: string) => {
     setShowTemplateModal(false);
     const sid = pendingSessionId;
+    const regenerate = pendingRegenerate;
     setPendingSessionId(null);
+    setPendingRegenerate(false);
     if (sid) {
-      await doGenerate(sid, selectedTemplateId, false);
+      const preferredOrgId = regenerate
+        ? (currentSession?.summaryOrgId ?? currentSession?.orgId ?? null)
+        : null;
+      await proceedWithOrgSelection(sid, selectedTemplateId, regenerate, preferredOrgId);
     }
   };
 
   const handleTemplateCancel = () => {
     setShowTemplateModal(false);
     setPendingSessionId(null);
+    setPendingRegenerate(false);
+  };
+
+  const handleOrgConfirm = async (orgId: string | null) => {
+    const pending = pendingGenerate;
+    setShowOrgModal(false);
+    setPendingGenerate(null);
+    if (!pending) return;
+    await doGenerate(pending.sessionId, pending.templateId, pending.regenerate, orgId);
+  };
+
+  const handleOrgCancel = () => {
+    setShowOrgModal(false);
+    setPendingGenerate(null);
   };
 
   const hasSummaryForCurrentTemplate =
@@ -265,15 +318,17 @@ export default function SessionsPage() {
           {sessions.map((session) => (
             <Card key={session.id} className="hover:shadow-lg transition-shadow">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <span className="truncate">{session.title}</span>
+                <CardTitle className="truncate">{session.title}</CardTitle>
+                <CardDescription className="flex items-center justify-between gap-2">
+                  <span className="min-w-0 truncate">
+                    {new Date(session.createdAt).toLocaleString()}
+                  </span>
                   {session.hasSummary && (
                     <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-normal text-primary">
                       已有纪要
                     </span>
                   )}
-                </CardTitle>
-                <CardDescription>{new Date(session.createdAt).toLocaleString()}</CardDescription>
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex gap-2">
@@ -303,7 +358,13 @@ export default function SessionsPage() {
       )}
 
       {currentSession && (
-        <Dialog open={openTranscript} onOpenChange={setOpenTranscript}>
+        <Dialog
+          open={openTranscript}
+          onOpenChange={(open) => {
+            if (!open && loadingSummary) return;
+            setOpenTranscript(open);
+          }}
+        >
           <DialogContent className="p-6 w-[90vw] max-w-3xl">
             <DialogHeader>
               <DialogTitle>{currentSession.title}</DialogTitle>
@@ -319,6 +380,13 @@ export default function SessionsPage() {
             />
 
             <div className="mt-4 space-y-3">
+              {loadingSummary && (
+                <div className="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-sm text-primary">
+                  <Spinner className="size-4 shrink-0" />
+                  <span>正在生成纪要，约需 1–3 分钟，请稍候…</span>
+                </div>
+              )}
+
               {/* 已有纪要模板提示 */}
               {currentSession.summaryTemplateIds && currentSession.summaryTemplateIds.length > 0 && (
                 <p className="text-xs text-muted-foreground">
@@ -374,6 +442,14 @@ export default function SessionsPage() {
           </DialogContent>
         </Dialog>
       )}
+
+      <OrgIdentityModal
+        open={showOrgModal}
+        defaultOrgId={orgDefaultId}
+        confirmLabel={pendingGenerate?.regenerate ? '确认重新生成' : '确认生成'}
+        onConfirm={(orgId) => void handleOrgConfirm(orgId)}
+        onCancel={handleOrgCancel}
+      />
     </div>
   );
 }

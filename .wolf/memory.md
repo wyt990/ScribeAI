@@ -1222,3 +1222,47 @@
 | 17:14 | Session end: 2 writes across 1 files (org-context-selector.tsx) | 1 reads | ~680 tok |
 | 17:20 | Edited frontend/components/recording-controls.tsx | 70→70 lines | ~658 |
 | 17:20 | Session end: 3 writes across 2 files (org-context-selector.tsx, recording-controls.tsx) | 2 reads | ~2870 tok |
+| 18:10 | Session end: 3 writes across 2 files (org-context-selector.tsx, recording-controls.tsx) | 3 reads | ~9412 tok |
+| 18:13 | Session end: 3 writes across 2 files (org-context-selector.tsx, recording-controls.tsx) | 3 reads | ~9412 tok |
+| 18:15 | Session end: 3 writes across 2 files (org-context-selector.tsx, recording-controls.tsx) | 3 reads | ~9412 tok |
+| 18:16 | Session end: 3 writes across 2 files (org-context-selector.tsx, recording-controls.tsx) | 3 reads | ~9412 tok |
+| 18:22 | Created frontend/app/(routes)/sessions/page.tsx | — | ~3622 |
+| 18:22 | Session end: 4 writes across 3 files (org-context-selector.tsx, recording-controls.tsx, page.tsx) | 5 reads | ~17200 tok |
+| 18:30 | Created backend/prisma/schema.prisma | — | ~1461 |
+| 18:30 | Created backend/prisma/migrations/20260611120000_summary_org_id/migration.sql | — | ~20 |
+| 18:30 | Created backend/src/lib/summary-template-service.ts | — | ~2822 |
+| 18:30 | Created backend/src/routes/sessions.ts | — | ~4111 |
+| 18:30 | Created backend/src/routes/sessions.ts | — | ~4124 |
+| 18:30 | Created backend/src/routes/sessions.ts | — | ~4202 |
+| 18:30 | Created backend/src/routes/sessions.ts | — | ~4294 |
+| 18:30 | Created frontend/components/org-identity-select.tsx | — | ~739 |
+| 18:31 | Created frontend/components/org-identity-modal.tsx | — | ~781 |
+| 18:31 | Created frontend/components/org-context-selector.tsx | — | ~61 |
+| 18:31 | Created frontend/lib/session-summary.ts | — | ~805 |
+| 18:31 | Created frontend/lib/session-summary.ts | — | ~831 |
+| 18:31 | Created frontend/lib/session-summary.ts | — | ~838 |
+| 18:31 | Created frontend/lib/promote-and-summarize.ts | — | ~374 |
+| 18:31 | Created frontend/lib/promote-and-summarize.ts | — | ~382 |
+| 18:31 | Created frontend/components/generate-meeting-summary-button.tsx | — | ~1226 |
+| 18:31 | Created frontend/app/(routes)/sessions/page.tsx | — | ~3649 |
+| 18:31 | Created frontend/app/(routes)/sessions/page.tsx | — | ~3665 |
+| 18:31 | Created frontend/app/(routes)/sessions/page.tsx | — | ~3766 |
+| 18:32 | Created frontend/app/(routes)/sessions/page.tsx | — | ~3809 |
+| 18:32 | Created frontend/app/(routes)/sessions/page.tsx | — | ~4145 |
+| 18:32 | Created frontend/app/(routes)/sessions/page.tsx | — | ~4221 |
+| 18:32 | Created frontend/app/(routes)/dashboard/page.tsx | — | ~2221 |
+| 18:32 | Created frontend/app/(routes)/dashboard/page.tsx | — | ~2212 |
+| 18:32 | Created frontend/hooks/use-draft-sync.ts | — | ~1212 |
+| 18:32 | Created frontend/hooks/use-draft-sync.ts | — | ~1204 |
+| 18:32 | Created frontend/hooks/use-draft-sync.ts | — | ~1201 |
+| 18:32 | Created frontend/components/generate-meeting-summary-button.tsx | — | ~1212 |
+| 18:32 | Session end: 32 writes across 13 files (org-context-selector.tsx, recording-controls.tsx, page.tsx, schema.prisma, migration.sql) | 23 reads | ~97159 tok |
+| 18:39 | Created frontend/components/org-identity-modal.tsx | — | ~783 |
+| 18:39 | Created frontend/components/org-identity-modal.tsx | — | ~794 |
+| 18:39 | Created frontend/components/org-identity-modal.tsx | — | ~857 |
+| 18:39 | Created frontend/components/org-identity-modal.tsx | — | ~852 |
+| 18:39 | Created frontend/app/(routes)/sessions/page.tsx | — | ~4235 |
+| 18:39 | Created frontend/app/(routes)/sessions/page.tsx | — | ~4235 |
+| 18:40 | Created frontend/app/(routes)/sessions/page.tsx | — | ~4270 |
+| 18:40 | Created frontend/app/(routes)/sessions/page.tsx | — | ~4363 |
+| 18:40 | Session end: 40 writes across 13 files (org-context-selector.tsx, recording-controls.tsx, page.tsx, schema.prisma, migration.sql) | 23 reads | ~117548 tok |

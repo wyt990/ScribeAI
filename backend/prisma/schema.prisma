@@ -168,6 +168,7 @@ model Summary {
   summaryType     String   @default("meeting-notes") // legacy 冗余字段
   templateId      String
   templateVersion Int      @default(1)
+  orgId           String? // 生成纪要时选用的组织身份
   text            String   @db.Text
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt

@@ -351,7 +351,13 @@ export function templateLegacyType(template: TemplateWithSkill): string {
 }
 
 export function formatSummaryResponse(
-  summary: { text: string; templateId: string; templateVersion: number; summaryType: string },
+  summary: {
+    text: string;
+    templateId: string;
+    templateVersion: number;
+    summaryType: string;
+    orgId?: string | null;
+  },
   template: Pick<TemplateWithSkill, 'id' | 'name' | 'legacySummaryType'>
 ) {
   return {
@@ -361,5 +367,6 @@ export function formatSummaryResponse(
     templateVersion: summary.templateVersion,
     summaryType: template.legacySummaryType ?? summary.summaryType,
     summaryTypeLabel: template.name,
+    orgId: summary.orgId ?? null,
   };
 }
