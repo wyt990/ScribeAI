@@ -28,6 +28,7 @@ router.get('/', verifyUser, async (req: AuthenticatedRequest, res) => {
         fullText: true,
         startedAt: true,
         lastSavedAt: true,
+        orgId: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -74,10 +75,11 @@ router.get('/:id', verifyUser, async (req: AuthenticatedRequest, res) => {
 /** 创建草稿（开始新录音时） */
 router.post('/', verifyUser, async (req: AuthenticatedRequest, res) => {
   const userId = req.user!.id;
-  const { audioMode = 'mic', recordingId, title } = req.body as {
+  const { audioMode = 'mic', recordingId, title, orgId } = req.body as {
     audioMode?: string;
     recordingId?: string;
     title?: string;
+    orgId?: string;
   };
 
   try {
@@ -99,6 +101,7 @@ router.post('/', verifyUser, async (req: AuthenticatedRequest, res) => {
         status: 'recording',
         audioMode: audioMode === 'tab' ? 'tab' : 'mic',
         recordingId: recordingId || null,
+        orgId: orgId || null,
         lastSavedAt: new Date(),
       },
     });
@@ -114,12 +117,13 @@ router.post('/', verifyUser, async (req: AuthenticatedRequest, res) => {
 router.patch('/:id', verifyUser, async (req: AuthenticatedRequest, res) => {
   const userId = req.user!.id;
   const { id } = req.params;
-  const { fullText, status, audioMode, recordingId, title } = req.body as {
+  const { fullText, status, audioMode, recordingId, title, orgId } = req.body as {
     fullText?: string;
     status?: string;
     audioMode?: string;
     recordingId?: string | null;
     title?: string;
+    orgId?: string | null;
   };
 
   try {
@@ -141,6 +145,7 @@ router.patch('/:id', verifyUser, async (req: AuthenticatedRequest, res) => {
         ...(audioMode ? { audioMode: audioMode === 'tab' ? 'tab' : 'mic' } : {}),
         ...(recordingId !== undefined ? { recordingId } : {}),
         ...(title?.trim() ? { title: title.trim() } : {}),
+        ...(orgId !== undefined ? { orgId: orgId || null } : {}),
         lastSavedAt: new Date(),
       },
     });
@@ -232,6 +237,7 @@ router.post('/:id/promote', verifyUser, async (req: AuthenticatedRequest, res) =
           title: title.trim(),
           fullText,
           recordedAt: draft.startedAt,
+          orgId: draft.orgId,
         },
       });
       await tx.draft.delete({ where: { id } });

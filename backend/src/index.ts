@@ -11,6 +11,7 @@ import drafts from "./routes/drafts"
 import templates from "./routes/templates"
 import manager from "./routes/manager"
 import downloads from "./routes/downloads"
+import organizations from "./routes/organizations"
 import { ensureSystemSummaryTemplates } from "./lib/summary-template-seed";
 import { ensureSystemSettingsSeeded, applySettingsToEnv } from "./lib/system-settings";
 import { createSocketServer, startStaleSessionCleanup } from "./socket/socket";
@@ -55,6 +56,7 @@ app.use('/api/drafts', drafts);
 app.use('/api/templates', templates);
 app.use('/api/manager', manager);
 app.use('/api/downloads', downloads);
+app.use('/api/user-orgs', organizations);
 
 const PORT = 4000;
 

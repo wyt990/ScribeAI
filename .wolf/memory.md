@@ -1171,3 +1171,54 @@
 | 13:18 | Edited README.md | expanded (+28 lines) | ~645 |
 | 13:18 | Edited README.md | expanded (+58 lines) | ~551 |
 | 13:18 | Session end: 3 writes across 1 files (README.md) | 9 reads | ~15188 tok |
+| 14:21 | Session end: 3 writes across 1 files (README.md) | 21 reads | ~31840 tok |
+
+## Session: 2026-06-10 14:26
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 14:40 | Edited backend/prisma/schema.prisma | expanded (+26 lines) | ~345 |
+| 14:40 | Edited backend/prisma/schema.prisma | 18→19 lines | ~163 |
+| 14:40 | Edited backend/prisma/schema.prisma | 12→13 lines | ~108 |
+| 14:41 | Edited backend/prisma/schema.prisma | 5→4 lines | ~19 |
+| 14:42 | Edited backend/prisma/schema.prisma | 4→5 lines | ~37 |
+| 14:43 | Created backend/prisma/migrations/20260611000000_add_user_organizations/migration.sql | — | ~374 |
+| 14:43 | Created backend/prisma/migrations/20260611000000_add_user_organizations/migration.sql | — | ~20 |
+| 14:44 | Created backend/src/routes/organizations.ts | — | ~2042 |
+| 14:45 | Edited backend/src/index.ts | added 1 import(s) | ~27 |
+| 14:45 | Edited backend/src/index.ts | 1→2 lines | ~23 |
+| 14:45 | Edited backend/src/routes/drafts.ts | 16→17 lines | ~111 |
+| 14:45 | Edited backend/src/routes/drafts.ts | modified if() | ~234 |
+| 14:45 | Edited backend/src/routes/drafts.ts | 7→8 lines | ~68 |
+| 14:45 | Edited backend/src/routes/drafts.ts | 11→12 lines | ~143 |
+| 14:45 | Edited backend/src/routes/drafts.ts | 12→13 lines | ~106 |
+| 14:46 | Edited backend/src/routes/sessions.ts | modified if() | ~263 |
+| 14:46 | Edited backend/src/routes/sessions.ts | added nullish coalescing | ~297 |
+| 14:47 | Edited backend/src/lib/summary-prompt-builder.ts | expanded (+7 lines) | ~104 |
+| 14:47 | Edited backend/src/lib/summary-prompt-builder.ts | modified buildSummaryMetaFromTranscript() | ~121 |
+| 14:47 | Edited backend/src/lib/summary-prompt-builder.ts | modified buildMetaBlock() | ~404 |
+| 14:47 | Created frontend/lib/user-orgs.ts | — | ~674 |
+| 14:47 | Edited frontend/lib/store.ts | 25→27 lines | ~254 |
+| 14:47 | Edited frontend/lib/store.ts | 34→37 lines | ~330 |
+| 14:48 | Edited frontend/lib/draft-api.ts | 12→13 lines | ~76 |
+| 14:48 | Edited frontend/lib/draft-api.ts | modified createDraft() | ~75 |
+| 14:48 | Edited frontend/lib/draft-api.ts | modified updateDraft() | ~49 |
+| 14:48 | Edited frontend/hooks/use-draft-sync.ts | 2→2 lines | ~38 |
+| 14:48 | Edited frontend/hooks/use-draft-sync.ts | modified if() | ~204 |
+| 14:49 | Created frontend/app/(routes)/profile/page.tsx | — | ~5058 |
+| 14:49 | Created frontend/components/org-context-selector.tsx | — | ~598 |
+| 14:50 | Edited frontend/app/(routes)/dashboard/page.tsx | added 1 import(s) | ~74 |
+| 14:50 | Edited frontend/app/(routes)/dashboard/page.tsx | 2→3 lines | ~42 |
+| 14:51 | Session end: 32 writes across 13 files (schema.prisma, migration.sql, organizations.ts, index.ts, drafts.ts) | 20 reads | ~41405 tok |
+| 16:37 | Session end: 32 writes across 13 files (schema.prisma, migration.sql, organizations.ts, index.ts, drafts.ts) | 20 reads | ~41405 tok |
+| 16:44 | Session end: 32 writes across 13 files (schema.prisma, migration.sql, organizations.ts, index.ts, drafts.ts) | 21 reads | ~44610 tok |
+
+## Session: 2026-06-10 17:14
+
+| Time | Action | File(s) | Outcome | ~Tokens |
+|------|--------|---------|---------|--------|
+| 17:14 | Edited frontend/components/org-context-selector.tsx | 3→3 lines | ~37 |
+| 17:14 | Edited frontend/components/org-context-selector.tsx | CSS: null | ~35 |
+| 17:14 | Session end: 2 writes across 1 files (org-context-selector.tsx) | 1 reads | ~680 tok |
+| 17:20 | Edited frontend/components/recording-controls.tsx | 70→70 lines | ~658 |
+| 17:20 | Session end: 3 writes across 2 files (org-context-selector.tsx, recording-controls.tsx) | 2 reads | ~2870 tok |

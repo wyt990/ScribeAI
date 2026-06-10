@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 import { AudioModeSelector } from "@/components/audio-mode-selector";
 import { RecordingControls } from "@/components/recording-controls";
+import { OrgContextSelector } from "@/components/org-context-selector";
 import { useRecordingStore } from "@/lib/store";
 import { TranscriptFeed } from "@/components/transcript-feed";
 import { DraftRestoreBanner } from "@/components/draft-restore-banner";
@@ -232,6 +233,7 @@ function DashboardContent() {
         <div className="lg:col-span-1 flex flex-col gap-2 md:gap-6 shrink-0 min-h-0">
           <AudioModeSelector />
           <RecordingControls ensureDraft={ensureDraft} flushDraft={flushDraft} />
+          <OrgContextSelector />
         </div>
 
         <div className="min-h-0 h-full overflow-hidden flex flex-col lg:col-span-2">

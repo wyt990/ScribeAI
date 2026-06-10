@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-06-10T05:18:42.586Z
-> Files: 254 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-06-10T09:20:44.140Z
+> Files: 258 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../root/.claude/plans/
 
@@ -110,7 +110,7 @@
 
 ## backend/prisma/
 
-- `schema.prisma` (~1239 tok)
+- `schema.prisma` (~1450 tok)
 
 ## backend/prisma/migrations/
 
@@ -156,6 +156,10 @@
 
 - `migration.sql` — Manager 系统设置：User.isActive、SystemSetting、AuditLog (~296 tok)
 
+## backend/prisma/migrations/20260611000000_add_user_organizations/
+
+- `migration.sql` — 组织和用户多组织支持 (~20 tok)
+
 ## backend/scripts/
 
 - `migrate-manager-settings.sh` (~226 tok)
@@ -174,7 +178,7 @@
 
 ## backend/src/
 
-- `index.ts` — Declares app (~710 tok)
+- `index.ts` — Declares app (~737 tok)
 
 ## backend/src/lib/
 
@@ -186,7 +190,7 @@
 - `summary-export-pdf.ts` — Exports markdownToPdfBuffer (~1040 tok)
 - `summary-guardrails.ts` — 每次生成纪要时追加的系统级护栏（用户模板不可覆盖） (~74 tok)
 - `summary-llm.ts` — Exports SummaryProvider, validateSummaryConfig, getResolvedChatCompletionsUrl, generateSummary, getS (~884 tok)
-- `summary-prompt-builder.ts` — 录音开始时间（草稿 startedAt → Transcript.recordedAt） (~1118 tok)
+- `summary-prompt-builder.ts` — 录音开始时间（草稿 startedAt → Transcript.recordedAt） (~1303 tok)
 - `summary-share-token.ts` — Exports SummarySharePayload, createSummaryShareToken, verifySummaryShareToken (~296 tok)
 - `summary-template-constants.ts` — 系统内置模板固定 ID（与 migration seed 一致） (~243 tok)
 - `summary-template-seed.ts` — 确保系统内置 Skill/Template 存在（迁移未跑或内容需同步时） (~783 tok)
@@ -213,8 +217,9 @@
 
 - `authroutes.ts` — routes/auth.js (~1393 tok)
 - `downloads.ts` — API routes: GET (2 endpoints) (~346 tok)
-- `drafts.ts` — 列表：用户所有未转正的草稿 (~2165 tok)
-- `sessions.ts` — API routes: GET, POST (6 endpoints) (~3961 tok)
+- `drafts.ts` — 列表：用户所有未转正的草稿 (~2224 tok)
+- `organizations.ts` — 列出当前用户绑定的组织及职务/职责信息 (~2042 tok)
+- `sessions.ts` — API routes: GET, POST (6 endpoints) (~4239 tok)
 - `templates.ts` — 列出可用模板（系统 + 我的 + 已审核公共） (~3250 tok)
 - `transcript.ts` — API routes: POST (1 endpoints) (~260 tok)
 
@@ -270,7 +275,7 @@
 
 ## frontend/app/(routes)/dashboard/
 
-- `page.tsx` — DashboardContent (~2206 tok)
+- `page.tsx` — DashboardContent (~2242 tok)
 
 ## frontend/app/(routes)/drafts/
 
@@ -331,7 +336,7 @@
 
 ## frontend/app/(routes)/profile/
 
-- `page.tsx` — ProfilePage (~2042 tok)
+- `page.tsx` — ProfilePage (~5058 tok)
 
 ## frontend/app/(routes)/sessions/
 
@@ -375,8 +380,9 @@
 - `manager-sidebar-link.tsx` — 侧栏/抽屉底部：系统设置入口（仅 manager） (~234 tok)
 - `mobile-promote-bar.tsx` — 移动端底栏：作为 shell 的 flex 子项，避免 WebView 裁切 fixed/portal (~278 tok)
 - `navbar.tsx` — Navbar (~1605 tok)
+- `org-context-selector.tsx` — OrgContextSelector (~608 tok)
 - `promote-draft-button.tsx` — PromoteDraftButton — renders modal (~693 tok)
-- `recording-controls.tsx` — VAD 状态指示器：显示一个小圆点 + 文字 (~1532 tok)
+- `recording-controls.tsx` — VAD 状态指示器：显示一个小圆点 + 文字 (~1546 tok)
 - `sidebar.tsx` — Sidebar (~442 tok)
 - `summary-markdown.tsx` — SummaryMarkdown (~189 tok)
 - `summary-template-select.tsx` — 标记已有纪要的模板 ID (~639 tok)
@@ -444,7 +450,7 @@
 
 - `use-audio-recorder.ts` — 跨页面导航缓存服务端下发的 VAD 配置（socket 已连接时不会重发 vad-config） (~6542 tok)
 - `use-can-promote.ts` — Exports useCanPromote (~155 tok)
-- `use-draft-sync.ts` — 草稿自动保存：转录追加防抖写入，状态变更立即写入，离开页面时刷盘 (~1194 tok)
+- `use-draft-sync.ts` — 草稿自动保存：转录追加防抖写入，状态变更立即写入，离开页面时刷盘 (~1216 tok)
 - `use-is-logged-in.ts` — 客户端检测是否已登录（localStorage 中有 token） (~83 tok)
 - `use-is-manager.ts` — Exports useIsManager (~228 tok)
 - `use-mobile.ts` — Exports useIsMobile (~162 tok)
@@ -459,7 +465,7 @@
 - `auth-session.ts` — 清除网页端登录态 (~128 tok)
 - `copy-to-clipboard.ts` — 复制文本；移动端在异步操作后 clipboard API 常因失去用户手势而失败，提供 textarea 回退 (~243 tok)
 - `dashboard-nav.ts` — Exports DashboardNavItem, DASHBOARD_NAV_ITEMS (~151 tok)
-- `draft-api.ts` — Exports DraftStatus, Draft, fetchDrafts, fetchActiveDraft + 7 more (~861 tok)
+- `draft-api.ts` — Exports DraftStatus, Draft, fetchDrafts, fetchActiveDraft + 8 more (~1006 tok)
 - `manager-api.ts` — Exports ManagerUser, ManagerSettingItem, managerApi (~905 tok)
 - `navigation.ts` — Android WebView 壳应用（MainActivity 自定义 UA） (~358 tok)
 - `pcm-capture.ts` — Target frame size in samples (at 16kHz) (~1350 tok)
@@ -468,10 +474,11 @@
 - `session-storage.ts` — Exports Session, useSessionStore (~223 tok)
 - `session-summary.ts` — legacy 兼容 (~785 tok)
 - `socket.ts` — Flush buffered segment results in seq order; returns texts ready to display (~1371 tok)
-- `store.ts` — Exports RecordingStatus, AudioMode, useRecordingStore (~653 tok)
+- `store.ts` — Exports RecordingStatus, AudioMode, useRecordingStore (~704 tok)
 - `summary-export.ts` — API routes: GET (1 endpoints) (~405 tok)
 - `summary-templates.ts` — Exports SummaryTemplateItem, SummaryTemplateDetail, TemplateDraft, fetchSummaryTemplates + 11 more (~1474 tok)
 - `summary-types.ts` — Exports SUMMARY_TYPES, SummaryType, DEFAULT_SUMMARY_TYPE, SUMMARY_TYPE_LABELS, isSummaryType (~128 tok)
 - `types.ts` — Exports Session, TranscriptLine (~84 tok)
+- `user-orgs.ts` — 获取用户所有绑定的组织 (~674 tok)
 - `utils.ts` — Exports cn (~48 tok)
 - `vad.ts` — RMS energy threshold (0~1). Below this = silence. (~1815 tok)

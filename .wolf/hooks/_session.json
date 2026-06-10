@@ -1,79 +1,45 @@
 {
-  "session_id": "session-2026-06-10-1317",
-  "started": "2026-06-10T05:17:47.345Z",
+  "session_id": "session-2026-06-10-1714",
+  "started": "2026-06-10T09:14:15.761Z",
   "files_read": {
-    "/apps/ScribeAI/frontend/app/(routes)/settings/summary-templates/page.tsx": {
+    "/apps/ScribeAI/frontend/components/org-context-selector.tsx": {
       "count": 1,
-      "tokens": 1664,
-      "first_read": "2026-06-10T05:17:59.841Z"
+      "tokens": 608,
+      "first_read": "2026-06-10T09:14:30.158Z"
     },
-    "/apps/ScribeAI/frontend/app/(routes)/settings/summary-templates/new/page.tsx": {
-      "count": 1,
-      "tokens": 1298,
-      "first_read": "2026-06-10T05:17:59.857Z"
-    },
-    "/apps/ScribeAI/frontend/app/(routes)/settings/summary-templates/[id]/page.tsx": {
-      "count": 1,
-      "tokens": 2488,
-      "first_read": "2026-06-10T05:18:00.005Z"
-    },
-    "/apps/ScribeAI/backend/src/lib/summary-template-constants.ts": {
-      "count": 1,
-      "tokens": 243,
-      "first_read": "2026-06-10T05:18:03.821Z"
-    },
-    "/apps/ScribeAI/frontend/components/dashboard-draft-actions.tsx": {
-      "count": 1,
-      "tokens": 412,
-      "first_read": "2026-06-10T05:18:03.840Z"
-    },
-    "/apps/ScribeAI/backend/src/routes/templates.ts": {
-      "count": 1,
-      "tokens": 3250,
-      "first_read": "2026-06-10T05:18:07.040Z"
-    },
-    "/apps/ScribeAI/backend/src/lib/summary-prompt-builder.ts": {
-      "count": 1,
-      "tokens": 1118,
-      "first_read": "2026-06-10T05:18:07.062Z"
-    },
-    "/apps/ScribeAI/backend/src/lib/summary-template-seed.ts": {
-      "count": 1,
-      "tokens": 783,
-      "first_read": "2026-06-10T05:18:15.186Z"
-    },
-    "/apps/ScribeAI/README.md": {
-      "count": 3,
-      "tokens": 2600,
-      "first_read": "2026-06-10T05:18:47.462Z"
+    "/apps/ScribeAI/frontend/components/recording-controls.tsx": {
+      "count": 2,
+      "tokens": 1532,
+      "first_read": "2026-06-10T09:20:14.974Z"
     }
   },
   "files_written": [
     {
-      "file": "/apps/ScribeAI/README.md",
+      "file": "/apps/ScribeAI/frontend/components/org-context-selector.tsx",
       "action": "edit",
-      "tokens": 51,
-      "at": "2026-06-10T05:18:20.289Z"
+      "tokens": 37,
+      "at": "2026-06-10T09:14:22.423Z"
     },
     {
-      "file": "/apps/ScribeAI/README.md",
+      "file": "/apps/ScribeAI/frontend/components/org-context-selector.tsx",
       "action": "edit",
-      "tokens": 691,
-      "at": "2026-06-10T05:18:31.026Z"
+      "tokens": 35,
+      "at": "2026-06-10T09:14:26.589Z"
     },
     {
-      "file": "/apps/ScribeAI/README.md",
+      "file": "/apps/ScribeAI/frontend/components/recording-controls.tsx",
       "action": "edit",
-      "tokens": 590,
-      "at": "2026-06-10T05:18:42.602Z"
+      "tokens": 658,
+      "at": "2026-06-10T09:20:44.158Z"
     }
   ],
   "edit_counts": {
-    "README.md": 3
+    "frontend/components/org-context-selector.tsx": 2,
+    "frontend/components/recording-controls.tsx": 1
   },
-  "anatomy_hits": 8,
+  "anatomy_hits": 2,
   "anatomy_misses": 0,
-  "repeated_reads_warned": 2,
+  "repeated_reads_warned": 1,
   "cerebrum_warnings": 0,
-  "stop_count": 1
+  "stop_count": 2
 }

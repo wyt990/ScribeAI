@@ -137,6 +137,7 @@ router.get("/:id", verifyUser, async (req: AuthenticatedRequest, res) => {
         title: true,
         fullText: true,
         createdAt: true,
+        orgId: true,
         summaries: {
           select: {
             text: true,
@@ -163,6 +164,7 @@ router.get("/:id", verifyUser, async (req: AuthenticatedRequest, res) => {
       title: transcript.title,
       fullText: transcript.fullText,
       createdAt: transcript.createdAt,
+      orgId: transcript.orgId,
       summary: matched?.text ?? null,
       summaryType: matched
         ? matched.template.legacySummaryType ?? matched.summaryType
@@ -366,10 +368,42 @@ router.post("/:id/summary", verifyUser, async (req: AuthenticatedRequest, res) =
       return res.json(formatSummaryResponse(existing, template));
     }
 
+    // 确定组织上下文：请求体覆盖 → 转录自带
+    const effectiveOrgId = req.body?.orgId || transcript.orgId || null;
+
+    // 查询用户组织上下文
+    let userOrgContext: {
+      orgName?: string;
+      industry?: string;
+      jobTitle?: string;
+      responsibilities?: string;
+    } | undefined;
+
+    if (effectiveOrgId) {
+      const uo = await prisma.userOrganization.findUnique({
+        where: {
+          userId_organizationId: { userId, organizationId: effectiveOrgId },
+        },
+        include: {
+          organization: {
+            select: { name: true, industry: true },
+          },
+        },
+      });
+      if (uo) {
+        userOrgContext = {
+          orgName: uo.organization.name,
+          industry: uo.organization.industry ?? undefined,
+          jobTitle: uo.jobTitle ?? undefined,
+          responsibilities: uo.responsibilities ?? undefined,
+        };
+      }
+    }
+
     const prompt = buildPromptForTemplate(
       template,
       transcript.fullText,
-      buildSummaryMetaFromTranscript(transcript, user?.name)
+      buildSummaryMetaFromTranscript(transcript, user?.name, userOrgContext)
     );
 
     const generatedSummary = await generateSummary(prompt);

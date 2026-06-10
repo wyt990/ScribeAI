@@ -27,6 +27,32 @@ model User {
   summarySkills    SummarySkill[]
   summaryTemplates SummaryTemplate[]
   auditLogs        AuditLog[]
+  organizations    UserOrganization[]
+}
+
+model Organization {
+  id          String   @id @default(uuid())
+  name        String
+  industry    String?
+  description String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  memberships UserOrganization[]
+}
+
+model UserOrganization {
+  userId          String
+  organizationId  String
+  jobTitle        String?
+  responsibilities String?  @db.Text
+  isDefault       Boolean  @default(false)
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@id([userId, organizationId])
+  @@index([userId])
 }
 
 model SystemSetting {
@@ -65,6 +91,7 @@ model Draft {
   recordingId String?
   startedAt   DateTime @default(now())
   lastSavedAt DateTime @default(now())
+  orgId      String? // 录音时选用的组织上下文
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -80,6 +107,7 @@ model Transcript {
   title     String
   fullText  String? // store entire transcript here
   recordedAt DateTime? // 会议录音开始时间（从草稿 startedAt 同步）
+  orgId     String? // 从草稿带入的组织上下文
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

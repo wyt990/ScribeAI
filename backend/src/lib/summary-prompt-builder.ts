@@ -7,6 +7,13 @@ export type SummaryPromptMeta = {
   /** 会议结束/转正保存时间（Transcript.createdAt） */
   endedAt?: Date;
   recorderName?: string;
+  /** 记录人组织上下文（用于标记与用户相关的内容） */
+  userOrg?: {
+    orgName?: string;
+    industry?: string;
+    jobTitle?: string;
+    responsibilities?: string;
+  };
 };
 
 /** 从正式会话记录组装纪要元数据 */
@@ -16,13 +23,15 @@ export function buildSummaryMetaFromTranscript(
     recordedAt: Date | null;
     createdAt: Date;
   },
-  recorderName?: string
+  recorderName?: string,
+  userOrg?: SummaryPromptMeta['userOrg']
 ): SummaryPromptMeta {
   return {
     title: transcript.title,
     startedAt: transcript.recordedAt ?? transcript.createdAt,
     endedAt: transcript.createdAt,
     recorderName,
+    userOrg,
   };
 }
 
@@ -101,12 +110,28 @@ function buildMetaBlock(meta: SummaryPromptMeta): string {
     ? '- 时间字段填写说明: 起止时间均已提供，请写「YYYY 年 M 月 D 日 上午/下午 H:MM–H:MM」格式。'
     : '- 时间字段填写说明: 仅知开始时间时只写开始时刻；完全未知写 TBD。禁止输出「10:52-TBD」这类把 TBD 接在时间点后的格式。';
 
+  const org = meta.userOrg;
+  const orgBlock = org?.orgName
+    ? `
+
+## 记录人本次身份信息（重要：用于标记与我相关的内容）
+- 记录人本次参会身份: ${org.jobTitle || '（未填写）'}
+- 所在单位: ${org.orgName}${org.industry ? `（${org.industry}）` : ''}
+- 工作职责: ${org.responsibilities || '（未填写）'}
+
+### 标记规则
+在输出中请执行以下标记：
+1. 「📌 **与我相关**」— 内容直接涉及记录人职责范围（任务分配、决策中涉及记录人分管领域、记录人负责的议题片段等）
+2. 「🔍 **关注领域**」— 内容与记录人所在单位/行业相关，但不直接涉及记录人本人
+3. 在 ### 与我相关的内容 章节集中展示标记项，同时在正文对应条款旁标注标记`
+    : '';
+
   return `## 已知元数据（可填入纪要头部，不足处仍标 TBD）
 
 - 建议标题: ${meta.title}
 - 会议开始时间: ${startStr}（录音开始时间）
 ${endTimeLine}${rangeLine}${timeHint}
-${recorderLine ? `${recorderLine}\n` : ''}`;
+${recorderLine ? `${recorderLine}\n` : ''}${orgBlock}`;
 }
 
 /** 从 Skill 配置组装完整 LLM prompt */

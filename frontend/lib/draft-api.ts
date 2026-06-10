@@ -7,6 +7,7 @@ export type Draft = {
   status: DraftStatus;
   audioMode: string;
   recordingId: string | null;
+  orgId: string | null;
   startedAt: string;
   lastSavedAt: string;
   createdAt: string;
@@ -44,6 +45,7 @@ export async function fetchDraft(id: string): Promise<Draft | null> {
 export async function createDraft(data: {
   audioMode: string;
   recordingId?: string;
+  orgId?: string | null;
 }): Promise<Draft> {
   const res = await fetch('/api/drafts', {
     method: 'POST',
@@ -60,7 +62,7 @@ export async function createDraft(data: {
 
 export async function updateDraft(
   id: string,
-  data: Partial<Pick<Draft, 'fullText' | 'status' | 'audioMode' | 'recordingId' | 'title'>>
+  data: Partial<Pick<Draft, 'fullText' | 'status' | 'audioMode' | 'recordingId' | 'title' | 'orgId'>>
 ): Promise<Draft> {
   const res = await fetch(`/api/drafts/${id}`, {
     method: 'PATCH',

@@ -14,6 +14,7 @@ interface RecordingState {
   recordingId: string | null;
   draftId: string | null;
   draftTitle: string | null;
+  activeOrgId: string | null;
 
   setStatus: (status: RecordingStatus) => void;
   setAudioMode: (mode: AudioMode) => void;
@@ -25,6 +26,7 @@ interface RecordingState {
   setRecordingId: (id: string | null) => void;
   setDraftId: (id: string | null) => void;
   setDraftTitle: (title: string | null) => void;
+  setActiveOrgId: (id: string | null) => void;
   clearDraft: () => void;
   reset: () => void;
   setTranscript: (text: string | string[]) => void;
@@ -40,6 +42,7 @@ export const useRecordingStore = create<RecordingState>((set) => ({
   recordingId: null,
   draftId: null,
   draftTitle: null,
+  activeOrgId: null,
 
   setStatus: (status) => set({ status }),
   setAudioMode: (mode) => set({ audioMode: mode }),
@@ -53,6 +56,7 @@ export const useRecordingStore = create<RecordingState>((set) => ({
   setRecordingId: (id) => set({ recordingId: id }),
   setDraftId: (id) => set({ draftId: id }),
   setDraftTitle: (title) => set({ draftTitle: title }),
+  setActiveOrgId: (id) => set({ activeOrgId: id }),
   clearDraft: () => set({ draftId: null, draftTitle: null }),
   reset: () => set({
     status: 'idle',
@@ -63,6 +67,7 @@ export const useRecordingStore = create<RecordingState>((set) => ({
     recordingId: null,
     draftId: null,
     draftTitle: null,
+    activeOrgId: null,
   }),
 
   // ✅ Implement setTranscript

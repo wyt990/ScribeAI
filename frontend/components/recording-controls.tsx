@@ -91,7 +91,10 @@ export function RecordingControls({ ensureDraft, flushDraft }: RecordingControls
   return (
     <Card>
       <CardHeader>
-        <CardTitle>录音控制</CardTitle>
+        <div className="flex items-center justify-between gap-2">
+          <CardTitle className="shrink-0">录音控制</CardTitle>
+          <VADBadge status={vadStatus} error={vadError} />
+        </div>
       </CardHeader>
       <CardContent>
         <div className="flex items-center gap-3 flex-wrap">
@@ -155,10 +158,7 @@ export function RecordingControls({ ensureDraft, flushDraft }: RecordingControls
           )}
         </div>
 
-        <div className="mt-2 w-full">
-          <VADBadge status={vadStatus} error={vadError} />
-          {isRecording && <VolumeMeter level={audioLevel} />}
-        </div>
+        {isRecording && <VolumeMeter level={audioLevel} />}
       </CardContent>
     </Card>
   );

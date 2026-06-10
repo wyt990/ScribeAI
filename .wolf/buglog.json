@@ -993,6 +993,70 @@
       "related_bugs": [],
       "occurrences": 2,
       "last_seen": "2026-06-10T05:18:42.604Z"
+    },
+    {
+      "id": "bug-063",
+      "timestamp": "2026-06-10T06:41:44.103Z",
+      "error_message": "Significant refactor of ",
+      "file": "backend/prisma/schema.prisma",
+      "root_cause": "3 lines replaced/restructured",
+      "fix": "Rewrote 5→4 lines (3 removed) | Also: provider = \"mysql\"; url      = env(\"DATABASE_URL\")",
+      "tags": [
+        "auto-detected",
+        "refactor",
+        "prisma"
+      ],
+      "related_bugs": [],
+      "occurrences": 2,
+      "last_seen": "2026-06-10T06:42:26.253Z"
+    },
+    {
+      "id": "bug-064",
+      "timestamp": "2026-06-10T06:46:43.865Z",
+      "error_message": "Null/undefined access in ",
+      "file": "backend/src/routes/sessions.ts",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "ts"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-10T06:46:43.865Z"
+    },
+    {
+      "id": "bug-065",
+      "timestamp": "2026-06-10T09:14:22.426Z",
+      "error_message": "Incorrect value in code",
+      "file": "frontend/components/org-context-selector.tsx",
+      "root_cause": "Had \">\n            <span className=\"",
+      "fix": "Changed to \"__none__\"",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-10T09:14:22.426Z"
+    },
+    {
+      "id": "bug-066",
+      "timestamp": "2026-06-10T09:14:26.592Z",
+      "error_message": "Type error",
+      "file": "frontend/components/org-context-selector.tsx",
+      "root_cause": "Missing or incorrect type annotation",
+      "fix": "Added type assertion/annotation",
+      "tags": [
+        "auto-detected",
+        "type-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-10T09:14:26.592Z"
     }
   ]
 }

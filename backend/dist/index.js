@@ -15,6 +15,7 @@ const drafts_1 = __importDefault(require("./routes/drafts"));
 const templates_1 = __importDefault(require("./routes/templates"));
 const manager_1 = __importDefault(require("./routes/manager"));
 const downloads_1 = __importDefault(require("./routes/downloads"));
+const organizations_1 = __importDefault(require("./routes/organizations"));
 const summary_template_seed_1 = require("./lib/summary-template-seed");
 const system_settings_1 = require("./lib/system-settings");
 const socket_1 = require("./socket/socket");
@@ -49,6 +50,7 @@ app.use('/api/drafts', drafts_1.default);
 app.use('/api/templates', templates_1.default);
 app.use('/api/manager', manager_1.default);
 app.use('/api/downloads', downloads_1.default);
+app.use('/api/user-orgs', organizations_1.default);
 const PORT = 4000;
 void (async () => {
     try {
