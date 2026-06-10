@@ -9,6 +9,7 @@ import { generateSummary, getSummaryProviderLabel } from '../lib/summary-llm';
 import { createSummaryShareToken } from '../lib/summary-share-token';
 import { markdownToDocxBuffer } from '../lib/summary-export-docx';
 import { markdownToPdfBuffer } from '../lib/summary-export-pdf';
+import { buildSummaryMetaFromTranscript } from '../lib/summary-prompt-builder';
 import {
   buildPromptForTemplate,
   formatSummaryResponse,
@@ -365,11 +366,11 @@ router.post("/:id/summary", verifyUser, async (req: AuthenticatedRequest, res) =
       return res.json(formatSummaryResponse(existing, template));
     }
 
-    const prompt = buildPromptForTemplate(template, transcript.fullText, {
-      title: transcript.title,
-      createdAt: transcript.recordedAt ?? transcript.createdAt,
-      recorderName: user?.name,
-    });
+    const prompt = buildPromptForTemplate(
+      template,
+      transcript.fullText,
+      buildSummaryMetaFromTranscript(transcript, user?.name)
+    );
 
     const generatedSummary = await generateSummary(prompt);
 

@@ -29,7 +29,8 @@ async function main() {
   });
   const prompt = buildPromptForTemplate(template, SAMPLE_TRANSCRIPT, {
     title: "产品路线图同步会",
-    createdAt: new Date("2026-06-09T10:00:00Z"),
+    startedAt: new Date("2026-06-09T02:00:00Z"),
+    endedAt: new Date("2026-06-09T03:30:00Z"),
     recorderName: "测试记录人",
   });
 

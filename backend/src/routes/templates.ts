@@ -277,9 +277,12 @@ router.post('/:id/preview', verifyUser, async (req: AuthenticatedRequest, res) =
     const template = await getTemplateForUser(req.params.id, req.user!.id);
     if (!template) return res.status(404).json({ error: 'Template not found' });
 
+    const previewEnd = new Date();
+    const previewStart = new Date(previewEnd.getTime() - 45 * 60_000);
     const prompt = buildPromptForTemplate(template, sampleText, {
       title: '模板预览示例会议',
-      createdAt: new Date(),
+      startedAt: previewStart,
+      endedAt: previewEnd,
       recorderName: '预览用户',
     });
 

@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-06-10T02:47:14.636Z
-> Files: 253 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-06-10T03:16:17.533Z
+> Files: 254 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../root/.claude/plans/
 
@@ -160,7 +160,7 @@
 
 - `migrate-manager-settings.sh` (~226 tok)
 - `migrate-summary-templates.sh` — 宝塔/MySQL 默认 socket 在 /tmp/mysql.sock，直接 mysql 命令会连错路径，请用 -h 127.0.0.1 (~428 tok)
-- `test-summary-prompt.ts` — 本地测试：模板 prompt 构建 +（可选）真实 LLM 调用 (~458 tok)
+- `test-summary-prompt.ts` — 本地测试：模板 prompt 构建 +（可选）真实 LLM 调用 (~472 tok)
 
 ## backend/skills/
 
@@ -186,9 +186,10 @@
 - `summary-export-pdf.ts` — Exports markdownToPdfBuffer (~1040 tok)
 - `summary-guardrails.ts` — 每次生成纪要时追加的系统级护栏（用户模板不可覆盖） (~74 tok)
 - `summary-llm.ts` — Exports SummaryProvider, validateSummaryConfig, getResolvedChatCompletionsUrl, generateSummary, getS (~884 tok)
-- `summary-prompt-builder.ts` — 从 Skill 配置组装完整 LLM prompt (~444 tok)
+- `summary-prompt-builder.ts` — 录音开始时间（草稿 startedAt → Transcript.recordedAt） (~1118 tok)
 - `summary-share-token.ts` — Exports SummarySharePayload, createSummaryShareToken, verifySummaryShareToken (~296 tok)
 - `summary-template-constants.ts` — 系统内置模板固定 ID（与 migration seed 一致） (~243 tok)
+- `summary-template-seed.ts` — 确保系统内置 Skill/Template 存在（迁移未跑或内容需同步时） (~783 tok)
 - `summary-template-service.ts` — 解析生成纪要所用模板：templateId 优先，其次 legacy summaryType，最后用户默认或系统默认 (~2799 tok)
 - `system-settings.ts` — 启动时从 DB 覆盖 process.env（在 ensure 之后调用） (~1997 tok)
 
@@ -204,7 +205,7 @@
 - `build-summary-prompt.ts` — Exports buildSummaryPrompt (~234 tok)
 - `suggest-session-title.ts` — 根据转录正文生成简短会议标题 (~107 tok)
 - `summary-brief.ts` — 保留的简要纪要模式（旧版单行 prompt 等价） (~144 tok)
-- `summary-meeting-notes.ts` — Prompt rules derived from backend/skills/transcript-to-meeting-notes/ (~531 tok)
+- `summary-meeting-notes.ts` — Prompt rules derived from backend/skills/transcript-to-meeting-notes/ (~613 tok)
 - `template-generate-draft.ts` — AI 辅助生成纪要模板草稿 (~188 tok)
 - `types.ts` — Exports SUMMARY_TYPES, SummaryType, DEFAULT_SUMMARY_TYPE, parseSummaryType, SUMMARY_TYPE_LABELS (~152 tok)
 
@@ -213,8 +214,8 @@
 - `authroutes.ts` — routes/auth.js (~1393 tok)
 - `downloads.ts` — API routes: GET (2 endpoints) (~346 tok)
 - `drafts.ts` — 列表：用户所有未转正的草稿 (~2165 tok)
-- `sessions.ts` — API routes: GET, POST (6 endpoints) (~3954 tok)
-- `templates.ts` — 列出可用模板（系统 + 我的 + 已审核公共） (~3211 tok)
+- `sessions.ts` — API routes: GET, POST (6 endpoints) (~3961 tok)
+- `templates.ts` — 列出可用模板（系统 + 我的 + 已审核公共） (~3250 tok)
 - `transcript.ts` — API routes: POST (1 endpoints) (~260 tok)
 
 ## backend/src/routes/manager/

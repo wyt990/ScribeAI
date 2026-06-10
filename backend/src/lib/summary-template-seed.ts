@@ -55,6 +55,9 @@ export async function ensureSystemSummaryTemplates(): Promise<void> {
     update: {
       slug: 'transcript-to-meeting-notes',
       name: '行政会议纪要',
+      rulesMd: MEETING_NOTES_SYSTEM_RULES,
+      stepsMd: MEETING_STEPS,
+      outputMd: MEETING_NOTES_OUTPUT_TEMPLATE,
       updatedAt: now,
     },
   });
