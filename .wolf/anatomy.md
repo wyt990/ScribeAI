@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-06-10T23:58:58.265Z
-> Files: 265 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-06-11T00:17:21.550Z
+> Files: 268 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../root/.claude/plans/
 
@@ -36,6 +36,7 @@
 - `c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-58e2039a-2ccd-405c-9271-750d0c503e75.png` (~30257 tok)
 - `c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-76e820c6-7462-46fd-b194-183bc411cfdd.png` (~11832 tok)
 - `c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-cda7c170-809f-441e-90e8-1e79fdbf5ad4.png` (~37594 tok)
+- `c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-f2c88af0-8692-427f-8cf3-edd43eba31d9.png` (~2847 tok)
 
 ## ./
 
@@ -395,7 +396,7 @@
 - `summary-template-select.tsx` — 标记已有纪要的模板 ID (~639 tok)
 - `template-select-modal.tsx` — TemplateSelectModal — renders modal (~731 tok)
 - `theme-provider.tsx` — ThemeProvider (~87 tok)
-- `transcript-feed.tsx` — TranscriptFeed (~860 tok)
+- `transcript-feed.tsx` — TranscriptFeed (~931 tok)
 
 ## frontend/components/ui/
 
@@ -461,6 +462,7 @@
 - `use-is-logged-in.ts` — 客户端检测是否已登录（localStorage 中有 token） (~83 tok)
 - `use-is-manager.ts` — Exports useIsManager (~228 tok)
 - `use-mobile.ts` — Exports useIsMobile (~162 tok)
+- `use-recording-duration.ts` — 录音进行中累计时长（暂停期间不计入） (~334 tok)
 
 ## frontend/lib/
 
@@ -480,6 +482,7 @@
 - `navigation.ts` — Android WebView 壳应用（MainActivity 自定义 UA） (~358 tok)
 - `pcm-capture.ts` — Target frame size in samples (at 16kHz) (~1350 tok)
 - `promote-and-summarize.ts` — Exports PromoteAndSummarizeOptions, PromoteAndSummarizeResult, promoteDraftAndGenerateSummary (~382 tok)
+- `recording-duration.ts` — 格式化录音时长：23秒 / 1分23秒 / 1小时43分23秒 (~103 tok)
 - `resolve-summary-template.ts` — 最终确定的 templateId (~314 tok)
 - `session-storage.ts` — Exports Session, useSessionStore (~223 tok)
 - `session-summary.ts` — legacy 兼容 (~838 tok)

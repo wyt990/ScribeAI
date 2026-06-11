@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from "react";
 import { useRecordingStore } from "@/lib/store";
+import { useRecordingDuration } from "@/hooks/use-recording-duration";
+import { formatRecordingDuration } from "@/lib/recording-duration";
 import {
   Card,
   CardContent,
@@ -14,6 +16,7 @@ import { DashboardDraftActions } from "@/components/dashboard-draft-actions";
 
 export function TranscriptFeed() {
   const { transcript, status, draftId, draftTitle } = useRecordingStore();
+  const recordingSeconds = useRecordingDuration();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -38,9 +41,9 @@ export function TranscriptFeed() {
             </div>
 
             {status === "recording" && (
-              <Badge className="bg-success text-success-foreground flex items-center gap-2 shrink-0">
+              <Badge className="bg-success text-success-foreground flex items-center gap-2 shrink-0 tabular-nums">
                 <span className="w-2 h-2 rounded-full bg-success-foreground animate-pulse" />
-                录音中
+                录音中({formatRecordingDuration(recordingSeconds)})
               </Badge>
             )}
             {status === "paused" && <Badge className="shrink-0">已暂停</Badge>}
