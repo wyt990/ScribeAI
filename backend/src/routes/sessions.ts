@@ -19,6 +19,7 @@ import {
   type TemplateWithSkill,
 } from '../lib/summary-template-service';
 import { parseSummaryType, DEFAULT_SUMMARY_TYPE } from '../prompts/build-summary-prompt';
+import { writeOperationTrace } from '../lib/operation-trace';
 
 const router = express.Router();
 
@@ -367,6 +368,14 @@ router.post("/:id/summary", verifyUser, async (req: AuthenticatedRequest, res) =
     }
 
     if (existing && !regenerate) {
+      writeOperationTrace({
+        userId,
+        category: 'summary',
+        action: 'summary.cache_hit',
+        target: id,
+        durationMs: 0,
+        detail: { templateId: template.id },
+      });
       return res.json(formatSummaryResponse(existing, template));
     }
 
@@ -417,9 +426,24 @@ router.post("/:id/summary", verifyUser, async (req: AuthenticatedRequest, res) =
       buildSummaryMetaFromTranscript(transcript, user?.name, userOrgContext)
     );
 
+    const summaryStarted = Date.now();
     const generatedSummary = await generateSummary(prompt);
+    const summaryDurationMs = Date.now() - summaryStarted;
 
     if (!generatedSummary || generatedSummary.trim().length < 5) {
+      writeOperationTrace({
+        userId,
+        category: 'summary',
+        action: 'summary.generate',
+        status: 'error',
+        target: id,
+        durationMs: summaryDurationMs,
+        detail: {
+          templateId: template.id,
+          provider: getSummaryProviderLabel(),
+          reason: 'empty_response',
+        },
+      });
       return res.status(500).json({ error: "Summary generation failed" });
     }
 
@@ -456,9 +480,34 @@ router.post("/:id/summary", verifyUser, async (req: AuthenticatedRequest, res) =
       return summary;
     });
 
+    writeOperationTrace({
+      userId,
+      category: 'summary',
+      action: 'summary.generate',
+      target: id,
+      durationMs: summaryDurationMs,
+      detail: {
+        templateId: template.id,
+        provider: getSummaryProviderLabel(),
+        regenerate,
+        transcriptChars: transcript.fullText.length,
+      },
+    });
+
     return res.json(formatSummaryResponse(savedSummary, template));
   } catch (err) {
     console.error(`[SummaryLLM:${getSummaryProviderLabel()}]`, err);
+    writeOperationTrace({
+      userId,
+      category: 'summary',
+      action: 'summary.generate',
+      status: 'error',
+      target: id,
+      detail: {
+        provider: getSummaryProviderLabel(),
+        error: err instanceof Error ? err.message : String(err),
+      },
+    });
     return res.status(500).json({ error: "Failed to generate/fetch summary" });
   }
 });

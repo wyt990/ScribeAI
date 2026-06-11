@@ -4,6 +4,7 @@ import path from "path";
 import { createClient, LiveTranscriptionEvents } from "@deepgram/sdk";
 import { STORAGE_CONFIG } from "../lib/storage-config";
 import { authenticateSocketHandshake } from "../lib/socket-auth";
+import { writeOperationTrace } from "../lib/operation-trace";
 import { assertSocketUser } from "./socket-types";
 
 const STT_PROVIDER = process.env.STT_PROVIDER || "deepgram";
@@ -23,6 +24,12 @@ export const createSocketServer = (httpServer: any) => {
       socket.handshake.headers.authorization
     );
     if (!user) {
+      writeOperationTrace({
+        category: "socket",
+        action: "auth.denied",
+        status: "error",
+        detail: { socketId: socket.id },
+      });
       return next(new Error("Unauthorized"));
     }
     socket.data.userId = user.id;
@@ -59,6 +66,8 @@ function handleDeepgram(socket: Socket) {
   let isDeepgramOpen = false;
   let currentUserId: string | null = null;
   let currentRecordingId: string | null = null;
+  let recordingStartedAt: number | null = null;
+  let transcriptEmitCount = 0;
 
   deepgramLive.on(LiveTranscriptionEvents.Open, () => {
     // console.log("[Deepgram] Connection opened for", socket.id);
@@ -74,6 +83,17 @@ function handleDeepgram(socket: Socket) {
   deepgramLive.on(LiveTranscriptionEvents.Error, (err) => {
     console.error("[Deepgram] ERROR for", socket.id, err);
     isDeepgramOpen = false;
+    writeOperationTrace({
+      userId: currentUserId,
+      category: "recording",
+      action: "stt.error",
+      status: "error",
+      target: currentRecordingId ?? undefined,
+      detail: {
+        provider: "deepgram",
+        error: err instanceof Error ? err.message : String(err),
+      },
+    });
     socket.emit("deepgram-error", err);
   });
 
@@ -81,6 +101,7 @@ function handleDeepgram(socket: Socket) {
     try {
       const transcript = response.channel.alternatives[0]?.transcript;
       if (transcript && transcript.trim() !== "") {
+        transcriptEmitCount += 1;
         socket.emit("transcript", transcript);
       }
     } catch (err) {
@@ -119,8 +140,17 @@ function handleDeepgram(socket: Socket) {
     }
     currentRecordingId = recordingId;
     currentUserId = authUserId;
+    recordingStartedAt = Date.now();
+    transcriptEmitCount = 0;
     const sessionDir = path.join(STORAGE_CONFIG.uploadsDir, authUserId, recordingId);
     fs.mkdirSync(sessionDir, { recursive: true });
+    writeOperationTrace({
+      userId: authUserId,
+      category: "recording",
+      action: "recording.start",
+      target: recordingId,
+      detail: { provider: "deepgram" },
+    });
   });
 
   socket.on("reset-recording", () => {
@@ -130,9 +160,22 @@ function handleDeepgram(socket: Socket) {
   socket.on("stop-recording", () => {
     if (!assertSocketUser(socket, currentUserId ?? undefined)) return;
     if (currentUserId && currentRecordingId) {
+      writeOperationTrace({
+        userId: currentUserId,
+        category: "recording",
+        action: "recording.stop",
+        target: currentRecordingId,
+        durationMs: recordingStartedAt ? Date.now() - recordingStartedAt : undefined,
+        detail: {
+          provider: "deepgram",
+          transcriptEmitCount,
+        },
+      });
       removeSessionDir(currentUserId, currentRecordingId);
       currentUserId = null;
       currentRecordingId = null;
+      recordingStartedAt = null;
+      transcriptEmitCount = 0;
     }
   });
 
@@ -177,6 +220,8 @@ function handleOpenAIASR(socket: Socket) {
   let lastTranscriptLength = 0;          // non-VAD timer mode: length-based incremental dedup
   let currentUserId: string | null = null;
   let currentRecordingId: string | null = null;
+  let recordingStartedAt: number | null = null;
+  let vadSegmentCount = 0;
 
   const resetSessionBuffers = () => {
     accumulatedChunks = [];
@@ -197,6 +242,7 @@ function handleOpenAIASR(socket: Socket) {
   async function flushToASR(seq?: number) {
     if (accumulatedChunks.length === 0) return;
 
+    const started = Date.now();
     try {
       let audioBuffer: Buffer;
 
@@ -217,6 +263,15 @@ function handleOpenAIASR(socket: Socket) {
         lastFlushedChunkIndex = accumulatedChunks.length;
 
         if (seq !== undefined) {
+          vadSegmentCount += 1;
+          writeOperationTrace({
+            userId: currentUserId,
+            category: "recording",
+            action: "stt.segment",
+            target: currentRecordingId ?? undefined,
+            durationMs: Date.now() - started,
+            detail: { provider: "openai_asr", seq, mode: "buffer_flush", vad: true },
+          });
           socket.emit("segment-result", { seq, text: trimmed });
           // console.log(`[ASR] segment seq=${seq}: "${trimmed.slice(0, 60)}..."`);
         } else {
@@ -229,12 +284,33 @@ function handleOpenAIASR(socket: Socket) {
           const newText = trimmed.slice(lastTranscriptLength).trim();
           lastTranscriptLength = trimmed.length;
           if (newText) {
+            writeOperationTrace({
+              userId: currentUserId,
+              category: "recording",
+              action: "stt.segment",
+              target: currentRecordingId ?? undefined,
+              durationMs: Date.now() - started,
+              detail: { provider: "openai_asr", mode: "timer_slice", vad: false },
+            });
             socket.emit("transcript", newText);
           }
         }
       }
     } catch (err) {
       console.error(`[OpenAI ASR] Flush error for ${socket.id}:`, err);
+      writeOperationTrace({
+        userId: currentUserId,
+        category: "recording",
+        action: "stt.error",
+        status: "error",
+        target: currentRecordingId ?? undefined,
+        durationMs: Date.now() - started,
+        detail: {
+          provider: "openai_asr",
+          seq,
+          error: err instanceof Error ? err.message : String(err),
+        },
+      });
       if (seq !== undefined) {
         socket.emit("deepgram-error", `Segment ${seq} transcription failed`);
       }
@@ -262,8 +338,17 @@ function handleOpenAIASR(socket: Socket) {
 
     currentRecordingId = recordingId;
     currentUserId = authUserId;
+    recordingStartedAt = Date.now();
+    vadSegmentCount = 0;
     const sessionDir = path.join(STORAGE_CONFIG.uploadsDir, authUserId, recordingId);
     fs.mkdirSync(sessionDir, { recursive: true });
+    writeOperationTrace({
+      userId: authUserId,
+      category: "recording",
+      action: "recording.start",
+      target: recordingId,
+      detail: { provider: "openai_asr", vadEnabled: VAD_ENABLED },
+    });
   });
 
   // ---- Receive audio chunks ----
@@ -306,6 +391,7 @@ function handleOpenAIASR(socket: Socket) {
     }
 
     // console.log(`[VAD] segment-end seq=${seq}, wav=${audio.byteLength}B`);
+    const started = Date.now();
     try {
       const text = await transcribeAudio(
         Buffer.from(audio),
@@ -317,11 +403,38 @@ function handleOpenAIASR(socket: Socket) {
         "wav"
       );
       if (text?.trim()) {
+        vadSegmentCount += 1;
+        writeOperationTrace({
+          userId: currentUserId,
+          category: "recording",
+          action: "stt.segment",
+          target: currentRecordingId ?? undefined,
+          durationMs: Date.now() - started,
+          detail: {
+            provider: "openai_asr",
+            seq,
+            mode: "vad_segment",
+            audioBytes: audio.byteLength,
+          },
+        });
         socket.emit("segment-result", { seq, text: text.trim() });
         // console.log(`[ASR] segment seq=${seq}: "${text.trim().slice(0, 60)}..."`);
       }
     } catch (err) {
       console.error(`[OpenAI ASR] Segment ${seq} error for ${socket.id}:`, err);
+      writeOperationTrace({
+        userId: currentUserId,
+        category: "recording",
+        action: "stt.error",
+        status: "error",
+        target: currentRecordingId ?? undefined,
+        durationMs: Date.now() - started,
+        detail: {
+          provider: "openai_asr",
+          seq,
+          error: err instanceof Error ? err.message : String(err),
+        },
+      });
       socket.emit("deepgram-error", `Segment ${seq} transcription failed`);
     }
   });
@@ -349,9 +462,23 @@ function handleOpenAIASR(socket: Socket) {
 
     // Clean up session directory
     if (currentUserId && currentRecordingId) {
+      writeOperationTrace({
+        userId: currentUserId,
+        category: "recording",
+        action: "recording.stop",
+        target: currentRecordingId,
+        durationMs: recordingStartedAt ? Date.now() - recordingStartedAt : undefined,
+        detail: {
+          provider: "openai_asr",
+          vadEnabled: VAD_ENABLED,
+          vadSegmentCount,
+        },
+      });
       removeSessionDir(currentUserId, currentRecordingId);
       currentUserId = null;
       currentRecordingId = null;
+      recordingStartedAt = null;
+      vadSegmentCount = 0;
     }
   });
 

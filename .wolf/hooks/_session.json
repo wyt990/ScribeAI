@@ -73,7 +73,7 @@
       "first_read": "2026-06-11T00:26:50.092Z"
     },
     "/apps/ScribeAI/backend/prisma/schema.prisma": {
-      "count": 1,
+      "count": 5,
       "tokens": 1461,
       "first_read": "2026-06-11T00:27:03.023Z"
     },
@@ -93,8 +93,8 @@
       "first_read": "2026-06-11T00:38:09.841Z"
     },
     "/apps/ScribeAI/backend/src/socket/socket.ts": {
-      "count": 5,
-      "tokens": 4669,
+      "count": 8,
+      "tokens": 4965,
       "first_read": "2026-06-11T00:46:08.000Z"
     },
     "/apps/ScribeAI/frontend/lib/types.ts": {
@@ -131,6 +131,101 @@
       "count": 1,
       "tokens": 0,
       "first_read": "2026-06-11T00:56:56.223Z"
+    },
+    "/apps/ScribeAI/backend/src/routes/manager/stats.ts": {
+      "count": 1,
+      "tokens": 478,
+      "first_read": "2026-06-11T01:02:55.331Z"
+    },
+    "/apps/ScribeAI/backend/src/lib/audit-log.ts": {
+      "count": 1,
+      "tokens": 141,
+      "first_read": "2026-06-11T01:02:55.351Z"
+    },
+    "/apps/ScribeAI/backend/src/lib/system-settings.ts": {
+      "count": 2,
+      "tokens": 1997,
+      "first_read": "2026-06-11T01:02:59.088Z"
+    },
+    "/apps/ScribeAI/backend/src/routes/manager/settings.ts": {
+      "count": 2,
+      "tokens": 593,
+      "first_read": "2026-06-11T01:02:59.101Z"
+    },
+    "/apps/ScribeAI/frontend/app/(routes)/manager/layout.tsx": {
+      "count": 1,
+      "tokens": 399,
+      "first_read": "2026-06-11T01:03:02.682Z"
+    },
+    "/apps/ScribeAI/frontend/app/(routes)/manager/audit/page.tsx": {
+      "count": 2,
+      "tokens": 410,
+      "first_read": "2026-06-11T01:03:02.712Z"
+    },
+    "/apps/ScribeAI/frontend/lib/manager-api.ts": {
+      "count": 3,
+      "tokens": 905,
+      "first_read": "2026-06-11T01:03:02.915Z"
+    },
+    "/apps/ScribeAI/frontend/components/manager-settings-form.tsx": {
+      "count": 2,
+      "tokens": 812,
+      "first_read": "2026-06-11T01:03:06.865Z"
+    },
+    "/apps/ScribeAI/frontend/app/(routes)/manager/page.tsx": {
+      "count": 1,
+      "tokens": 508,
+      "first_read": "2026-06-11T01:03:06.894Z"
+    },
+    "/apps/ScribeAI/frontend/components/manager-nav.tsx": {
+      "count": 3,
+      "tokens": 390,
+      "first_read": "2026-06-11T01:03:07.210Z"
+    },
+    "/apps/ScribeAI/backend/src/routes/sessions.ts": {
+      "count": 4,
+      "tokens": 4435,
+      "first_read": "2026-06-11T01:03:16.241Z"
+    },
+    "/apps/ScribeAI/backend/src/routes/manager/index.ts": {
+      "count": 2,
+      "tokens": 0,
+      "first_read": "2026-06-11T01:03:16.275Z"
+    },
+    "/apps/ScribeAI/backend/prisma/migrations/20260611140000_operation_trace/migration.sql": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-11T01:03:24.447Z"
+    },
+    "/apps/ScribeAI/backend/src/lib/operation-trace.ts": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-11T01:03:26.547Z"
+    },
+    "/apps/ScribeAI/backend/src/lib/operation-trace-cleanup.ts": {
+      "count": 2,
+      "tokens": 428,
+      "first_read": "2026-06-11T01:03:28.041Z"
+    },
+    "/apps/ScribeAI/backend/src/routes/manager/observability.ts": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-11T01:03:37.457Z"
+    },
+    "/apps/ScribeAI/backend/src/index.ts": {
+      "count": 1,
+      "tokens": 737,
+      "first_read": "2026-06-11T01:03:37.905Z"
+    },
+    "/apps/ScribeAI/frontend/app/(routes)/manager/settings/stt/page.tsx": {
+      "count": 1,
+      "tokens": 113,
+      "first_read": "2026-06-11T01:03:47.643Z"
+    },
+    "/apps/ScribeAI/frontend/app/(routes)/manager/settings/observability/page.tsx": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-11T01:04:18.105Z"
     }
   },
   "files_written": [
@@ -337,6 +432,210 @@
       "action": "create",
       "tokens": 2232,
       "at": "2026-06-11T00:57:24.195Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/prisma/schema.prisma",
+      "action": "create",
+      "tokens": 1576,
+      "at": "2026-06-11T01:03:23.661Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/prisma/schema.prisma",
+      "action": "create",
+      "tokens": 1714,
+      "at": "2026-06-11T01:03:25.446Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/prisma/migrations/20260611140000_operation_trace/migration.sql",
+      "action": "create",
+      "tokens": 244,
+      "at": "2026-06-11T01:03:25.956Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/lib/operation-trace.ts",
+      "action": "create",
+      "tokens": 672,
+      "at": "2026-06-11T01:03:28.093Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/lib/operation-trace-cleanup.ts",
+      "action": "create",
+      "tokens": 428,
+      "at": "2026-06-11T01:03:29.965Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/lib/system-settings.ts",
+      "action": "create",
+      "tokens": 2002,
+      "at": "2026-06-11T01:03:34.931Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/lib/system-settings.ts",
+      "action": "create",
+      "tokens": 2167,
+      "at": "2026-06-11T01:03:36.443Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/routes/manager/settings.ts",
+      "action": "create",
+      "tokens": 598,
+      "at": "2026-06-11T01:03:37.018Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/routes/manager/observability.ts",
+      "action": "create",
+      "tokens": 816,
+      "at": "2026-06-11T01:03:38.762Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/routes/manager/index.ts",
+      "action": "create",
+      "tokens": 185,
+      "at": "2026-06-11T01:03:39.032Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/index.ts",
+      "action": "create",
+      "tokens": 736,
+      "at": "2026-06-11T01:03:39.077Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/index.ts",
+      "action": "create",
+      "tokens": 744,
+      "at": "2026-06-11T01:03:40.349Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/socket/socket.ts",
+      "action": "create",
+      "tokens": 4983,
+      "at": "2026-06-11T01:03:54.864Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/socket/socket.ts",
+      "action": "create",
+      "tokens": 5029,
+      "at": "2026-06-11T01:03:55.724Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/socket/socket.ts",
+      "action": "create",
+      "tokens": 5052,
+      "at": "2026-06-11T01:03:56.684Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/socket/socket.ts",
+      "action": "create",
+      "tokens": 5140,
+      "at": "2026-06-11T01:03:57.653Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/socket/socket.ts",
+      "action": "create",
+      "tokens": 5150,
+      "at": "2026-06-11T01:03:58.687Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/socket/socket.ts",
+      "action": "create",
+      "tokens": 5340,
+      "at": "2026-06-11T01:03:59.763Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/socket/socket.ts",
+      "action": "create",
+      "tokens": 5362,
+      "at": "2026-06-11T01:04:00.755Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/socket/socket.ts",
+      "action": "create",
+      "tokens": 5371,
+      "at": "2026-06-11T01:04:01.919Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/routes/sessions.ts",
+      "action": "create",
+      "tokens": 4312,
+      "at": "2026-06-11T01:04:02.967Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/socket/socket.ts",
+      "action": "create",
+      "tokens": 5476,
+      "at": "2026-06-11T01:04:03.131Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/socket/socket.ts",
+      "action": "create",
+      "tokens": 5687,
+      "at": "2026-06-11T01:04:04.228Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/socket/socket.ts",
+      "action": "create",
+      "tokens": 5766,
+      "at": "2026-06-11T01:04:05.055Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/socket/socket.ts",
+      "action": "create",
+      "tokens": 5775,
+      "at": "2026-06-11T01:04:06.059Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/socket/socket.ts",
+      "action": "create",
+      "tokens": 6009,
+      "at": "2026-06-11T01:04:07.001Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/routes/sessions.ts",
+      "action": "create",
+      "tokens": 4371,
+      "at": "2026-06-11T01:04:08.289Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/socket/socket.ts",
+      "action": "create",
+      "tokens": 6135,
+      "at": "2026-06-11T01:04:08.298Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/routes/sessions.ts",
+      "action": "create",
+      "tokens": 4499,
+      "at": "2026-06-11T01:04:09.508Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/routes/sessions.ts",
+      "action": "create",
+      "tokens": 4678,
+      "at": "2026-06-11T01:04:10.516Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/app/(routes)/manager/settings/observability/page.tsx",
+      "action": "create",
+      "tokens": 2040,
+      "at": "2026-06-11T01:04:20.381Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/lib/manager-api.ts",
+      "action": "create",
+      "tokens": 1138,
+      "at": "2026-06-11T01:04:21.826Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/components/manager-nav.tsx",
+      "action": "create",
+      "tokens": 408,
+      "at": "2026-06-11T01:04:22.040Z"
+    },
+    {
+      "file": "/apps/ScribeAI/docs/可扩展的功能或技术.md",
+      "action": "create",
+      "tokens": 1192,
+      "at": "2026-06-11T01:04:26.147Z"
     }
   ],
   "edit_counts": {
@@ -351,18 +650,31 @@
     "frontend/config/audio.ts": 1,
     "frontend/lib/audio-settings.ts": 1,
     "frontend/lib/store.ts": 1,
-    "docs/可扩展的功能或技术.md": 1,
+    "docs/可扩展的功能或技术.md": 2,
     "backend/src/lib/socket-auth.ts": 1,
     "backend/src/socket/socket-types.ts": 1,
-    "backend/src/socket/socket.ts": 8,
+    "backend/src/socket/socket.ts": 22,
     "frontend/lib/socket.ts": 1,
     "frontend/lib/auth-session.ts": 1,
     "frontend/hooks/use-audio-recorder.ts": 4,
-    "frontend/app/(routes)/dashboard/page.tsx": 2
+    "frontend/app/(routes)/dashboard/page.tsx": 2,
+    "backend/prisma/schema.prisma": 2,
+    "backend/prisma/migrations/20260611140000_operation_trace/migration.sql": 1,
+    "backend/src/lib/operation-trace.ts": 1,
+    "backend/src/lib/operation-trace-cleanup.ts": 1,
+    "backend/src/lib/system-settings.ts": 2,
+    "backend/src/routes/manager/settings.ts": 1,
+    "backend/src/routes/manager/observability.ts": 1,
+    "backend/src/routes/manager/index.ts": 1,
+    "backend/src/index.ts": 2,
+    "backend/src/routes/sessions.ts": 4,
+    "frontend/app/(routes)/manager/settings/observability/page.tsx": 1,
+    "frontend/lib/manager-api.ts": 1,
+    "frontend/components/manager-nav.tsx": 1
   },
-  "anatomy_hits": 16,
-  "anatomy_misses": 8,
-  "repeated_reads_warned": 14,
+  "anatomy_hits": 27,
+  "anatomy_misses": 14,
+  "repeated_reads_warned": 34,
   "cerebrum_warnings": 0,
-  "stop_count": 10
+  "stop_count": 12
 }

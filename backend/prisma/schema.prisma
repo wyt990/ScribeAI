@@ -27,6 +27,7 @@ model User {
   summarySkills    SummarySkill[]
   summaryTemplates SummaryTemplate[]
   auditLogs        AuditLog[]
+  operationTraces  OperationTrace[]
   organizations    UserOrganization[]
 }
 
@@ -79,6 +80,25 @@ model AuditLog {
 
   @@index([userId])
   @@index([createdAt])
+}
+
+model OperationTrace {
+  id         String   @id @default(uuid())
+  userId     String?
+  category   String // recording | summary | socket | system
+  action     String
+  status     String   @default("ok") // ok | error
+  durationMs Int?
+  target     String?
+  detail     Json?
+  createdAt  DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([category])
+  @@index([status])
+  @@index([createdAt])
+  @@index([userId])
 }
 
 model Draft {

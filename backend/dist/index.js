@@ -20,6 +20,7 @@ const summary_template_seed_1 = require("./lib/summary-template-seed");
 const system_settings_1 = require("./lib/system-settings");
 const socket_1 = require("./socket/socket");
 const draft_cleanup_1 = require("./lib/draft-cleanup");
+const operation_trace_cleanup_1 = require("./lib/operation-trace-cleanup");
 const summary_llm_1 = require("./lib/summary-llm");
 try {
     (0, summary_llm_1.validateSummaryConfig)();
@@ -40,6 +41,7 @@ server.keepAliveTimeout = 65000;
 // Start stale session cleanup timer (safety net for orphaned uploads)
 (0, socket_1.startStaleSessionCleanup)();
 (0, draft_cleanup_1.startDraftCleanup)();
+(0, operation_trace_cleanup_1.startOperationTraceCleanup)();
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 // REST Routes

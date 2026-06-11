@@ -16,6 +16,7 @@ import { ensureSystemSummaryTemplates } from "./lib/summary-template-seed";
 import { ensureSystemSettingsSeeded, applySettingsToEnv } from "./lib/system-settings";
 import { createSocketServer, startStaleSessionCleanup } from "./socket/socket";
 import { startDraftCleanup } from "./lib/draft-cleanup";
+import { startOperationTraceCleanup } from "./lib/operation-trace-cleanup";
 import {
   validateSummaryConfig,
   getSummaryProviderLabel,
@@ -44,6 +45,7 @@ createSocketServer(server);
 // Start stale session cleanup timer (safety net for orphaned uploads)
 startStaleSessionCleanup();
 startDraftCleanup();
+startOperationTraceCleanup();
 
 app.use(cors());
 app.use(express.json());

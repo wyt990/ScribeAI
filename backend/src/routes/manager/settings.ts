@@ -12,7 +12,7 @@ import { generateSummary } from '../../lib/summary-llm';
 const router = Router();
 router.use(requireManager);
 
-const GROUPS: SettingGroup[] = ['stt', 'llm', 'storage', 'security', 'mobile'];
+const GROUPS: SettingGroup[] = ['stt', 'llm', 'storage', 'security', 'mobile', 'observability'];
 
 function parseGroup(raw: string): SettingGroup | null {
   return GROUPS.includes(raw as SettingGroup) ? (raw as SettingGroup) : null;

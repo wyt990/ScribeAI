@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-06-11T00:57:24.178Z
-> Files: 274 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-06-11T01:04:26.131Z
+> Files: 280 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../root/.claude/plans/
 
@@ -113,7 +113,7 @@
 
 ## backend/prisma/
 
-- `schema.prisma` (~1461 tok)
+- `schema.prisma` (~1599 tok)
 
 ## backend/prisma/migrations/
 
@@ -167,6 +167,10 @@
 
 - `migration.sql` — AlterTable (~20 tok)
 
+## backend/prisma/migrations/20260611140000_operation_trace/
+
+- `migration.sql` — CreateTable (~228 tok)
+
 ## backend/scripts/
 
 - `migrate-manager-settings.sh` (~226 tok)
@@ -185,12 +189,14 @@
 
 ## backend/src/
 
-- `index.ts` — Declares app (~737 tok)
+- `index.ts` — Declares app (~768 tok)
 
 ## backend/src/lib/
 
 - `audit-log.ts` — Exports writeAuditLog (~141 tok)
 - `openai-api-url.ts` — Join OpenAI-compatible API paths without duplicating slashes. (~239 tok)
+- `operation-trace-cleanup.ts` — Exports cleanupOperationTraces, startOperationTraceCleanup (~428 tok)
+- `operation-trace.ts` — 结构化写入运行 trace（异步，不阻塞主流程） (~672 tok)
 - `prisma.ts` — Declares prisma (~40 tok)
 - `socket-auth.ts` — 校验 Socket 握手 token，与 REST verifyUser 逻辑一致 (~326 tok)
 - `storage-config.ts` — Exports STORAGE_CONFIG (~91 tok)
@@ -203,7 +209,7 @@
 - `summary-template-constants.ts` — 系统内置模板固定 ID（与 migration seed 一致） (~243 tok)
 - `summary-template-seed.ts` — 确保系统内置 Skill/Template 存在（迁移未跑或内容需同步时） (~783 tok)
 - `summary-template-service.ts` — 解析生成纪要所用模板：templateId 优先，其次 legacy summaryType，最后用户默认或系统默认 (~2822 tok)
-- `system-settings.ts` — 启动时从 DB 覆盖 process.env（在 ensure 之后调用） (~1997 tok)
+- `system-settings.ts` — 启动时从 DB 覆盖 process.env（在 ensure 之后调用） (~2167 tok)
 
 ## backend/src/middleware/
 
@@ -227,7 +233,7 @@
 - `downloads.ts` — API routes: GET (2 endpoints) (~346 tok)
 - `drafts.ts` — 列表：用户所有未转正的草稿 (~2224 tok)
 - `organizations.ts` — 列出当前用户绑定的组织及职务/职责信息 (~2042 tok)
-- `sessions.ts` — API routes: GET, POST (6 endpoints) (~4435 tok)
+- `sessions.ts` — API routes: GET, POST (6 endpoints) (~4833 tok)
 - `templates.ts` — 列出可用模板（系统 + 我的 + 已审核公共） (~3250 tok)
 - `transcript.ts` — API routes: POST (1 endpoints) (~260 tok)
 
@@ -235,7 +241,9 @@
 
 - `audit.ts` — API routes: GET (1 endpoints) (~194 tok)
 - `content.ts` — API routes: GET, DELETE (4 endpoints) (~742 tok)
-- `settings.ts` — API routes: GET, PATCH, POST (3 endpoints) (~593 tok)
+- `index.ts` — Declares router (~185 tok)
+- `observability.ts` — API routes: GET (2 endpoints) (~816 tok)
+- `settings.ts` — API routes: GET, PATCH, POST (3 endpoints) (~598 tok)
 - `stats.ts` — API routes: GET (1 endpoints) (~478 tok)
 - `templates.ts` — API routes: GET, PUT, POST (4 endpoints) (~1069 tok)
 - `users.ts` — API routes: GET, POST, PUT, DELETE (6 endpoints) (~1574 tok)
@@ -243,12 +251,12 @@
 ## backend/src/socket/
 
 - `socket-types.ts` — 校验当前 socket 已鉴权，且（若提供）payload userId 与 token 一致 (~190 tok)
-- `socket.ts` — Safety flush interval: flush accumulated audio to ASR every N ms even in VAD mode (~4965 tok)
+- `socket.ts` — Safety flush interval: flush accumulated audio to ASR every N ms even in VAD mode (~6135 tok)
 
 ## docs/
 
 - `会话纪要-Skills分析与集成建议.md` — ScribeAI 会话纪要 Skills 分析与集成建议 (~2839 tok)
-- `可扩展的功能或技术.md` — ScribeAI 可扩展的功能与技术建议 (~983 tok)
+- `可扩展的功能或技术.md` — ScribeAI 可扩展的功能与技术建议 (~1043 tok)
 
 ## docs/skills/transcript-to-meeting-notes/
 
@@ -311,6 +319,10 @@
 ## frontend/app/(routes)/manager/settings/llm/
 
 - `page.tsx` — ManagerLlmSettingsPage (~336 tok)
+
+## frontend/app/(routes)/manager/settings/observability/
+
+- `page.tsx` — CATEGORIES — renders table (~2040 tok)
 
 ## frontend/app/(routes)/manager/settings/security/
 
@@ -386,7 +398,7 @@
 - `dashboard-shell.tsx` — 会议录音页需要锁高度、内部弹性布局；其余页面允许纵向滚动 (~369 tok)
 - `draft-restore-banner.tsx` — DraftRestoreBanner (~333 tok)
 - `generate-meeting-summary-button.tsx` — GenerateMeetingSummaryButton (~1212 tok)
-- `manager-nav.tsx` — NAV (~390 tok)
+- `manager-nav.tsx` — NAV (~408 tok)
 - `manager-settings-form.tsx` — ManagerSettingsForm (~812 tok)
 - `manager-sidebar-link.tsx` — 侧栏/抽屉底部：系统设置入口（仅 manager） (~234 tok)
 - `mobile-promote-bar.tsx` — 移动端底栏：作为 shell 的 flex 子项，避免 WebView 裁切 fixed/portal (~278 tok)
@@ -487,7 +499,7 @@
 - `copy-to-clipboard.ts` — 复制文本；移动端在异步操作后 clipboard API 常因失去用户手势而失败，提供 textarea 回退 (~243 tok)
 - `dashboard-nav.ts` — Exports DashboardNavItem, DASHBOARD_NAV_ITEMS (~151 tok)
 - `draft-api.ts` — Exports DraftStatus, Draft, fetchDrafts, fetchActiveDraft + 8 more (~1006 tok)
-- `manager-api.ts` — Exports ManagerUser, ManagerSettingItem, managerApi (~905 tok)
+- `manager-api.ts` — Exports ManagerUser, ManagerSettingItem, managerApi (~1138 tok)
 - `navigation.ts` — Android WebView 壳应用（MainActivity 自定义 UA） (~358 tok)
 - `pcm-capture.ts` — Target frame size in samples (at 16kHz) (~1350 tok)
 - `promote-and-summarize.ts` — Exports PromoteAndSummarizeOptions, PromoteAndSummarizeResult, promoteDraftAndGenerateSummary (~382 tok)

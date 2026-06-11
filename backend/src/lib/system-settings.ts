@@ -1,6 +1,6 @@
 import { prisma } from './prisma';
 
-export type SettingGroup = 'stt' | 'llm' | 'storage' | 'security' | 'mobile';
+export type SettingGroup = 'stt' | 'llm' | 'storage' | 'security' | 'mobile' | 'observability';
 
 export type SettingDef = {
   key: string;
@@ -44,6 +44,10 @@ export const SETTING_DEFINITIONS: SettingDef[] = [
   { key: 'security.share_token_expires', group: 'security', envKey: 'SUMMARY_SHARE_TOKEN_EXPIRES', label: '分享链接有效期', defaultValue: '7d' },
   { key: 'security.http_long_request_ms', group: 'security', envKey: 'HTTP_LONG_REQUEST_MS', label: 'HTTP 长请求超时(ms)', defaultValue: '300000' },
   { key: 'mobile.android_apk_path', group: 'mobile', envKey: 'ANDROID_APK_PATH', label: 'Android APK 路径' },
+  { key: 'observability.enabled', group: 'observability', envKey: 'OBSERVABILITY_ENABLED', label: '启用运行 trace 入库', defaultValue: 'true' },
+  { key: 'observability.log_to_console', group: 'observability', envKey: 'OBSERVABILITY_LOG_TO_CONSOLE', label: '输出结构化日志到控制台', defaultValue: 'true' },
+  { key: 'observability.retention_days', group: 'observability', envKey: 'OBSERVABILITY_RETENTION_DAYS', label: 'Trace 保留天数', defaultValue: '14' },
+  { key: 'observability.max_rows', group: 'observability', envKey: 'OBSERVABILITY_MAX_ROWS', label: 'Trace 最大条数', defaultValue: '5000' },
 ];
 
 const ENV_TO_KEY = new Map(SETTING_DEFINITIONS.map((d) => [d.envKey, d.key]));

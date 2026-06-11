@@ -72,4 +72,25 @@ export const managerApi = {
   audit: {
     list: () => managerFetch<{ logs: unknown[] }>('/audit'),
   },
+  observability: {
+    summary: () =>
+      managerFetch<{
+        windowHours: number;
+        total24h: number;
+        errors24h: number;
+        recordingStarts: number;
+        vadSegmentCount: number;
+        avgSttSegmentMs: number | null;
+        avgSummaryGenerateMs: number | null;
+        avgSummaryCacheMs: number | null;
+      }>('/observability/summary'),
+    traces: (params?: { category?: string; status?: string; limit?: number }) => {
+      const qs = new URLSearchParams();
+      if (params?.category) qs.set('category', params.category);
+      if (params?.status) qs.set('status', params.status);
+      if (params?.limit) qs.set('limit', String(params.limit));
+      const q = qs.toString();
+      return managerFetch<{ traces: unknown[] }>(`/observability/traces${q ? `?${q}` : ''}`);
+    },
+  },
 };

@@ -11,6 +11,7 @@ const NAV = [
   { href: '/manager/settings/llm', label: '纪要 LLM' },
   { href: '/manager/settings/storage', label: '存储清理' },
   { href: '/manager/settings/security', label: '安全与超时' },
+  { href: '/manager/settings/observability', label: '可观测性' },
   { href: '/manager/templates', label: '模板与 Skills' },
   { href: '/manager/content', label: '内容管理' },
   { href: '/manager/mobile', label: '移动端 APK' },
