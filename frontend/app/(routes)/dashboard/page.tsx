@@ -9,7 +9,7 @@ import { RecordingControls } from "@/components/recording-controls";
 import { useRecordingStore } from "@/lib/store";
 import { TranscriptFeed } from "@/components/transcript-feed";
 import { DraftRestoreBanner } from "@/components/draft-restore-banner";
-import { getSocket, onTranscript, onProcessing, onCompleted, onSegmentResult, bufferSegmentResult } from '@/lib/socket';
+import { connectSocket, onTranscript, onProcessing, onCompleted, onSegmentResult, bufferSegmentResult } from '@/lib/socket';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { useDraftSync } from "@/hooks/use-draft-sync";
@@ -130,8 +130,7 @@ function DashboardContent() {
 
   // --- Socket listeners for live transcription ---
   useEffect(() => {
-    const socket = getSocket();
-    socket.connect();
+    connectSocket();
 
     const unsubscribeTranscript = onTranscript((text) => addTranscriptLine(text));
 

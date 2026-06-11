@@ -3,6 +3,8 @@ import fs from "fs";
 import path from "path";
 import { createClient, LiveTranscriptionEvents } from "@deepgram/sdk";
 import { STORAGE_CONFIG } from "../lib/storage-config";
+import { authenticateSocketHandshake } from "../lib/socket-auth";
+import { assertSocketUser } from "./socket-types";
 
 const STT_PROVIDER = process.env.STT_PROVIDER || "deepgram";
 const SLICE_INTERVAL_MS = (parseInt(process.env.ASR_SLICE_INTERVAL || "5", 10)) * 1000;
@@ -15,18 +17,28 @@ export const createSocketServer = (httpServer: any) => {
     cors: { origin: "*" },
   });
 
-  io.on("connection", (socket: Socket) => {
-    // console.log("Client connected:", socket.id, "| STT provider:", STT_PROVIDER);
+  io.use(async (socket, next) => {
+    const user = await authenticateSocketHandshake(
+      socket.handshake.auth?.token,
+      socket.handshake.headers.authorization
+    );
+    if (!user) {
+      return next(new Error("Unauthorized"));
+    }
+    socket.data.userId = user.id;
+    socket.data.userEmail = user.email;
+    next();
+  });
 
+  io.on("connection", (socket: Socket) => {
     if (STT_PROVIDER === "openai_asr") {
       handleOpenAIASR(socket);
     } else {
       handleDeepgram(socket);
     }
 
-    // --- Disconnect cleanup (shared) ---
     socket.on("disconnect", () => {
-      // console.log("Client disconnected:", socket.id);
+      // per-handler cleanup
     });
   });
 
@@ -79,6 +91,7 @@ function handleDeepgram(socket: Socket) {
   // Receive audio chunks
   socket.on("audio-chunk", async (blob: ArrayBuffer) => {
     try {
+      if (!assertSocketUser(socket, currentUserId ?? undefined) || !currentRecordingId) return;
       if (!isDeepgramOpen) return;
 
       const buffer = Buffer.from(blob);
@@ -98,19 +111,24 @@ function handleDeepgram(socket: Socket) {
     }
   });
 
-  socket.on("start-recording", ({ recordingId, userId }: { recordingId: string; userId: string }) => {
+  socket.on("start-recording", ({ recordingId, userId }: { recordingId: string; userId?: string }) => {
+    const authUserId = assertSocketUser(socket, userId);
+    if (!authUserId || !recordingId) {
+      socket.emit("socket-error", { code: "FORBIDDEN", message: "Invalid recording session" });
+      return;
+    }
     currentRecordingId = recordingId;
-    currentUserId = userId;
-    const sessionDir = path.join(STORAGE_CONFIG.uploadsDir, userId, recordingId);
+    currentUserId = authUserId;
+    const sessionDir = path.join(STORAGE_CONFIG.uploadsDir, authUserId, recordingId);
     fs.mkdirSync(sessionDir, { recursive: true });
-    // console.log(`[Storage] Session dir: ${userId}/${recordingId}`);
   });
 
   socket.on("reset-recording", () => {
-    // console.log("Reset recording requested by", socket.id);
+    if (!assertSocketUser(socket, currentUserId ?? undefined)) return;
   });
 
   socket.on("stop-recording", () => {
+    if (!assertSocketUser(socket, currentUserId ?? undefined)) return;
     if (currentUserId && currentRecordingId) {
       removeSessionDir(currentUserId, currentRecordingId);
       currentUserId = null;
@@ -232,21 +250,26 @@ function handleOpenAIASR(socket: Socket) {
   }
 
   // ---- Start recording: set up session context ----
-  socket.on("start-recording", ({ recordingId, userId }: { recordingId: string; userId: string }) => {
+  socket.on("start-recording", ({ recordingId, userId }: { recordingId: string; userId?: string }) => {
+    const authUserId = assertSocketUser(socket, userId);
+    if (!authUserId || !recordingId) {
+      socket.emit("socket-error", { code: "FORBIDDEN", message: "Invalid recording session" });
+      return;
+    }
     if (sliceTimer) { clearInterval(sliceTimer); sliceTimer = null; }
     if (safetyTimer) { clearInterval(safetyTimer); safetyTimer = null; }
     resetSessionBuffers();
 
     currentRecordingId = recordingId;
-    currentUserId = userId;
-    const sessionDir = path.join(STORAGE_CONFIG.uploadsDir, userId, recordingId);
+    currentUserId = authUserId;
+    const sessionDir = path.join(STORAGE_CONFIG.uploadsDir, authUserId, recordingId);
     fs.mkdirSync(sessionDir, { recursive: true });
-    // console.log(`[Storage] Session dir: ${userId}/${recordingId}`);
   });
 
   // ---- Receive audio chunks ----
   socket.on("audio-chunk", async (blob: ArrayBuffer) => {
     try {
+      if (!assertSocketUser(socket, currentUserId ?? undefined) || !currentRecordingId) return;
       const buffer = Buffer.from(blob);
       accumulatedChunks.push(buffer);
 
@@ -275,6 +298,7 @@ function handleOpenAIASR(socket: Socket) {
   // ---- VAD-triggered segment end: transcribe WAV audio from frontend VAD ----
   socket.on("segment-end", async ({ seq, audio }: { seq: number; audio?: ArrayBuffer }) => {
     if (!VAD_ENABLED) return;
+    if (!assertSocketUser(socket, currentUserId ?? undefined) || !currentRecordingId) return;
 
     if (!audio || audio.byteLength === 0) {
       // console.warn(`[VAD] segment-end seq=${seq} missing audio data, skipping`);
@@ -304,7 +328,7 @@ function handleOpenAIASR(socket: Socket) {
 
   // ---- Client signals recording is complete ----
   socket.on("stop-recording", async () => {
-    // console.log(`[OpenAI ASR] stop-recording for ${socket.id}`);
+    if (!assertSocketUser(socket, currentUserId ?? undefined)) return;
 
     // Stop timers
     if (sliceTimer) {
@@ -332,7 +356,7 @@ function handleOpenAIASR(socket: Socket) {
   });
 
   socket.on("reset-recording", () => {
-    // console.log("Reset recording for", socket.id);
+    if (!assertSocketUser(socket, currentUserId ?? undefined)) return;
     resetSessionBuffers();
     if (sliceTimer) {
       clearInterval(sliceTimer);

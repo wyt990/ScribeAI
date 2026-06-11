@@ -1,6 +1,9 @@
+import { disconnectSocket } from './socket';
+
 /** 清除网页端登录态 */
 export function clearAuthSession(): void {
   if (typeof window === 'undefined') return;
+  disconnectSocket();
   localStorage.removeItem('token');
   localStorage.removeItem('user');
 }

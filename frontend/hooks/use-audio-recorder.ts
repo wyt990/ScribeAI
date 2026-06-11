@@ -4,7 +4,7 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { useRecordingStore, AudioMode } from '@/lib/store';
 import {
-  getSocket, emitAudioChunk, emitStopRecording, emitStartRecording,
+  getSocket, connectSocket, emitAudioChunk, emitStopRecording, emitStartRecording,
   incrementSegmentSeq, emitSegmentEnd, resetSegmentSeq, resetSegmentDisplay,
   DEFAULT_VAD_CONFIG, type VADConfig,
 } from '@/lib/socket';
@@ -377,10 +377,13 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
       setIsReady(false);
     };
 
-    const onConnectError = (err: any) => {
+    const onConnectError = (err: { message?: string }) => {
       console.error('[Socket] connect_error', err);
       setIsReady(false);
       setIsConnecting(false);
+      if (err?.message === 'Unauthorized') {
+        setError?.('Socket 认证失败，请重新登录');
+      }
     };
 
     const onDeepgramReady = () => {
@@ -423,8 +426,12 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
     }
 
     setIsConnecting(true);
-    socket.connect();
-  }, [preloadVAD]);
+    if (!connectSocket()) {
+      setIsConnecting(false);
+      setIsReady(false);
+      setError?.('未登录，无法连接转录服务');
+    }
+  }, [preloadVAD, setError]);
 
   // 录音中同步自动增益开关
   useEffect(() => {
@@ -547,7 +554,13 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
       };
 
       if (!socketRef.current) initSocket();
-      if (socketRef.current && !socketRef.current.connected) socketRef.current.connect();
+      if (socketRef.current && !socketRef.current.connected) {
+        if (!connectSocket()) {
+          setError?.('未登录，无法开始录音');
+          setStatus('idle');
+          return;
+        }
+      }
 
       await startVAD(processedStream, audioContext);
 

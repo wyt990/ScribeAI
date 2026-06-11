@@ -33,7 +33,7 @@
       "first_read": "2026-06-11T00:23:25.283Z"
     },
     "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts": {
-      "count": 1,
+      "count": 2,
       "tokens": 6454,
       "first_read": "2026-06-11T00:23:25.296Z"
     },
@@ -63,7 +63,7 @@
       "first_read": "2026-06-11T00:23:33.929Z"
     },
     "/apps/ScribeAI/frontend/app/(routes)/dashboard/page.tsx": {
-      "count": 1,
+      "count": 2,
       "tokens": 2240,
       "first_read": "2026-06-11T00:23:46.333Z"
     },
@@ -86,6 +86,51 @@
       "count": 1,
       "tokens": 0,
       "first_read": "2026-06-11T00:29:57.574Z"
+    },
+    "/apps/ScribeAI/docs/可扩展的功能或技术.md": {
+      "count": 2,
+      "tokens": 0,
+      "first_read": "2026-06-11T00:38:09.841Z"
+    },
+    "/apps/ScribeAI/backend/src/socket/socket.ts": {
+      "count": 5,
+      "tokens": 4669,
+      "first_read": "2026-06-11T00:46:08.000Z"
+    },
+    "/apps/ScribeAI/frontend/lib/types.ts": {
+      "count": 1,
+      "tokens": 84,
+      "first_read": "2026-06-11T00:46:08.032Z"
+    },
+    "/apps/ScribeAI/frontend/lib/socket.ts": {
+      "count": 2,
+      "tokens": 1371,
+      "first_read": "2026-06-11T00:56:34.509Z"
+    },
+    "/apps/ScribeAI/backend/src/middleware/authMiddleware.ts": {
+      "count": 1,
+      "tokens": 389,
+      "first_read": "2026-06-11T00:56:35.634Z"
+    },
+    "/apps/ScribeAI/backend/src/routes/authroutes.ts": {
+      "count": 1,
+      "tokens": 1393,
+      "first_read": "2026-06-11T00:56:44.156Z"
+    },
+    "/apps/ScribeAI/frontend/lib/auth-session.ts": {
+      "count": 2,
+      "tokens": 128,
+      "first_read": "2026-06-11T00:56:44.195Z"
+    },
+    "/apps/ScribeAI/backend/src/lib/socket-auth.ts": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-11T00:56:55.662Z"
+    },
+    "/apps/ScribeAI/backend/src/socket/socket-types.ts": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-11T00:56:56.223Z"
     }
   },
   "files_written": [
@@ -178,6 +223,120 @@
       "action": "create",
       "tokens": 1103,
       "at": "2026-06-11T00:30:01.350Z"
+    },
+    {
+      "file": "/apps/ScribeAI/docs/可扩展的功能或技术.md",
+      "action": "create",
+      "tokens": 1123,
+      "at": "2026-06-11T00:38:20.547Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/lib/socket-auth.ts",
+      "action": "create",
+      "tokens": 326,
+      "at": "2026-06-11T00:56:56.345Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/socket/socket-types.ts",
+      "action": "create",
+      "tokens": 190,
+      "at": "2026-06-11T00:56:57.193Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/socket/socket.ts",
+      "action": "create",
+      "tokens": 4718,
+      "at": "2026-06-11T00:57:00.545Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/socket/socket.ts",
+      "action": "create",
+      "tokens": 4769,
+      "at": "2026-06-11T00:57:01.436Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/socket/socket.ts",
+      "action": "create",
+      "tokens": 4797,
+      "at": "2026-06-11T00:57:02.273Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/socket/socket.ts",
+      "action": "create",
+      "tokens": 4862,
+      "at": "2026-06-11T00:57:03.122Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/socket/socket.ts",
+      "action": "create",
+      "tokens": 4932,
+      "at": "2026-06-11T00:57:04.359Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/socket/socket.ts",
+      "action": "create",
+      "tokens": 4959,
+      "at": "2026-06-11T00:57:05.349Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/socket/socket.ts",
+      "action": "create",
+      "tokens": 4960,
+      "at": "2026-06-11T00:57:06.247Z"
+    },
+    {
+      "file": "/apps/ScribeAI/backend/src/socket/socket.ts",
+      "action": "create",
+      "tokens": 4965,
+      "at": "2026-06-11T00:57:07.062Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/lib/socket.ts",
+      "action": "create",
+      "tokens": 1322,
+      "at": "2026-06-11T00:57:16.304Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/lib/auth-session.ts",
+      "action": "create",
+      "tokens": 147,
+      "at": "2026-06-11T00:57:16.863Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+      "action": "create",
+      "tokens": 6458,
+      "at": "2026-06-11T00:57:16.908Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/app/(routes)/dashboard/page.tsx",
+      "action": "create",
+      "tokens": 2241,
+      "at": "2026-06-11T00:57:19.424Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+      "action": "create",
+      "tokens": 6490,
+      "at": "2026-06-11T00:57:19.775Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+      "action": "create",
+      "tokens": 6521,
+      "at": "2026-06-11T00:57:21.643Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts",
+      "action": "create",
+      "tokens": 6552,
+      "at": "2026-06-11T00:57:24.170Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/app/(routes)/dashboard/page.tsx",
+      "action": "create",
+      "tokens": 2232,
+      "at": "2026-06-11T00:57:24.195Z"
     }
   ],
   "edit_counts": {
@@ -191,11 +350,19 @@
     "README.md": 3,
     "frontend/config/audio.ts": 1,
     "frontend/lib/audio-settings.ts": 1,
-    "frontend/lib/store.ts": 1
+    "frontend/lib/store.ts": 1,
+    "docs/可扩展的功能或技术.md": 1,
+    "backend/src/lib/socket-auth.ts": 1,
+    "backend/src/socket/socket-types.ts": 1,
+    "backend/src/socket/socket.ts": 8,
+    "frontend/lib/socket.ts": 1,
+    "frontend/lib/auth-session.ts": 1,
+    "frontend/hooks/use-audio-recorder.ts": 4,
+    "frontend/app/(routes)/dashboard/page.tsx": 2
   },
-  "anatomy_hits": 11,
-  "anatomy_misses": 5,
-  "repeated_reads_warned": 5,
+  "anatomy_hits": 16,
+  "anatomy_misses": 8,
+  "repeated_reads_warned": 14,
   "cerebrum_warnings": 0,
-  "stop_count": 6
+  "stop_count": 10
 }

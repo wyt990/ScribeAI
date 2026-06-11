@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-06-11T00:30:01.336Z
-> Files: 271 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-06-11T00:57:24.178Z
+> Files: 274 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../root/.claude/plans/
 
@@ -192,6 +192,7 @@
 - `audit-log.ts` — Exports writeAuditLog (~141 tok)
 - `openai-api-url.ts` — Join OpenAI-compatible API paths without duplicating slashes. (~239 tok)
 - `prisma.ts` — Declares prisma (~40 tok)
+- `socket-auth.ts` — 校验 Socket 握手 token，与 REST verifyUser 逻辑一致 (~326 tok)
 - `storage-config.ts` — Exports STORAGE_CONFIG (~91 tok)
 - `summary-export-docx.ts` — Exports markdownToDocxBuffer (~53 tok)
 - `summary-export-pdf.ts` — Exports markdownToPdfBuffer (~1040 tok)
@@ -241,11 +242,13 @@
 
 ## backend/src/socket/
 
-- `socket.ts` — Safety flush interval: flush accumulated audio to ASR every N ms even in VAD mode (~4669 tok)
+- `socket-types.ts` — 校验当前 socket 已鉴权，且（若提供）payload userId 与 token 一致 (~190 tok)
+- `socket.ts` — Safety flush interval: flush accumulated audio to ASR every N ms even in VAD mode (~4965 tok)
 
 ## docs/
 
 - `会话纪要-Skills分析与集成建议.md` — ScribeAI 会话纪要 Skills 分析与集成建议 (~2839 tok)
+- `可扩展的功能或技术.md` — ScribeAI 可扩展的功能与技术建议 (~983 tok)
 
 ## docs/skills/transcript-to-meeting-notes/
 
@@ -282,7 +285,7 @@
 
 ## frontend/app/(routes)/dashboard/
 
-- `page.tsx` — DashboardContent (~2240 tok)
+- `page.tsx` — DashboardContent (~2232 tok)
 
 ## frontend/app/(routes)/drafts/
 
@@ -462,7 +465,7 @@
 
 ## frontend/hooks/
 
-- `use-audio-recorder.ts` — /hooks/use-audio-recorder.ts (~6454 tok)
+- `use-audio-recorder.ts` — /hooks/use-audio-recorder.ts (~6552 tok)
 - `use-can-promote.ts` — Exports useCanPromote (~155 tok)
 - `use-draft-sync.ts` — 草稿自动保存：转录追加防抖写入，状态变更立即写入，离开页面时刷盘 (~1201 tok)
 - `use-is-logged-in.ts` — 客户端检测是否已登录（localStorage 中有 token） (~83 tok)
@@ -479,7 +482,7 @@
 - `audio-pipeline.ts` — 预热 RNNoise worklet（浏览器会缓存脚本） (~1562 tok)
 - `audio-settings.ts` — Exports AudioSettings, DEFAULT_AUDIO_SETTINGS, loadAudioSettings, saveAudioSettings, formatGainLabel (~586 tok)
 - `audio-utils.ts` — 将 Float32 PCM（-1~1）编码为 16-bit mono WAV (~358 tok)
-- `auth-session.ts` — 清除网页端登录态 (~128 tok)
+- `auth-session.ts` — 清除网页端登录态 (~147 tok)
 - `auto-gain.ts` — Exports AutoGainController, createAutoGainController (~498 tok)
 - `copy-to-clipboard.ts` — 复制文本；移动端在异步操作后 clipboard API 常因失去用户手势而失败，提供 textarea 回退 (~243 tok)
 - `dashboard-nav.ts` — Exports DashboardNavItem, DASHBOARD_NAV_ITEMS (~151 tok)
@@ -492,7 +495,7 @@
 - `resolve-summary-template.ts` — 最终确定的 templateId (~314 tok)
 - `session-storage.ts` — Exports Session, useSessionStore (~223 tok)
 - `session-summary.ts` — legacy 兼容 (~838 tok)
-- `socket.ts` — Flush buffered segment results in seq order; returns texts ready to display (~1371 tok)
+- `socket.ts` — 携带 JWT 连接 Socket（未登录或无 token 时不连接） (~1377 tok)
 - `store.ts` — 自动增益实时刷新显示，不写入 localStorage (~1137 tok)
 - `summary-export.ts` — API routes: GET (1 endpoints) (~405 tok)
 - `summary-templates.ts` — Exports SummaryTemplateItem, SummaryTemplateDetail, TemplateDraft, fetchSummaryTemplates + 11 more (~1474 tok)
