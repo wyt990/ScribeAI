@@ -5,7 +5,7 @@ import { useEffect, useRef, useCallback, useState } from 'react';
 import { useRecordingStore, AudioMode } from '@/lib/store';
 import {
   getSocket, connectSocket, emitAudioChunk, emitStopRecording, emitStartRecording,
-  emitRecordingInterrupted, emitRecordingRecovered,
+  emitRecordingInterrupted, emitRecordingRecovered, emitRecordingStale,
   incrementSegmentSeq, emitSegmentEnd, resetSegmentSeq, resetSegmentDisplay,
   DEFAULT_VAD_CONFIG, type VADConfig,
 } from '@/lib/socket';
@@ -19,6 +19,15 @@ import {
 
 const VAD_ASSET_PATH = '/vad/';
 const VAD_WASM_PATH = '/vad/';
+
+/** 音量超过此阈值视为「可能有语音」 */
+const SPEECH_LEVEL_THRESHOLD = 0.06;
+/** 累计约 7s 有语音电平却无任何 VAD 分段 → 转写管线异常 */
+const SPEECH_MS_WITHOUT_SEGMENT = 7000;
+/** 录音中健康巡检间隔 */
+const HEALTH_POLL_MS = 3000;
+/** 轻量自动恢复失败后，才弹窗要求用户介入 */
+const MAX_LIGHTWEIGHT_RECOVER_ATTEMPTS = 2;
 
 let lastVadConfig: VADConfig = DEFAULT_VAD_CONFIG;
 
@@ -97,6 +106,8 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
     recordingId,
     setRecordingId,
     setRecordingInterrupted,
+    setTranscriptionWarning,
+    setLastSegmentAgeSec,
   } = useRecordingStore();
 
   const statusRef = useRef(status);
@@ -124,6 +135,11 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
   const listenersAttachedRef = useRef(false);
   const streamMonitorCleanupRef = useRef<(() => void) | null>(null);
   const interruptionHandledRef = useRef(false);
+  const lastSegmentAtRef = useRef<number | null>(null);
+  const speechAccumMsRef = useRef(0);
+  const audioLevelRef = useRef(0);
+  const lightweightRecoverAttemptsRef = useRef(0);
+  const healthPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const vadRef = useRef<any>(null);
   const vadConfigRef = useRef<VADConfig>(DEFAULT_VAD_CONFIG);
@@ -176,7 +192,17 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
       }
       const rms = Math.sqrt(sum / buf.length);
       const level = Math.min(1, rms * 2);
+      audioLevelRef.current = level;
       setAudioLevel((prev) => prev * 0.35 + level * 0.65);
+
+      if (statusRef.current === 'recording') {
+        if (level >= SPEECH_LEVEL_THRESHOLD) {
+          speechAccumMsRef.current += 16;
+        } else {
+          speechAccumMsRef.current = Math.max(0, speechAccumMsRef.current - 24);
+        }
+      }
+
       meterRafRef.current = requestAnimationFrame(tick);
     };
 
@@ -225,12 +251,16 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
     onSpeechEnd: (audio: Float32Array) => {
       const seq = incrementSegmentSeq();
       emitSegmentEnd(seq, audio);
+      lastSegmentAtRef.current = Date.now();
+      speechAccumMsRef.current = 0;
+      lightweightRecoverAttemptsRef.current = 0;
+      setTranscriptionWarning(null);
       console.log('[VAD] speech end, seq:', seq, 'duration:', (audio.length / 16000).toFixed(1) + 's');
     },
     onVADMisfire: () => {
       console.log('[VAD] misfire');
     },
-  }), []);
+  }), [setTranscriptionWarning]);
 
   const teardownVAD = useCallback(async (vad: {
     initializationState?: string;
@@ -425,7 +455,7 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
     pipelineRef.current.setManualGain(audioGain);
   }, [audioGain, autoGainEnabled, status]);
 
-  const isPipelineHealthy = useCallback((): boolean => {
+  const isCapturePipelineHealthy = useCallback((): boolean => {
     const raw = rawStreamRef.current;
     const recorder = mediaRecorderRef.current;
     if (!raw || !recorder) return false;
@@ -436,10 +466,59 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
     if (recorder.state !== 'recording') return false;
 
     const ctx = audioContextRef.current;
-    if (!ctx || ctx.state === 'closed') return false;
+    if (!ctx || ctx.state === 'closed' || ctx.state === 'suspended') return false;
 
     return true;
   }, []);
+
+  const isTranscriptionPipelineHealthy = useCallback((): boolean => {
+    const vad = vadRef.current;
+    if (!vad || vadStatus === 'error') return true;
+    if (!vad.listening) return false;
+    if (speechAccumMsRef.current >= SPEECH_MS_WITHOUT_SEGMENT) return false;
+    return true;
+  }, [vadStatus]);
+
+  const isPipelineHealthy = useCallback((): boolean => {
+    return isCapturePipelineHealthy() && isTranscriptionPipelineHealthy();
+  }, [isCapturePipelineHealthy, isTranscriptionPipelineHealthy]);
+
+  const ensureAudioContextRunning = useCallback(async (): Promise<boolean> => {
+    const ctx = audioContextRef.current;
+    if (!ctx || ctx.state === 'closed') return false;
+    if (ctx.state === 'suspended') {
+      try {
+        await ctx.resume();
+      } catch (err) {
+        console.error('[useAudioRecorder] AudioContext resume failed', err);
+        return false;
+      }
+    }
+    return ctx.state === 'running';
+  }, []);
+
+  const restartVADListening = useCallback(async (): Promise<boolean> => {
+    const vad = vadRef.current;
+    const stream = streamRef.current;
+    const ctx = audioContextRef.current;
+    if (!vad || !stream || !ctx || vadStatus === 'error') return false;
+
+    try {
+      if (vad.listening) {
+        await vad.pause();
+      }
+      vadPendingStreamRef.current = stream;
+      if (vad.initializationState === 'uninitialized') {
+        vad.options.audioContext = ctx;
+      }
+      await vad.start();
+      console.log('[useAudioRecorder] VAD restarted');
+      return Boolean(vad.listening);
+    } catch (err) {
+      console.error('[useAudioRecorder] VAD restart failed', err);
+      return false;
+    }
+  }, [vadStatus]);
 
   const detachStreamMonitor = useCallback(() => {
     streamMonitorCleanupRef.current?.();
@@ -465,6 +544,7 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
     stopAudioMeter();
     void draftSyncRef.current?.flushDraft?.();
     setRecordingInterrupted(true);
+    setTranscriptionWarning(null);
     setStatus('paused');
 
     const rid = recordingIdRef.current;
@@ -472,7 +552,102 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
     if (rid && uid) {
       emitRecordingInterrupted(rid, uid, reason);
     }
-  }, [pauseVAD, stopAudioMeter, setRecordingInterrupted, setStatus]);
+  }, [pauseVAD, stopAudioMeter, setRecordingInterrupted, setTranscriptionWarning, setStatus]);
+
+  const tryLightweightRecover = useCallback(async (): Promise<boolean> => {
+    console.warn('[useAudioRecorder] attempting lightweight transcription recover');
+    setTranscriptionWarning('检测到语音但未产生转写，正在尝试自动恢复…');
+
+    const ctxOk = await ensureAudioContextRunning();
+    const vadOk = await restartVADListening();
+
+    if (ctxOk && vadOk) {
+      speechAccumMsRef.current = 0;
+      lightweightRecoverAttemptsRef.current += 1;
+      setTranscriptionWarning(null);
+
+      const rid = recordingIdRef.current;
+      const uid = userIdRef.current;
+      if (rid && uid) {
+        emitRecordingRecovered(rid, uid);
+      }
+      return true;
+    }
+    return false;
+  }, [ensureAudioContextRunning, restartVADListening, setTranscriptionWarning]);
+
+  const handleTranscriptionStall = useCallback(async () => {
+    if (statusRef.current !== 'recording' || interruptionHandledRef.current) return;
+
+    if (lightweightRecoverAttemptsRef.current < MAX_LIGHTWEIGHT_RECOVER_ATTEMPTS) {
+      const ok = await tryLightweightRecover();
+      if (ok) return;
+    }
+
+    const rid = recordingIdRef.current;
+    const uid = userIdRef.current;
+    if (rid && uid) {
+      emitRecordingStale(rid, uid, 'transcription-stall', {
+        speechAccumMs: speechAccumMsRef.current,
+        vadListening: Boolean(vadRef.current?.listening),
+        audioContextState: audioContextRef.current?.state,
+        recoverAttempts: lightweightRecoverAttemptsRef.current,
+      });
+    }
+
+    handleSystemInterruption('transcription-stall');
+  }, [tryLightweightRecover, handleSystemInterruption]);
+
+  const refreshSegmentAge = useCallback(() => {
+    if (statusRef.current !== 'recording' || !lastSegmentAtRef.current) {
+      setLastSegmentAgeSec(null);
+      return;
+    }
+    const age = Math.floor((Date.now() - lastSegmentAtRef.current) / 1000);
+    setLastSegmentAgeSec(age);
+  }, [setLastSegmentAgeSec]);
+
+  const runPipelineHealthCheck = useCallback(async () => {
+    if (statusRef.current !== 'recording') return;
+
+    refreshSegmentAge();
+
+    if (!isCapturePipelineHealthy()) {
+      handleSystemInterruption('capture-unhealthy');
+      return;
+    }
+
+    await ensureAudioContextRunning();
+
+    if (vadRef.current && !vadRef.current.listening && vadStatus !== 'error') {
+      console.warn('[useAudioRecorder] VAD not listening during recording');
+      const ok = await restartVADListening();
+      if (!ok) {
+        await handleTranscriptionStall();
+        return;
+      }
+    }
+
+    if (speechAccumMsRef.current >= SPEECH_MS_WITHOUT_SEGMENT) {
+      await handleTranscriptionStall();
+      return;
+    }
+
+    if (speechAccumMsRef.current >= SPEECH_MS_WITHOUT_SEGMENT * 0.45) {
+      setTranscriptionWarning('检测到语音活动，但尚未产生新的转写…');
+    } else if (!interruptionHandledRef.current) {
+      setTranscriptionWarning(null);
+    }
+  }, [
+    refreshSegmentAge,
+    isCapturePipelineHealthy,
+    ensureAudioContextRunning,
+    restartVADListening,
+    handleTranscriptionStall,
+    handleSystemInterruption,
+    vadStatus,
+    setTranscriptionWarning,
+  ]);
 
   const attachStreamMonitor = useCallback((stream: MediaStream) => {
     const cleanups: Array<() => void> = [];
@@ -603,12 +778,19 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
 
       void reacquireScreenWakeIfNeeded(statusRef.current === 'recording');
 
+      if (statusRef.current === 'recording') {
+        void ensureAudioContextRunning().then(() => runPipelineHealthCheck());
+      }
+
       if (statusRef.current === 'recording' && !isPipelineHealthy()) {
         handleSystemInterruption('visibility-return');
       }
     };
 
     const handleDeviceChange = () => {
+      if (statusRef.current === 'recording') {
+        void runPipelineHealthCheck();
+      }
       if (statusRef.current === 'recording' && !isPipelineHealthy()) {
         handleSystemInterruption('devicechange');
       }
@@ -620,7 +802,38 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
       document.removeEventListener('visibilitychange', handleVisibility);
       navigator.mediaDevices?.removeEventListener('devicechange', handleDeviceChange);
     };
-  }, [handleSystemInterruption, isPipelineHealthy]);
+  }, [
+    handleSystemInterruption,
+    isPipelineHealthy,
+    ensureAudioContextRunning,
+    runPipelineHealthCheck,
+  ]);
+
+  useEffect(() => {
+    if (status !== 'recording') {
+      if (healthPollRef.current) {
+        clearInterval(healthPollRef.current);
+        healthPollRef.current = null;
+      }
+      if (status === 'idle') {
+        setTranscriptionWarning(null);
+        setLastSegmentAgeSec(null);
+      }
+      return;
+    }
+
+    void runPipelineHealthCheck();
+    healthPollRef.current = setInterval(() => {
+      void runPipelineHealthCheck();
+    }, HEALTH_POLL_MS);
+
+    return () => {
+      if (healthPollRef.current) {
+        clearInterval(healthPollRef.current);
+        healthPollRef.current = null;
+      }
+    };
+  }, [status, runPipelineHealthCheck, setTranscriptionWarning, setLastSegmentAgeSec]);
 
   const recoverRecording = useCallback(async () => {
     if (!isReady) {
@@ -659,6 +872,10 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
       await setupCapturePipeline();
       void acquireScreenWake();
       setRecordingInterrupted(false);
+      lastSegmentAtRef.current = Date.now();
+      speechAccumMsRef.current = 0;
+      lightweightRecoverAttemptsRef.current = 0;
+      setTranscriptionWarning(null);
       setStatus('recording');
 
       const rid = recordingIdRef.current;
@@ -722,6 +939,11 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
       setError?.(null);
       interruptionHandledRef.current = false;
       setRecordingInterrupted(false);
+      lastSegmentAtRef.current = Date.now();
+      speechAccumMsRef.current = 0;
+      lightweightRecoverAttemptsRef.current = 0;
+      setTranscriptionWarning(null);
+      setLastSegmentAgeSec(null);
 
       if (!navigator.mediaDevices?.getUserMedia) {
         setError?.('您的浏览器不支持录音功能，请使用最新版 Chrome 或 Edge，并通过 HTTPS 访问。');

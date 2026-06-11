@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-06-11T03:18:37.768Z
-> Files: 299 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-06-11T04:59:29.052Z
+> Files: 303 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../root/.claude/plans/
 
@@ -32,12 +32,15 @@
 ## ../../root/.cursor/projects/apps-ScribeAI/assets/
 
 - `c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_12d9ad4864617a6acf9b7a6aff0dc44-18ba5176-b2f7-46b1-8575-dc2ceb9388df.png` (~6488 tok)
+- `c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_24b009f4097b644d88e323f190a92f0-25e53f55-055b-44f6-a18f-05ad69809917.png` (~13966 tok)
 - `c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-352b296d-98cc-4580-9db2-ae4a319b5216.png` (~13884 tok)
 - `c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-35454b60-0e81-42f6-b599-47d22822f0b8.png` (~7865 tok)
 - `c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-4c02e8b9-cf66-426a-95c2-5901c8acdc09.png` (~6366 tok)
 - `c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-54026190-d945-4ddf-9bae-1ba519897844.png` (~19552 tok)
 - `c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-58e2039a-2ccd-405c-9271-750d0c503e75.png` (~30257 tok)
 - `c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-76e820c6-7462-46fd-b194-183bc411cfdd.png` (~11832 tok)
+- `c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-a12d2150-c053-434c-9f95-62766954ab44.png` (~18025 tok)
+- `c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-c73e1fd3-6e31-4d65-9934-bc9b49d96d14.png` (~12980 tok)
 - `c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-cda7c170-809f-441e-90e8-1e79fdbf5ad4.png` (~37594 tok)
 - `c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-f2c88af0-8692-427f-8cf3-edd43eba31d9.png` (~2847 tok)
 
@@ -270,7 +273,7 @@
 
 ## backend/src/socket/
 
-- `recording-trace-handlers.ts` — 来电/系统抢占等录音中断与恢复的可观测性埋点 (~577 tok)
+- `recording-trace-handlers.ts` — 来电/系统抢占等录音中断与恢复的可观测性埋点 (~820 tok)
 - `socket-types.ts` — 校验当前 socket 已鉴权，且（若提供）payload userId 与 token 一致 (~190 tok)
 - `socket.ts` — Safety flush interval: flush accumulated audio to ASR every N ms even in VAD mode (~4811 tok)
 
@@ -278,6 +281,7 @@
 
 - `会话纪要-Skills分析与集成建议.md` — ScribeAI 会话纪要 Skills 分析与集成建议 (~2839 tok)
 - `可扩展的功能或技术.md` — ScribeAI 可扩展的功能与技术建议 (~1110 tok)
+- `原生后台录音完整方案.md` — ScribeAI 原生后台录音完整方案 (~3259 tok)
 
 ## docs/skills/transcript-to-meeting-notes/
 
@@ -428,7 +432,7 @@
 - `org-identity-modal.tsx` — 若用户有组织则弹出身份选择，否则直接返回 null (~852 tok)
 - `org-identity-select.tsx` — 加载用户组织列表，供生成纪要前判断是否需要弹出身份选择 (~739 tok)
 - `promote-draft-button.tsx` — PromoteDraftButton — renders modal (~693 tok)
-- `recording-controls.tsx` — VAD 状态指示器：显示一个小圆点 + 文字 (~2098 tok)
+- `recording-controls.tsx` — VAD 状态指示器：显示一个小圆点 + 文字 (~2182 tok)
 - `recording-panel.tsx` — RecordingPanel (~1294 tok)
 - `session-search-results.tsx` — SessionSearchResults (~681 tok)
 - `sidebar.tsx` — Sidebar (~442 tok)
@@ -436,7 +440,7 @@
 - `summary-template-select.tsx` — 标记已有纪要的模板 ID (~639 tok)
 - `template-select-modal.tsx` — TemplateSelectModal — renders modal (~731 tok)
 - `theme-provider.tsx` — ThemeProvider (~87 tok)
-- `transcript-feed.tsx` — TranscriptFeed (~931 tok)
+- `transcript-feed.tsx` — TranscriptFeed (~1158 tok)
 - `transcript-search-panel.tsx` — TranscriptSearchPanel (~1220 tok)
 
 ## frontend/components/ui/
@@ -501,7 +505,7 @@
 
 ## frontend/hooks/
 
-- `use-audio-recorder.ts` — /hooks/use-audio-recorder.ts (~8196 tok)
+- `use-audio-recorder.ts` — 音量超过此阈值视为「可能有语音」 (~10265 tok)
 - `use-can-promote.ts` — Exports useCanPromote (~155 tok)
 - `use-draft-sync.ts` — 草稿自动保存：转录追加防抖写入，状态变更立即写入，离开页面时刷盘 (~1201 tok)
 - `use-is-logged-in.ts` — 客户端检测是否已登录（localStorage 中有 token） (~83 tok)
@@ -535,8 +539,8 @@
 - `session-search-api.ts` — Exports SessionSearchHit, SessionSearchResult, searchSessions, SEARCH_FIELD_LABEL (~310 tok)
 - `session-storage.ts` — Exports Session, useSessionStore (~223 tok)
 - `session-summary.ts` — legacy 兼容 (~838 tok)
-- `socket.ts` — 携带 JWT 连接 Socket（未登录或无 token 时不连接） (~1514 tok)
-- `store.ts` — 来电等系统抢占麦克风导致的中断（与手动暂停区分） (~1218 tok)
+- `socket.ts` — 携带 JWT 连接 Socket（未登录或无 token 时不连接） (~1732 tok)
+- `store.ts` — 来电等系统抢占麦克风导致的中断（与手动暂停区分） (~1367 tok)
 - `summary-export.ts` — API routes: GET (1 endpoints) (~405 tok)
 - `summary-templates.ts` — Exports SummaryTemplateItem, SummaryTemplateDetail, TemplateDraft, fetchSummaryTemplates + 11 more (~1474 tok)
 - `summary-types.ts` — Exports SUMMARY_TYPES, SummaryType, DEFAULT_SUMMARY_TYPE, SUMMARY_TYPE_LABELS, isSummaryType (~128 tok)

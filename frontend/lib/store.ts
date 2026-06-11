@@ -37,6 +37,10 @@ interface RecordingState {
   noiseSuppressionEnabled: boolean;
   /** 来电等系统抢占麦克风导致的中断（与手动暂停区分） */
   recordingInterrupted: boolean;
+  /** 转写管线预警（有语音但未出字等） */
+  transcriptionWarning: string | null;
+  /** 距上次 VAD 分段的秒数（录音中刷新） */
+  lastSegmentAgeSec: number | null;
 
   setStatus: (status: RecordingStatus) => void;
   setAudioMode: (mode: AudioMode) => void;
@@ -55,6 +59,8 @@ interface RecordingState {
   setAutoGainEnabled: (enabled: boolean) => void;
   setNoiseSuppressionEnabled: (enabled: boolean) => void;
   setRecordingInterrupted: (interrupted: boolean) => void;
+  setTranscriptionWarning: (warning: string | null) => void;
+  setLastSegmentAgeSec: (sec: number | null) => void;
   clearDraft: () => void;
   reset: () => void;
   setTranscript: (text: string | string[]) => void;
@@ -75,6 +81,8 @@ export const useRecordingStore = create<RecordingState>((set) => ({
   autoGainEnabled: persistedAudio.autoGainEnabled,
   noiseSuppressionEnabled: persistedAudio.noiseSuppressionEnabled,
   recordingInterrupted: false,
+  transcriptionWarning: null,
+  lastSegmentAgeSec: null,
 
   setStatus: (status) => set({ status }),
   setAudioMode: (mode) => set({ audioMode: mode }),
@@ -103,6 +111,8 @@ export const useRecordingStore = create<RecordingState>((set) => ({
     set({ noiseSuppressionEnabled: next.noiseSuppressionEnabled });
   },
   setRecordingInterrupted: (interrupted) => set({ recordingInterrupted: interrupted }),
+  setTranscriptionWarning: (warning) => set({ transcriptionWarning: warning }),
+  setLastSegmentAgeSec: (sec) => set({ lastSegmentAgeSec: sec }),
   clearDraft: () => set({ draftId: null, draftTitle: null }),
   reset: () => set({
     status: 'idle',
@@ -115,6 +125,8 @@ export const useRecordingStore = create<RecordingState>((set) => ({
     draftTitle: null,
     activeOrgId: null,
     recordingInterrupted: false,
+    transcriptionWarning: null,
+    lastSegmentAgeSec: null,
   }),
 
   setTranscript: (text) => set({

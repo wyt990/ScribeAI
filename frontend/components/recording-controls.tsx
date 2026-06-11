@@ -80,7 +80,7 @@ type RecordingControlsProps = {
 };
 
 export function RecordingControls({ ensureDraft, flushDraft }: RecordingControlsProps) {
-  const { status, recordingInterrupted } = useRecordingStore();
+  const { status, recordingInterrupted, transcriptionWarning } = useRecordingStore();
   const {
     startRecording,
     pauseRecording,
@@ -180,6 +180,12 @@ export function RecordingControls({ ensureDraft, flushDraft }: RecordingControls
 
         {isRecording && <VolumeMeter level={audioLevel} />}
 
+        {isRecording && transcriptionWarning && (
+          <p className="text-xs text-amber-600 dark:text-amber-400 mt-3 leading-relaxed rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2">
+            {transcriptionWarning}
+          </p>
+        )}
+
         {(isRecording || isPaused) && isIOSDevice() && (
           <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
             iPhone 可能仍会按系统自动锁定熄屏。建议：设置 → 显示与亮度 → 自动锁定 → 永不（或较长时间），并关闭低电量模式；录音时尽量保持本页在前台。
@@ -192,7 +198,7 @@ export function RecordingControls({ ensureDraft, flushDraft }: RecordingControls
           <AlertDialogHeader>
             <AlertDialogTitle>录音已中断</AlertDialogTitle>
             <AlertDialogDescription>
-              录音已被系统中断（如来电抢占麦克风）。挂断后请点击「继续录音」重新获取麦克风，此前已转写的内容会保留在同一会话中。
+              转写管线已异常（可能因来电、VAD 停止工作或音频上下文挂起）。请点击「继续录音」尝试恢复；若仍无法转写，可停止录音后使用「重跑 ASR」补全。此前已转写的内容会保留在同一会话中。
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

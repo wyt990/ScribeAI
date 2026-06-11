@@ -78,4 +78,40 @@ export function attachRecordingInterruptHandlers(
       });
     }
   );
+
+  socket.on(
+    "recording-stale",
+    ({
+      recordingId,
+      reason,
+      userId,
+      detail,
+    }: {
+      recordingId?: string;
+      reason?: string;
+      userId?: string;
+      detail?: Record<string, unknown>;
+    }) => {
+      const authUserId = assertSocketUser(socket, userId);
+      if (!authUserId) return;
+
+      const ctx = getCtx();
+      const target = recordingId ?? ctx.currentRecordingId;
+      if (!target) return;
+
+      writeOperationTrace({
+        userId: authUserId,
+        category: "recording",
+        action: "recording.stale",
+        status: "error",
+        target,
+        durationMs: ctx.recordingStartedAt ? Date.now() - ctx.recordingStartedAt : undefined,
+        detail: {
+          reason: reason ?? "unknown",
+          provider: ctx.provider,
+          ...detail,
+        },
+      });
+    }
+  );
 }

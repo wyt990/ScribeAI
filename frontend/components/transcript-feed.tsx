@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { DashboardDraftActions } from "@/components/dashboard-draft-actions";
 
 export function TranscriptFeed() {
-  const { transcript, status, draftId, draftTitle } = useRecordingStore();
+  const { transcript, status, draftId, draftTitle, transcriptionWarning, lastSegmentAgeSec } = useRecordingStore();
   const recordingSeconds = useRecordingDuration();
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -41,18 +41,30 @@ export function TranscriptFeed() {
             </div>
 
             {status === "recording" && (
-              <Badge className="bg-success text-success-foreground flex items-center gap-2 shrink-0 tabular-nums">
-                <span className="w-2 h-2 rounded-full bg-success-foreground animate-pulse" />
-                录音中({formatRecordingDuration(recordingSeconds)})
-              </Badge>
+              <div className="flex flex-col items-end gap-1 shrink-0">
+                <Badge className="bg-success text-success-foreground flex items-center gap-2 tabular-nums">
+                  <span className="w-2 h-2 rounded-full bg-success-foreground animate-pulse" />
+                  录音中({formatRecordingDuration(recordingSeconds)})
+                </Badge>
+                {lastSegmentAgeSec != null && lastSegmentAgeSec > 0 && (
+                  <span className="text-[10px] text-muted-foreground tabular-nums">
+                    上次转写 {lastSegmentAgeSec < 60 ? `${lastSegmentAgeSec} 秒` : `${Math.floor(lastSegmentAgeSec / 60)} 分`}前
+                  </span>
+                )}
+              </div>
             )}
             {status === "paused" && <Badge className="shrink-0">已暂停</Badge>}
             {status === "processing" && <Badge className="shrink-0">处理中</Badge>}
           </div>
         </CardHeader>
 
-        <CardContent className="flex-1 min-h-0 px-4 pb-3 md:px-6 md:pb-4">
-          <ScrollArea className="h-full pr-3 md:pr-4" ref={scrollRef}>
+        <CardContent className="flex-1 min-h-0 px-4 pb-3 md:px-6 md:pb-4 flex flex-col gap-2">
+          {status === "recording" && transcriptionWarning && (
+            <p className="text-xs text-amber-600 dark:text-amber-400 leading-relaxed rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 shrink-0">
+              {transcriptionWarning}
+            </p>
+          )}
+          <ScrollArea className="h-full pr-3 md:pr-4 flex-1 min-h-0" ref={scrollRef}>
             {!hasContent ? (
               <div className="flex items-center justify-center min-h-[4rem] h-full text-muted-foreground">
                 <p className="text-center text-sm">

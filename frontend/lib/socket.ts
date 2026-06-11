@@ -111,6 +111,18 @@ export const emitRecordingRecovered = (
   }
 };
 
+export const emitRecordingStale = (
+  recordingId: string,
+  userId: string,
+  reason: string,
+  detail?: Record<string, unknown>
+) => {
+  const s = getSocket();
+  if (s.connected) {
+    s.emit('recording-stale', { recordingId, userId, reason, detail });
+  }
+};
+
 export const onTranscript = (callback: (text: string) => void) => {
   const s = getSocket();
   s.on('transcript', callback);
@@ -157,11 +169,28 @@ export const resetSegmentDisplay = () => {
 
 export const flushSegmentBuffer = (): string[] => {
   const ready: string[] = [];
-  while (_reorderBuffer.has(_lastDisplayedSeq + 1)) {
-    _lastDisplayedSeq++;
-    const t = _reorderBuffer.get(_lastDisplayedSeq)!;
-    _reorderBuffer.delete(_lastDisplayedSeq);
-    ready.push(t);
+  while (true) {
+    const next = _lastDisplayedSeq + 1;
+    if (_reorderBuffer.has(next)) {
+      _lastDisplayedSeq = next;
+      const t = _reorderBuffer.get(next)!;
+      _reorderBuffer.delete(next);
+      ready.push(t);
+      continue;
+    }
+    // seq 空洞：跳过错号，避免后续识别结果永远卡在缓冲区
+    let minHigher: number | null = null;
+    for (const k of _reorderBuffer.keys()) {
+      if (k > next && (minHigher === null || k < minHigher)) {
+        minHigher = k;
+      }
+    }
+    if (minHigher !== null) {
+      console.warn('[segment-buffer] gap skipped, missing seq', next, 'continue from', minHigher);
+      _lastDisplayedSeq = minHigher - 1;
+      continue;
+    }
+    break;
   }
   return ready;
 };
