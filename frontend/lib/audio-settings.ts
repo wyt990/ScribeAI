@@ -1,3 +1,10 @@
+import {
+  GAIN_MIN,
+  GAIN_MAX,
+  GAIN_STEP,
+  GAIN_DEFAULT,
+} from '@/config/audio';
+
 export type AudioSettings = {
   audioGain: number;
   autoGainEnabled: boolean;
@@ -6,10 +13,7 @@ export type AudioSettings = {
 
 const STORAGE_KEY = 'scribeai-audio-settings';
 
-export const GAIN_MIN = 0;
-export const GAIN_MAX = 3;
-export const GAIN_STEP = 0.2;
-export const GAIN_DEFAULT = 1;
+export { GAIN_MIN, GAIN_MAX, GAIN_STEP, GAIN_DEFAULT };
 
 export const DEFAULT_AUDIO_SETTINGS: AudioSettings = {
   audioGain: GAIN_DEFAULT,

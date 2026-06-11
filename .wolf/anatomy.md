@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-06-11T00:17:21.550Z
-> Files: 268 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-06-11T00:30:01.336Z
+> Files: 271 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../root/.claude/plans/
 
@@ -11,7 +11,9 @@
 ## ../../root/.claude/projects/-apps-ScribeAI/memory/
 
 - `constraint_vad_only.md` (~146 tok)
-- `MEMORY.md` (~36 tok)
+- `feature_recording_duration.md` — 录音时长显示 (~118 tok)
+- `features_audio_processing.md` — 音频处理管线 (~385 tok)
+- `MEMORY.md` (~78 tok)
 
 ## ../../root/.cursor/projects/apps-ScribeAI/agent-tools/
 
@@ -42,7 +44,7 @@
 
 - `.gitignore` — Git ignore rules (~79 tok)
 - `CLAUDE.md` — CLAUDE.md (~1052 tok)
-- `README.md` — Project documentation (~2600 tok)
+- `README.md` — Project documentation (~2896 tok)
 
 ## .claude/
 
@@ -454,6 +456,10 @@
 - `toggle.tsx` — toggleVariants (~449 tok)
 - `tooltip.tsx` — TooltipProvider (~541 tok)
 
+## frontend/config/
+
+- `audio.ts` — 代码兜底：环境变量缺失或无效时使用 (~552 tok)
+
 ## frontend/hooks/
 
 - `use-audio-recorder.ts` — /hooks/use-audio-recorder.ts (~6454 tok)
@@ -471,7 +477,7 @@
 - `app-config.ts` — 是否显示音频源选择器（麦克风/标签页切换） (~98 tok)
 - `app-version.ts` — 构建时注入，用于确认前端是否已部署到最新版本 (~29 tok)
 - `audio-pipeline.ts` — 预热 RNNoise worklet（浏览器会缓存脚本） (~1562 tok)
-- `audio-settings.ts` — Exports AudioSettings, GAIN_MIN, GAIN_MAX, GAIN_STEP + 5 more (~578 tok)
+- `audio-settings.ts` — Exports AudioSettings, DEFAULT_AUDIO_SETTINGS, loadAudioSettings, saveAudioSettings, formatGainLabel (~586 tok)
 - `audio-utils.ts` — 将 Float32 PCM（-1~1）编码为 16-bit mono WAV (~358 tok)
 - `auth-session.ts` — 清除网页端登录态 (~128 tok)
 - `auto-gain.ts` — Exports AutoGainController, createAutoGainController (~498 tok)
@@ -487,7 +493,7 @@
 - `session-storage.ts` — Exports Session, useSessionStore (~223 tok)
 - `session-summary.ts` — legacy 兼容 (~838 tok)
 - `socket.ts` — Flush buffered segment results in seq order; returns texts ready to display (~1371 tok)
-- `store.ts` — 自动增益实时刷新显示，不写入 localStorage (~1110 tok)
+- `store.ts` — 自动增益实时刷新显示，不写入 localStorage (~1137 tok)
 - `summary-export.ts` — API routes: GET (1 endpoints) (~405 tok)
 - `summary-templates.ts` — Exports SummaryTemplateItem, SummaryTemplateDetail, TemplateDraft, fetchSummaryTemplates + 11 more (~1474 tok)
 - `summary-types.ts` — Exports SUMMARY_TYPES, SummaryType, DEFAULT_SUMMARY_TYPE, SUMMARY_TYPE_LABELS, isSummaryType (~128 tok)

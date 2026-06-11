@@ -4,10 +4,8 @@ import {
   loadAudioSettings,
   saveAudioSettings,
   GAIN_DEFAULT,
-  GAIN_STEP,
-  GAIN_MIN,
-  GAIN_MAX,
 } from './audio-settings';
+import { GAIN_MIN, GAIN_MAX, GAIN_STEP } from '@/config/audio';
 
 function clampGain(value: number): number {
   const steps = Math.round(value / GAIN_STEP);

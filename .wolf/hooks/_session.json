@@ -8,8 +8,8 @@
       "first_read": "2026-06-11T00:12:39.579Z"
     },
     "/apps/ScribeAI/frontend/components/transcript-feed.tsx": {
-      "count": 2,
-      "tokens": 860,
+      "count": 3,
+      "tokens": 931,
       "first_read": "2026-06-11T00:17:07.091Z"
     },
     "/apps/ScribeAI/frontend/lib/recording-duration.ts": {
@@ -21,6 +21,71 @@
       "count": 1,
       "tokens": 0,
       "first_read": "2026-06-11T00:17:15.879Z"
+    },
+    "/apps/ScribeAI/frontend/components/recording-controls.tsx": {
+      "count": 1,
+      "tokens": 1546,
+      "first_read": "2026-06-11T00:23:25.274Z"
+    },
+    "/apps/ScribeAI/frontend/lib/store.ts": {
+      "count": 2,
+      "tokens": 1110,
+      "first_read": "2026-06-11T00:23:25.283Z"
+    },
+    "/apps/ScribeAI/frontend/hooks/use-audio-recorder.ts": {
+      "count": 1,
+      "tokens": 6454,
+      "first_read": "2026-06-11T00:23:25.296Z"
+    },
+    "/apps/ScribeAI/frontend/lib/audio-settings.ts": {
+      "count": 1,
+      "tokens": 578,
+      "first_read": "2026-06-11T00:23:29.952Z"
+    },
+    "/apps/ScribeAI/frontend/lib/app-config.ts": {
+      "count": 2,
+      "tokens": 98,
+      "first_read": "2026-06-11T00:23:29.974Z"
+    },
+    "/apps/ScribeAI/frontend/lib/audio-pipeline.ts": {
+      "count": 1,
+      "tokens": 1562,
+      "first_read": "2026-06-11T00:23:30.037Z"
+    },
+    "/apps/ScribeAI/frontend/lib/auto-gain.ts": {
+      "count": 1,
+      "tokens": 498,
+      "first_read": "2026-06-11T00:23:33.914Z"
+    },
+    "/apps/ScribeAI/frontend/components/audio-mode-selector.tsx": {
+      "count": 1,
+      "tokens": 792,
+      "first_read": "2026-06-11T00:23:33.929Z"
+    },
+    "/apps/ScribeAI/frontend/app/(routes)/dashboard/page.tsx": {
+      "count": 1,
+      "tokens": 2240,
+      "first_read": "2026-06-11T00:23:46.333Z"
+    },
+    "/apps/ScribeAI/README.md": {
+      "count": 1,
+      "tokens": 2600,
+      "first_read": "2026-06-11T00:26:50.092Z"
+    },
+    "/apps/ScribeAI/backend/prisma/schema.prisma": {
+      "count": 1,
+      "tokens": 1461,
+      "first_read": "2026-06-11T00:27:03.023Z"
+    },
+    "/apps/ScribeAI/frontend/.env.local": {
+      "count": 2,
+      "tokens": 0,
+      "first_read": "2026-06-11T00:29:49.321Z"
+    },
+    "/apps/ScribeAI/frontend/config/audio.ts": {
+      "count": 1,
+      "tokens": 0,
+      "first_read": "2026-06-11T00:29:57.574Z"
     }
   },
   "files_written": [
@@ -59,17 +124,78 @@
       "action": "create",
       "tokens": 908,
       "at": "2026-06-11T00:17:21.566Z"
+    },
+    {
+      "file": "/root/.claude/projects/-apps-ScribeAI/memory/features_audio_processing.md",
+      "action": "create",
+      "tokens": 440,
+      "at": "2026-06-11T00:24:15.196Z"
+    },
+    {
+      "file": "/root/.claude/projects/-apps-ScribeAI/memory/feature_recording_duration.md",
+      "action": "create",
+      "tokens": 135,
+      "at": "2026-06-11T00:24:15.399Z"
+    },
+    {
+      "file": "/root/.claude/projects/-apps-ScribeAI/memory/MEMORY.md",
+      "action": "edit",
+      "tokens": 89,
+      "at": "2026-06-11T00:24:19.803Z"
+    },
+    {
+      "file": "/apps/ScribeAI/README.md",
+      "action": "edit",
+      "tokens": 213,
+      "at": "2026-06-11T00:27:14.333Z"
+    },
+    {
+      "file": "/apps/ScribeAI/README.md",
+      "action": "edit",
+      "tokens": 86,
+      "at": "2026-06-11T00:27:19.485Z"
+    },
+    {
+      "file": "/apps/ScribeAI/README.md",
+      "action": "edit",
+      "tokens": 204,
+      "at": "2026-06-11T00:27:26.154Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/config/audio.ts",
+      "action": "create",
+      "tokens": 552,
+      "at": "2026-06-11T00:29:58.249Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/lib/audio-settings.ts",
+      "action": "create",
+      "tokens": 586,
+      "at": "2026-06-11T00:30:00.328Z"
+    },
+    {
+      "file": "/apps/ScribeAI/frontend/lib/store.ts",
+      "action": "create",
+      "tokens": 1103,
+      "at": "2026-06-11T00:30:01.350Z"
     }
   ],
   "edit_counts": {
     "../../root/.cursor/projects/apps-ScribeAI/assets/c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-f2c88af0-8692-427f-8cf3-edd43eba31d9.png": 1,
     "frontend/lib/recording-duration.ts": 1,
     "frontend/hooks/use-recording-duration.ts": 1,
-    "frontend/components/transcript-feed.tsx": 3
+    "frontend/components/transcript-feed.tsx": 3,
+    "../../root/.claude/projects/-apps-ScribeAI/memory/features_audio_processing.md": 1,
+    "../../root/.claude/projects/-apps-ScribeAI/memory/feature_recording_duration.md": 1,
+    "../../root/.claude/projects/-apps-ScribeAI/memory/MEMORY.md": 1,
+    "README.md": 3,
+    "frontend/config/audio.ts": 1,
+    "frontend/lib/audio-settings.ts": 1,
+    "frontend/lib/store.ts": 1
   },
-  "anatomy_hits": 1,
-  "anatomy_misses": 3,
-  "repeated_reads_warned": 1,
+  "anatomy_hits": 11,
+  "anatomy_misses": 5,
+  "repeated_reads_warned": 5,
   "cerebrum_warnings": 0,
-  "stop_count": 2
+  "stop_count": 6
 }

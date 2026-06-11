@@ -1303,3 +1303,16 @@
 | 08:17 | Created frontend/components/transcript-feed.tsx | — | ~891 |
 | 08:17 | Created frontend/components/transcript-feed.tsx | — | ~908 |
 | 08:17 | Session end: 6 writes across 4 files (c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-f2c88af0-8692-427f-8cf3-edd43eba31d9.png, recording-duration.ts, use-recording-duration.ts, transcript-feed.tsx) | 4 reads | ~3972 tok |
+| 08:22 | Session end: 6 writes across 4 files (c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-f2c88af0-8692-427f-8cf3-edd43eba31d9.png, recording-duration.ts, use-recording-duration.ts, transcript-feed.tsx) | 4 reads | ~3972 tok |
+| 08:24 | Created ../../root/.claude/projects/-apps-ScribeAI/memory/features_audio_processing.md | — | ~411 |
+| 08:24 | Created ../../root/.claude/projects/-apps-ScribeAI/memory/feature_recording_duration.md | — | ~126 |
+| 08:24 | Edited ../../root/.claude/projects/-apps-ScribeAI/memory/MEMORY.md | 1→3 lines | ~83 |
+| 08:24 | Session end: 9 writes across 7 files (c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-f2c88af0-8692-427f-8cf3-edd43eba31d9.png, recording-duration.ts, use-recording-duration.ts, transcript-feed.tsx, features_audio_processing.md) | 13 reads | ~18475 tok |
+| 08:27 | Edited README.md | expanded (+27 lines) | ~199 |
+| 08:27 | Edited README.md | expanded (+7 lines) | ~81 |
+| 08:27 | Edited README.md | 8→10 lines | ~190 |
+| 08:27 | Session end: 12 writes across 8 files (c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-f2c88af0-8692-427f-8cf3-edd43eba31d9.png, recording-duration.ts, use-recording-duration.ts, transcript-feed.tsx, features_audio_processing.md) | 15 reads | ~23039 tok |
+| 08:29 | Created frontend/config/audio.ts | — | ~552 |
+| 08:30 | Created frontend/lib/audio-settings.ts | — | ~586 |
+| 08:30 | Created frontend/lib/store.ts | — | ~1103 |
+| 08:30 | Session end: 15 writes across 11 files (c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-f2c88af0-8692-427f-8cf3-edd43eba31d9.png, recording-duration.ts, use-recording-duration.ts, transcript-feed.tsx, features_audio_processing.md) | 17 reads | ~26390 tok |
