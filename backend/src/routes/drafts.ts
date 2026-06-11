@@ -350,7 +350,13 @@ router.post('/:id/promote', verifyUser, async (req: AuthenticatedRequest, res) =
     res.status(201).json({ success: true, transcript: result });
   } catch (err) {
     console.error('[Drafts] promote error:', err);
-    res.status(500).json({ error: 'Failed to promote draft' });
+    const message =
+      err && typeof err === 'object' && 'code' in err && err.code === 'P2000'
+        ? '转录内容过长，数据库字段配置异常，请执行最新数据库迁移'
+        : err instanceof Error
+          ? err.message
+          : 'Failed to promote draft';
+    res.status(500).json({ error: message });
   }
 });
 

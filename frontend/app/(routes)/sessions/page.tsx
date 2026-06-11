@@ -18,6 +18,10 @@ import { TemplateSelectModal } from '@/components/template-select-modal';
 import { OrgIdentityModal, promptOrgIdentityIfNeeded } from '@/components/org-identity-modal';
 import type { SummaryTemplateItem } from '@/lib/summary-templates';
 import { RecordingPanel } from '@/components/recording-panel';
+import { TranscriptSearchPanel } from '@/components/transcript-search-panel';
+import { SessionSearchResults } from '@/components/session-search-results';
+import { searchSessions, type SessionSearchResult } from '@/lib/session-search-api';
+import { Input } from '@/components/ui/input';
 
 interface SessionListItem {
   id: string;
@@ -62,6 +66,10 @@ export default function SessionsPage() {
     templateId: string;
     regenerate: boolean;
   } | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<SessionSearchResult[]>([]);
+  const [searching, setSearching] = useState(false);
+  const [searchMode, setSearchMode] = useState(false);
 
   const hasCachedSummary = (session: SessionListItem, tid: string) =>
     session.summaryTemplateIds?.includes(tid) ?? false;
@@ -77,6 +85,30 @@ export default function SessionsPage() {
     });
     return res.json() as Promise<SessionDetail>;
   };
+
+  useEffect(() => {
+    const q = searchQuery.trim();
+    if (!q) {
+      setSearchResults([]);
+      setSearchMode(false);
+      setSearching(false);
+      return;
+    }
+
+    setSearching(true);
+    setSearchMode(true);
+    const timer = setTimeout(() => {
+      void searchSessions(q)
+        .then((data) => setSearchResults(data.results))
+        .catch((err) => {
+          console.error(err);
+          setSearchResults([]);
+        })
+        .finally(() => setSearching(false));
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -311,7 +343,28 @@ export default function SessionsPage() {
 
   return (
     <div className="p-6 space-y-6">
-      {sessions.length === 0 && !loading ? (
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+        <Input
+          placeholder="搜索标题、转录全文、纪要内容…"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="max-w-xl"
+        />
+        {searchQuery.trim() && (
+          <Button variant="ghost" size="sm" onClick={() => setSearchQuery('')}>
+            清除搜索
+          </Button>
+        )}
+      </div>
+
+      {searchMode ? (
+        <SessionSearchResults
+          query={searchQuery}
+          results={searchResults}
+          searching={searching}
+          onOpenSession={(id) => void openSession(id)}
+        />
+      ) : sessions.length === 0 && !loading ? (
         <div className="flex items-center justify-center h-64 text-muted-foreground">
           <p className="text-lg">暂无会议记录</p>
         </div>
@@ -382,11 +435,13 @@ export default function SessionsPage() {
               </DialogDescription>
             </DialogHeader>
 
-            <textarea
-              className="w-full h-64 p-4 mt-4 border rounded"
-              readOnly
-              value={currentSession.fullText}
-            />
+            <div className="mt-4">
+              <TranscriptSearchPanel
+                text={currentSession.fullText || ''}
+                summaryText={currentSession.summary}
+                summaryLabel={currentSession.templateName ?? undefined}
+              />
+            </div>
 
             <RecordingPanel
               scope="sessions"

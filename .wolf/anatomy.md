@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-06-11T01:24:40.549Z
-> Files: 287 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-06-11T01:43:04.519Z
+> Files: 297 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../root/.claude/plans/
 
@@ -33,6 +33,7 @@
 
 - `c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_12d9ad4864617a6acf9b7a6aff0dc44-18ba5176-b2f7-46b1-8575-dc2ceb9388df.png` (~6488 tok)
 - `c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-352b296d-98cc-4580-9db2-ae4a319b5216.png` (~13884 tok)
+- `c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-35454b60-0e81-42f6-b599-47d22822f0b8.png` (~7865 tok)
 - `c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-4c02e8b9-cf66-426a-95c2-5901c8acdc09.png` (~6366 tok)
 - `c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-54026190-d945-4ddf-9bae-1ba519897844.png` (~19552 tok)
 - `c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-58e2039a-2ccd-405c-9271-750d0c503e75.png` (~30257 tok)
@@ -175,6 +176,14 @@
 
 - `migration.sql` — AlterTable (~47 tok)
 
+## backend/prisma/migrations/20260611180000_fulltext_search/
+
+- `migration.sql` — Full-text search indexes (ngram parser for Chinese) (~66 tok)
+
+## backend/prisma/migrations/20260611200000_transcript_fulltext_text/
+
+- `migration.sql` — Transcript.fullText 须为 TEXT，否则从草稿转正时长转录会超出 varchar(191) 限制 (~31 tok)
+
 ## backend/scripts/
 
 - `migrate-manager-settings.sh` (~226 tok)
@@ -206,6 +215,9 @@
 - `operation-trace.ts` — 结构化写入运行 trace（异步，不阻塞主流程） (~672 tok)
 - `prisma.ts` — Declares prisma (~40 tok)
 - `recording-http.ts` — Exports respondRecordingMeta, streamRecording, retranscribeRecording (~506 tok)
+- `search-snippet.ts` — 提取命中关键词附近的摘要片段 (~552 tok)
+- `session-search-fallback.ts` — LIKE 回退检索（无 FULLTEXT 索引或查询失败时使用） (~974 tok)
+- `session-search.ts` — Exports SearchHitField, SessionSearchHit, SessionSearchResult, searchUserSessions (~1745 tok)
 - `socket-auth.ts` — 校验 Socket 握手 token，与 REST verifyUser 逻辑一致 (~326 tok)
 - `storage-config.ts` — Exports STORAGE_CONFIG (~155 tok)
 - `summary-export-docx.ts` — Exports markdownToDocxBuffer (~53 tok)
@@ -239,9 +251,9 @@
 
 - `authroutes.ts` — routes/auth.js (~1393 tok)
 - `downloads.ts` — API routes: GET (2 endpoints) (~346 tok)
-- `drafts.ts` — 列表：用户所有未转正的草稿 (~3179 tok)
+- `drafts.ts` — 列表：用户所有未转正的草稿 (~3240 tok)
 - `organizations.ts` — 列出当前用户绑定的组织及职务/职责信息 (~2042 tok)
-- `sessions.ts` — API routes: GET, POST (7 endpoints) (~5871 tok)
+- `sessions.ts` — API routes: GET, POST (8 endpoints) (~6052 tok)
 - `templates.ts` — 列出可用模板（系统 + 我的 + 已审核公共） (~3250 tok)
 - `transcript.ts` — API routes: POST (1 endpoints) (~260 tok)
 
@@ -264,7 +276,7 @@
 ## docs/
 
 - `会话纪要-Skills分析与集成建议.md` — ScribeAI 会话纪要 Skills 分析与集成建议 (~2839 tok)
-- `可扩展的功能或技术.md` — ScribeAI 可扩展的功能与技术建议 (~1092 tok)
+- `可扩展的功能或技术.md` — ScribeAI 可扩展的功能与技术建议 (~1110 tok)
 
 ## docs/skills/transcript-to-meeting-notes/
 
@@ -370,7 +382,7 @@
 
 ## frontend/app/(routes)/sessions/
 
-- `page.tsx` — 执行实际的生成逻辑（模板与身份已确定后调用） (~4556 tok)
+- `page.tsx` — 执行实际的生成逻辑（模板与身份已确定后调用） (~5087 tok)
 
 ## frontend/app/(routes)/sessions/[id]/summary/
 
@@ -417,12 +429,14 @@
 - `promote-draft-button.tsx` — PromoteDraftButton — renders modal (~693 tok)
 - `recording-controls.tsx` — VAD 状态指示器：显示一个小圆点 + 文字 (~1546 tok)
 - `recording-panel.tsx` — RecordingPanel (~1294 tok)
+- `session-search-results.tsx` — SessionSearchResults (~681 tok)
 - `sidebar.tsx` — Sidebar (~442 tok)
 - `summary-markdown.tsx` — SummaryMarkdown (~189 tok)
 - `summary-template-select.tsx` — 标记已有纪要的模板 ID (~639 tok)
 - `template-select-modal.tsx` — TemplateSelectModal — renders modal (~731 tok)
 - `theme-provider.tsx` — ThemeProvider (~87 tok)
 - `transcript-feed.tsx` — TranscriptFeed (~931 tok)
+- `transcript-search-panel.tsx` — TranscriptSearchPanel (~1220 tok)
 
 ## frontend/components/ui/
 
@@ -515,6 +529,8 @@
 - `recording-api.ts` — Exports RecordingScope, RecordingMeta, fetchRecordingMeta, loadRecordingBlobUrl + 2 more (~777 tok)
 - `recording-duration.ts` — 格式化录音时长：23秒 / 1分23秒 / 1小时43分23秒 (~103 tok)
 - `resolve-summary-template.ts` — 最终确定的 templateId (~314 tok)
+- `search-highlight.ts` — Exports escapeHtml, escapeRegExp, highlightPlainText, findMatchIndices (~296 tok)
+- `session-search-api.ts` — Exports SessionSearchHit, SessionSearchResult, searchSessions, SEARCH_FIELD_LABEL (~310 tok)
 - `session-storage.ts` — Exports Session, useSessionStore (~223 tok)
 - `session-summary.ts` — legacy 兼容 (~838 tok)
 - `socket.ts` — 携带 JWT 连接 Socket（未登录或无 token 时不连接） (~1377 tok)

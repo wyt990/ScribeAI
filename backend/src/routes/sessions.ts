@@ -23,6 +23,7 @@ import { writeOperationTrace } from '../lib/operation-trace';
 import { getRecordingMeta, removeRecordingAudio } from '../lib/audio-archive';
 import { respondRecordingMeta, retranscribeRecording, streamRecording } from '../lib/recording-http';
 import { getSttProviderLabel } from '../lib/asr-transcribe';
+import { searchUserSessions } from '../lib/session-search';
 
 const router = express.Router();
 
@@ -83,6 +84,24 @@ function summaryLookupFromBody(body: Record<string, unknown> | undefined): Summa
     summaryType: body?.summaryType ? String(body.summaryType) : null,
   };
 }
+
+router.get('/search', verifyUser, async (req: AuthenticatedRequest, res) => {
+  const userId = req.user!.id;
+  const q = typeof req.query.q === 'string' ? req.query.q.trim() : '';
+  const limit = Math.min(50, Math.max(1, Number(req.query.limit) || 30));
+
+  if (!q) {
+    return res.json({ query: '', results: [] });
+  }
+
+  try {
+    const results = await searchUserSessions(userId, q, limit);
+    res.json({ query: q, results });
+  } catch (err) {
+    console.error('[Sessions] search', err);
+    res.status(500).json({ error: 'Search failed' });
+  }
+});
 
 // Fetch all transcripts for user
 router.get("/", verifyUser, async (req: AuthenticatedRequest, res) => {
