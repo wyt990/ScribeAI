@@ -5,11 +5,17 @@ import { useEffect, useRef, useCallback, useState } from 'react';
 import { useRecordingStore, AudioMode } from '@/lib/store';
 import {
   getSocket, connectSocket, emitAudioChunk, emitStopRecording, emitStartRecording,
+  emitRecordingInterrupted, emitRecordingRecovered,
   incrementSegmentSeq, emitSegmentEnd, resetSegmentSeq, resetSegmentDisplay,
   DEFAULT_VAD_CONFIG, type VADConfig,
 } from '@/lib/socket';
 import { MicVAD } from '@ricky0123/vad-web';
 import { buildAudioPipeline, preloadRnnoiseWorklet, type AudioPipeline } from '@/lib/audio-pipeline';
+import {
+  acquireScreenWake,
+  releaseScreenWake,
+  reacquireScreenWakeIfNeeded,
+} from '@/lib/screen-wake';
 
 const VAD_ASSET_PATH = '/vad/';
 const VAD_WASM_PATH = '/vad/';
@@ -88,13 +94,19 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
     setAudioGainLive,
     clearTranscript,
     userId,
+    recordingId,
     setRecordingId,
+    setRecordingInterrupted,
   } = useRecordingStore();
 
   const statusRef = useRef(status);
   statusRef.current = status;
   const draftSyncRef = useRef(draftSync);
   draftSyncRef.current = draftSync;
+  const recordingIdRef = useRef(recordingId);
+  const userIdRef = useRef(userId);
+  recordingIdRef.current = recordingId;
+  userIdRef.current = userId;
 
   const audioGainRef = useRef(audioGain);
   const autoGainRef = useRef(autoGainEnabled);
@@ -110,41 +122,8 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
   const socketRef = useRef<ReturnType<typeof getSocket> | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const listenersAttachedRef = useRef(false);
-
-  const wakeLockRef = useRef<WakeLockSentinel | null>(null);
-
-  const requestWakeLock = useCallback(async () => {
-    if (!('wakeLock' in navigator)) return;
-    try {
-      await releaseWakeLock();
-      const sentinel = await navigator.wakeLock.request('screen');
-      wakeLockRef.current = sentinel;
-      sentinel.onrelease = () => {
-        wakeLockRef.current = null;
-      };
-    } catch (err) {
-      console.warn('[WakeLock] failed to acquire:', (err as Error)?.message);
-    }
-  }, []);
-
-  const releaseWakeLock = useCallback(async () => {
-    if (wakeLockRef.current) {
-      try {
-        await wakeLockRef.current.release();
-      } catch { /* ignore */ }
-      wakeLockRef.current = null;
-    }
-  }, []);
-
-  useEffect(() => {
-    const handleVisibility = () => {
-      if (document.visibilityState === 'visible' && status === 'recording') {
-        requestWakeLock();
-      }
-    };
-    document.addEventListener('visibilitychange', handleVisibility);
-    return () => document.removeEventListener('visibilitychange', handleVisibility);
-  }, [status, requestWakeLock]);
+  const streamMonitorCleanupRef = useRef<(() => void) | null>(null);
+  const interruptionHandledRef = useRef(false);
 
   const vadRef = useRef<any>(null);
   const vadConfigRef = useRef<VADConfig>(DEFAULT_VAD_CONFIG);
@@ -160,6 +139,7 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
   const [vadError, setVadError] = useState<string | null>(null);
   const [audioLevel, setAudioLevel] = useState(0);
   const [rnnoiseReady, setRnnoiseReady] = useState(false);
+  const [isRecovering, setIsRecovering] = useState(false);
 
   const audioContextRef = useRef<AudioContext | null>(null);
   const meterAnalyserRef = useRef<AnalyserNode | null>(null);
@@ -445,6 +425,274 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
     pipelineRef.current.setManualGain(audioGain);
   }, [audioGain, autoGainEnabled, status]);
 
+  const isPipelineHealthy = useCallback((): boolean => {
+    const raw = rawStreamRef.current;
+    const recorder = mediaRecorderRef.current;
+    if (!raw || !recorder) return false;
+
+    const audioTracks = raw.getAudioTracks();
+    if (audioTracks.length === 0) return false;
+    if (audioTracks.some((t) => t.readyState === 'ended' || t.muted)) return false;
+    if (recorder.state !== 'recording') return false;
+
+    const ctx = audioContextRef.current;
+    if (!ctx || ctx.state === 'closed') return false;
+
+    return true;
+  }, []);
+
+  const detachStreamMonitor = useCallback(() => {
+    streamMonitorCleanupRef.current?.();
+    streamMonitorCleanupRef.current = null;
+  }, []);
+
+  const handleSystemInterruption = useCallback((reason: string) => {
+    if (statusRef.current !== 'recording') return;
+    if (interruptionHandledRef.current) return;
+    interruptionHandledRef.current = true;
+
+    console.warn('[useAudioRecorder] system interruption:', reason);
+
+    try {
+      if (mediaRecorderRef.current?.state === 'recording') {
+        mediaRecorderRef.current.pause();
+      }
+    } catch {
+      /* ignore */
+    }
+
+    void pauseVAD();
+    stopAudioMeter();
+    void draftSyncRef.current?.flushDraft?.();
+    setRecordingInterrupted(true);
+    setStatus('paused');
+
+    const rid = recordingIdRef.current;
+    const uid = userIdRef.current;
+    if (rid && uid) {
+      emitRecordingInterrupted(rid, uid, reason);
+    }
+  }, [pauseVAD, stopAudioMeter, setRecordingInterrupted, setStatus]);
+
+  const attachStreamMonitor = useCallback((stream: MediaStream) => {
+    const cleanups: Array<() => void> = [];
+
+    for (const track of stream.getAudioTracks()) {
+      const onEnded = () => handleSystemInterruption('track-ended');
+      const onMute = () => {
+        if (track.muted) handleSystemInterruption('track-muted');
+      };
+      track.addEventListener('ended', onEnded);
+      track.addEventListener('mute', onMute);
+      cleanups.push(() => {
+        track.removeEventListener('ended', onEnded);
+        track.removeEventListener('mute', onMute);
+      });
+    }
+
+    const prevCleanup = streamMonitorCleanupRef.current;
+    streamMonitorCleanupRef.current = () => {
+      prevCleanup?.();
+      cleanups.forEach((fn) => fn());
+    };
+  }, [handleSystemInterruption]);
+
+  const wireMediaRecorder = useCallback((mediaRecorder: MediaRecorder) => {
+    mediaRecorder.ondataavailable = (event: BlobEvent) => {
+      try {
+        if (event.data && event.data.size > 0) {
+          chunksRef.current.push(event.data);
+          emitAudioChunk(event.data);
+        }
+      } catch (err) {
+        console.error('[useAudioRecorder] ondataavailable error', err);
+      }
+    };
+
+    mediaRecorder.onerror = (ev) => {
+      console.error('[useAudioRecorder] mediaRecorder error', ev);
+      handleSystemInterruption('media-recorder-error');
+    };
+
+    mediaRecorder.onstop = () => {
+      setStatus('processing');
+      setTimeout(() => {
+        setStatus('idle');
+        chunksRef.current = [];
+      }, 500);
+    };
+  }, [handleSystemInterruption, setStatus]);
+
+  const stopMediaRecorderQuietly = useCallback(() => {
+    const recorder = mediaRecorderRef.current;
+    if (!recorder || recorder.state === 'inactive') {
+      mediaRecorderRef.current = null;
+      return;
+    }
+    recorder.onstop = null;
+    try {
+      recorder.stop();
+    } catch {
+      /* ignore */
+    }
+    mediaRecorderRef.current = null;
+  }, []);
+
+  const teardownCapturePipeline = useCallback(async () => {
+    detachStreamMonitor();
+    stopMediaRecorderQuietly();
+    destroyPipeline();
+    stopRawStream();
+    vadPendingStreamRef.current = null;
+    await pauseVAD();
+  }, [detachStreamMonitor, stopMediaRecorderQuietly, destroyPipeline, stopRawStream, pauseVAD]);
+
+  const setupCapturePipeline = useCallback(async () => {
+    const rawStream = await acquireAudioStream(audioMode);
+    rawStreamRef.current = rawStream;
+    attachStreamMonitor(rawStream);
+
+    let audioContext = audioContextRef.current;
+    if (!audioContext || audioContext.state === 'closed') {
+      audioContext = new AudioContext();
+      audioContextRef.current = audioContext;
+    }
+    if (audioContext.state === 'suspended') {
+      await audioContext.resume();
+    }
+
+    const pipeline = await buildAudioPipeline({
+      rawStream,
+      audioContext,
+      gain: audioGainRef.current,
+      autoGain: autoGainRef.current,
+      noiseSuppression: noiseSuppressionRef.current,
+      onGainChange: (gain) => setAudioGainLive(gain),
+    });
+    pipelineRef.current = pipeline;
+
+    const processedStream = pipeline.processedStream;
+    streamRef.current = processedStream;
+    attachStreamMonitor(processedStream);
+
+    const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+      ? 'audio/webm;codecs=opus'
+      : MediaRecorder.isTypeSupported('audio/webm')
+      ? 'audio/webm'
+      : '';
+
+    const mediaRecorder = new MediaRecorder(processedStream, mimeType ? { mimeType } : undefined);
+    mediaRecorderRef.current = mediaRecorder;
+    wireMediaRecorder(mediaRecorder);
+
+    await startVAD(processedStream, audioContext);
+    mediaRecorder.start(1000);
+    startAudioMeter(pipeline.outputAnalyser);
+  }, [
+    audioMode,
+    attachStreamMonitor,
+    wireMediaRecorder,
+    startVAD,
+    startAudioMeter,
+    setAudioGainLive,
+  ]);
+
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState !== 'visible') return;
+
+      void reacquireScreenWakeIfNeeded(statusRef.current === 'recording');
+
+      if (statusRef.current === 'recording' && !isPipelineHealthy()) {
+        handleSystemInterruption('visibility-return');
+      }
+    };
+
+    const handleDeviceChange = () => {
+      if (statusRef.current === 'recording' && !isPipelineHealthy()) {
+        handleSystemInterruption('devicechange');
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibility);
+    navigator.mediaDevices?.addEventListener('devicechange', handleDeviceChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility);
+      navigator.mediaDevices?.removeEventListener('devicechange', handleDeviceChange);
+    };
+  }, [handleSystemInterruption, isPipelineHealthy]);
+
+  const recoverRecording = useCallback(async () => {
+    if (!isReady) {
+      setError?.('转录服务未连接，请稍候后重试');
+      return;
+    }
+    if (vadLoading || vadStatus === 'loading') {
+      setError?.('VAD 模型仍在加载，请稍候...');
+      return;
+    }
+    if (!vadRef.current && vadStatus !== 'error') {
+      setError?.('VAD 尚未就绪，请稍候后重试');
+      return;
+    }
+
+    setIsRecovering(true);
+    try {
+      setError?.(null);
+
+      if (!navigator.mediaDevices?.getUserMedia) {
+        setError?.('您的浏览器不支持录音功能');
+        return;
+      }
+
+      await teardownCapturePipeline();
+      interruptionHandledRef.current = false;
+
+      if (!socketRef.current) initSocket();
+      if (socketRef.current && !socketRef.current.connected) {
+        if (!connectSocket()) {
+          setError?.('未登录，无法恢复录音');
+          return;
+        }
+      }
+
+      await setupCapturePipeline();
+      void acquireScreenWake();
+      setRecordingInterrupted(false);
+      setStatus('recording');
+
+      const rid = recordingIdRef.current;
+      const uid = userIdRef.current;
+      if (rid && uid) {
+        emitRecordingRecovered(rid, uid);
+      }
+    } catch (err) {
+      console.error('[useAudioRecorder] recoverRecording error', err);
+      const message = (err as Error).message;
+      setError?.('无法恢复录音：' + message);
+      setRecordingInterrupted(true);
+      setStatus('paused');
+
+      const rid = recordingIdRef.current;
+      const uid = userIdRef.current;
+      if (rid && uid) {
+        emitRecordingRecovered(rid, uid, message);
+      }
+    } finally {
+      setIsRecovering(false);
+    }
+  }, [
+    isReady,
+    vadLoading,
+    vadStatus,
+    teardownCapturePipeline,
+    setupCapturePipeline,
+    initSocket,
+    setError,
+    setRecordingInterrupted,
+    setStatus,
+  ]);
+
   const startRecording = useCallback(async () => {
     if (isResetting) {
       console.warn('[useAudioRecorder] start prevented - resetting in progress');
@@ -472,6 +720,8 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
 
     try {
       setError?.(null);
+      interruptionHandledRef.current = false;
+      setRecordingInterrupted(false);
 
       if (!navigator.mediaDevices?.getUserMedia) {
         setError?.('您的浏览器不支持录音功能，请使用最新版 Chrome 或 Edge，并通过 HTTPS 访问。');
@@ -479,12 +729,8 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
         return;
       }
 
-      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-        mediaRecorderRef.current.stop();
-      }
-      destroyPipeline();
-      stopRawStream();
-      await pauseVAD();
+      await teardownCapturePipeline();
+      chunksRef.current = [];
 
       resetSegmentSeq();
       resetSegmentDisplay();
@@ -496,63 +742,6 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
       }
       await draftSync?.ensureDraft?.();
 
-      const rawStream = await acquireAudioStream(audioMode);
-      rawStreamRef.current = rawStream;
-
-      const audioContext = new AudioContext();
-      audioContextRef.current = audioContext;
-      if (audioContext.state === 'suspended') {
-        await audioContext.resume();
-      }
-
-      const pipeline = await buildAudioPipeline({
-        rawStream,
-        audioContext,
-        gain: audioGainRef.current,
-        autoGain: autoGainRef.current,
-        noiseSuppression: noiseSuppressionRef.current,
-        onGainChange: (gain) => setAudioGainLive(gain),
-      });
-      pipelineRef.current = pipeline;
-
-      const processedStream = pipeline.processedStream;
-      streamRef.current = processedStream;
-
-      const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
-        ? 'audio/webm;codecs=opus'
-        : MediaRecorder.isTypeSupported('audio/webm')
-        ? 'audio/webm'
-        : '';
-
-      const mediaRecorder = new MediaRecorder(processedStream, mimeType ? { mimeType } : undefined);
-      mediaRecorderRef.current = mediaRecorder;
-      chunksRef.current = [];
-
-      mediaRecorder.ondataavailable = (event: BlobEvent) => {
-        try {
-          if (event.data && event.data.size > 0) {
-            chunksRef.current.push(event.data);
-            emitAudioChunk(event.data);
-          }
-        } catch (err) {
-          console.error('[useAudioRecorder] ondataavailable error', err);
-        }
-      };
-
-      mediaRecorder.onerror = (ev) => {
-        console.error('[useAudioRecorder] mediaRecorder error', ev);
-        setError?.('Recording error occurred');
-        setStatus('idle');
-      };
-
-      mediaRecorder.onstop = () => {
-        setStatus('processing');
-        setTimeout(() => {
-          setStatus('idle');
-          chunksRef.current = [];
-        }, 500);
-      };
-
       if (!socketRef.current) initSocket();
       if (socketRef.current && !socketRef.current.connected) {
         if (!connectSocket()) {
@@ -562,38 +751,30 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
         }
       }
 
-      await startVAD(processedStream, audioContext);
-
-      mediaRecorder.start(1000);
-      startAudioMeter(pipeline.outputAnalyser);
-      requestWakeLock();
+      await setupCapturePipeline();
+      void acquireScreenWake();
       setStatus('recording');
     } catch (err) {
       console.error('[useAudioRecorder] startRecording error', err);
-      destroyPipeline();
-      stopRawStream();
+      await teardownCapturePipeline();
       setStatus('idle');
       setError?.('Failed to start recording: ' + (err as Error).message);
     }
   }, [
-    audioMode,
     initSocket,
     isReady,
     isResetting,
     setError,
     setStatus,
-    setAudioGainLive,
     userId,
     setRecordingId,
-    pauseVAD,
-    startVAD,
-    startAudioMeter,
+    setRecordingInterrupted,
     vadLoading,
     vadStatus,
     draftSync,
     preloadVAD,
-    destroyPipeline,
-    stopRawStream,
+    teardownCapturePipeline,
+    setupCapturePipeline,
   ]);
 
   const pauseRecording = useCallback(() => {
@@ -635,6 +816,10 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
         mediaRecorderRef.current.state !== 'inactive';
 
       try {
+        detachStreamMonitor();
+        interruptionHandledRef.current = false;
+        setRecordingInterrupted(false);
+
         if (recorderActive) {
           mediaRecorderRef.current!.stop();
         }
@@ -647,7 +832,7 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
         stopAudioMeter();
         void pauseVAD();
         void draftSyncRef.current?.flushDraft?.();
-        void releaseWakeLock();
+        void releaseScreenWake();
 
         if (vadRef.current) {
           setVadStatus('ready');
@@ -661,7 +846,7 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
         setStatus('idle');
       }
     },
-    [pauseVAD, stopAudioMeter, releaseWakeLock, setStatus, destroyPipeline, stopRawStream]
+    [pauseVAD, stopAudioMeter, setStatus, destroyPipeline, stopRawStream, detachStreamMonitor, setRecordingInterrupted]
   );
 
   const stopRecording = useCallback(() => {
@@ -691,7 +876,7 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
         if (wasActive) {
           finalizeActiveRecording({ notifyBackend: true });
         } else {
-          void releaseWakeLock();
+          void releaseScreenWake();
         }
 
         void destroyVAD();
@@ -707,7 +892,7 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
         console.error('[useAudioRecorder] cleanup error', err);
       }
     };
-  }, [initSocket, destroyVAD, finalizeActiveRecording, releaseWakeLock]);
+  }, [initSocket, destroyVAD, finalizeActiveRecording]);
 
   const resetRecording = useCallback(() => {
     setIsResetting(true);
@@ -727,10 +912,14 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
 
       stopAudioMeter();
       void pauseVAD();
-      releaseWakeLock();
+      void releaseScreenWake();
       if (vadRef.current) {
         setVadStatus('ready');
       }
+
+      detachStreamMonitor();
+      interruptionHandledRef.current = false;
+      setRecordingInterrupted(false);
 
       resetSegmentSeq();
       resetSegmentDisplay();
@@ -743,18 +932,20 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
     };
 
     cleanup();
-  }, [setStatus, clearTranscript, setRecordingId, pauseVAD, stopAudioMeter, destroyPipeline, stopRawStream]);
+  }, [setStatus, clearTranscript, setRecordingId, pauseVAD, stopAudioMeter, destroyPipeline, stopRawStream, detachStreamMonitor, setRecordingInterrupted]);
 
   return {
     startRecording,
     pauseRecording,
     resumeRecording,
+    recoverRecording,
     stopRecording,
     resetRecording,
     isRecording: status === 'recording',
     isPaused: status === 'paused',
     isProcessing: status === 'processing',
     isResetting,
+    isRecovering,
     isReady,
     isConnecting,
     vadLoading,

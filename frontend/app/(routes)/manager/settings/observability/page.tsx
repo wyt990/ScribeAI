@@ -10,6 +10,8 @@ type TraceSummary = {
   total24h: number;
   errors24h: number;
   recordingStarts: number;
+  recordingInterruptions: number;
+  recordingRecoveries: number;
   vadSegmentCount: number;
   avgSttSegmentMs: number | null;
   avgSummaryGenerateMs: number | null;
@@ -103,6 +105,12 @@ export default function ManagerObservabilityPage() {
           <StatCard label="24h Trace 总数" value={String(summary.total24h)} />
           <StatCard label="24h 错误数" value={String(summary.errors24h)} highlight={summary.errors24h > 0} />
           <StatCard label="录音开始次数" value={String(summary.recordingStarts)} />
+          <StatCard
+            label="录音中断次数"
+            value={String(summary.recordingInterruptions)}
+            highlight={summary.recordingInterruptions > 0}
+          />
+          <StatCard label="录音恢复次数" value={String(summary.recordingRecoveries)} />
           <StatCard label="STT 段数 (VAD/切片)" value={String(summary.vadSegmentCount)} />
           <StatCard label="STT 段均耗时" value={formatMs(summary.avgSttSegmentMs)} />
           <StatCard label="纪要生成均耗时" value={formatMs(summary.avgSummaryGenerateMs)} />

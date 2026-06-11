@@ -8,6 +8,7 @@ import { transcribeAudioBuffer } from "../lib/asr-transcribe";
 import { authenticateSocketHandshake } from "../lib/socket-auth";
 import { writeOperationTrace } from "../lib/operation-trace";
 import { assertSocketUser } from "./socket-types";
+import { attachRecordingInterruptHandlers } from "./recording-trace-handlers";
 
 const STT_PROVIDER = process.env.STT_PROVIDER || "deepgram";
 const SLICE_INTERVAL_MS = (parseInt(process.env.ASR_SLICE_INTERVAL || "5", 10)) * 1000;
@@ -186,6 +187,13 @@ function handleDeepgram(socket: Socket) {
       deepgramLive.finish();
     }
   });
+
+  attachRecordingInterruptHandlers(socket, () => ({
+    currentUserId,
+    currentRecordingId,
+    recordingStartedAt,
+    provider: "deepgram",
+  }));
 }
 
 // ============================================================
@@ -496,4 +504,11 @@ function handleOpenAIASR(socket: Socket) {
     }
     resetSessionBuffers();
   });
+
+  attachRecordingInterruptHandlers(socket, () => ({
+    currentUserId,
+    currentRecordingId,
+    recordingStartedAt,
+    provider: "openai_asr",
+  }));
 }

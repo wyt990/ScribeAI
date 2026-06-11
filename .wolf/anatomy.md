@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-06-11T01:43:04.519Z
-> Files: 297 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-06-11T03:18:37.768Z
+> Files: 299 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../root/.claude/plans/
 
@@ -262,7 +262,7 @@
 - `audit.ts` — API routes: GET (1 endpoints) (~194 tok)
 - `content.ts` — API routes: GET, DELETE, POST (10 endpoints) (~2317 tok)
 - `index.ts` — Declares router (~185 tok)
-- `observability.ts` — API routes: GET (2 endpoints) (~816 tok)
+- `observability.ts` — API routes: GET (2 endpoints) (~889 tok)
 - `settings.ts` — API routes: GET, PATCH, POST (3 endpoints) (~598 tok)
 - `stats.ts` — API routes: GET (1 endpoints) (~478 tok)
 - `templates.ts` — API routes: GET, PUT, POST (4 endpoints) (~1069 tok)
@@ -270,8 +270,9 @@
 
 ## backend/src/socket/
 
+- `recording-trace-handlers.ts` — 来电/系统抢占等录音中断与恢复的可观测性埋点 (~577 tok)
 - `socket-types.ts` — 校验当前 socket 已鉴权，且（若提供）payload userId 与 token 一致 (~190 tok)
-- `socket.ts` — Safety flush interval: flush accumulated audio to ASR every N ms even in VAD mode (~4744 tok)
+- `socket.ts` — Safety flush interval: flush accumulated audio to ASR every N ms even in VAD mode (~4811 tok)
 
 ## docs/
 
@@ -342,7 +343,7 @@
 
 ## frontend/app/(routes)/manager/settings/observability/
 
-- `page.tsx` — CATEGORIES — renders table (~2040 tok)
+- `page.tsx` — CATEGORIES — renders table (~2058 tok)
 
 ## frontend/app/(routes)/manager/settings/security/
 
@@ -427,7 +428,7 @@
 - `org-identity-modal.tsx` — 若用户有组织则弹出身份选择，否则直接返回 null (~852 tok)
 - `org-identity-select.tsx` — 加载用户组织列表，供生成纪要前判断是否需要弹出身份选择 (~739 tok)
 - `promote-draft-button.tsx` — PromoteDraftButton — renders modal (~693 tok)
-- `recording-controls.tsx` — VAD 状态指示器：显示一个小圆点 + 文字 (~1546 tok)
+- `recording-controls.tsx` — VAD 状态指示器：显示一个小圆点 + 文字 (~2098 tok)
 - `recording-panel.tsx` — RecordingPanel (~1294 tok)
 - `session-search-results.tsx` — SessionSearchResults (~681 tok)
 - `sidebar.tsx` — Sidebar (~442 tok)
@@ -500,7 +501,7 @@
 
 ## frontend/hooks/
 
-- `use-audio-recorder.ts` — /hooks/use-audio-recorder.ts (~6552 tok)
+- `use-audio-recorder.ts` — /hooks/use-audio-recorder.ts (~8196 tok)
 - `use-can-promote.ts` — Exports useCanPromote (~155 tok)
 - `use-draft-sync.ts` — 草稿自动保存：转录追加防抖写入，状态变更立即写入，离开页面时刷盘 (~1201 tok)
 - `use-is-logged-in.ts` — 客户端检测是否已登录（localStorage 中有 token） (~83 tok)
@@ -522,19 +523,20 @@
 - `copy-to-clipboard.ts` — 复制文本；移动端在异步操作后 clipboard API 常因失去用户手势而失败，提供 textarea 回退 (~243 tok)
 - `dashboard-nav.ts` — Exports DashboardNavItem, DASHBOARD_NAV_ITEMS (~151 tok)
 - `draft-api.ts` — Exports DraftStatus, Draft, fetchDrafts, fetchActiveDraft + 8 more (~1013 tok)
-- `manager-api.ts` — Exports ManagerUser, ManagerSettingItem, managerApi (~1138 tok)
+- `manager-api.ts` — Exports ManagerUser, ManagerSettingItem, managerApi (~1160 tok)
 - `navigation.ts` — Android WebView 壳应用（MainActivity 自定义 UA） (~358 tok)
 - `pcm-capture.ts` — Target frame size in samples (at 16kHz) (~1350 tok)
 - `promote-and-summarize.ts` — Exports PromoteAndSummarizeOptions, PromoteAndSummarizeResult, promoteDraftAndGenerateSummary (~382 tok)
 - `recording-api.ts` — Exports RecordingScope, RecordingMeta, fetchRecordingMeta, loadRecordingBlobUrl + 2 more (~777 tok)
 - `recording-duration.ts` — 格式化录音时长：23秒 / 1分23秒 / 1小时43分23秒 (~103 tok)
 - `resolve-summary-template.ts` — 最终确定的 templateId (~314 tok)
+- `screen-wake.ts` — 防止录音时熄屏：优先 Screen Wake Lock API，iOS / 失败时用静音循环视频兜底。 (~1004 tok)
 - `search-highlight.ts` — Exports escapeHtml, escapeRegExp, highlightPlainText, findMatchIndices (~296 tok)
 - `session-search-api.ts` — Exports SessionSearchHit, SessionSearchResult, searchSessions, SEARCH_FIELD_LABEL (~310 tok)
 - `session-storage.ts` — Exports Session, useSessionStore (~223 tok)
 - `session-summary.ts` — legacy 兼容 (~838 tok)
-- `socket.ts` — 携带 JWT 连接 Socket（未登录或无 token 时不连接） (~1377 tok)
-- `store.ts` — 自动增益实时刷新显示，不写入 localStorage (~1137 tok)
+- `socket.ts` — 携带 JWT 连接 Socket（未登录或无 token 时不连接） (~1514 tok)
+- `store.ts` — 来电等系统抢占麦克风导致的中断（与手动暂停区分） (~1218 tok)
 - `summary-export.ts` — API routes: GET (1 endpoints) (~405 tok)
 - `summary-templates.ts` — Exports SummaryTemplateItem, SummaryTemplateDetail, TemplateDraft, fetchSummaryTemplates + 11 more (~1474 tok)
 - `summary-types.ts` — Exports SUMMARY_TYPES, SummaryType, DEFAULT_SUMMARY_TYPE, SUMMARY_TYPE_LABELS, isSummaryType (~128 tok)

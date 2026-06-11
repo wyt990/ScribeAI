@@ -31,12 +31,16 @@ router.get('/summary', async (_req, res) => {
 
     const segmentCount = traces.filter((t) => t.action === 'stt.segment').length;
     const recordingStarts = traces.filter((t) => t.action === 'recording.start').length;
+    const recordingInterruptions = traces.filter((t) => t.action === 'recording.interrupted').length;
+    const recordingRecoveries = traces.filter((t) => t.action === 'recording.recovered').length;
 
     res.json({
       windowHours: 24,
       total24h,
       errors24h,
       recordingStarts,
+      recordingInterruptions,
+      recordingRecoveries,
       vadSegmentCount: segmentCount,
       avgSttSegmentMs: avg('stt.segment'),
       avgSummaryGenerateMs: avg('summary.generate'),

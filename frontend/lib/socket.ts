@@ -89,6 +89,28 @@ export const emitStopRecording = () => {
   }
 };
 
+export const emitRecordingInterrupted = (
+  recordingId: string,
+  userId: string,
+  reason: string
+) => {
+  const s = getSocket();
+  if (s.connected) {
+    s.emit('recording-interrupted', { recordingId, userId, reason });
+  }
+};
+
+export const emitRecordingRecovered = (
+  recordingId: string,
+  userId: string,
+  error?: string
+) => {
+  const s = getSocket();
+  if (s.connected) {
+    s.emit('recording-recovered', { recordingId, userId, error });
+  }
+};
+
 export const onTranscript = (callback: (text: string) => void) => {
   const s = getSocket();
   s.on('transcript', callback);

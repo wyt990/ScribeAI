@@ -35,6 +35,8 @@ interface RecordingState {
   audioGain: number;
   autoGainEnabled: boolean;
   noiseSuppressionEnabled: boolean;
+  /** 来电等系统抢占麦克风导致的中断（与手动暂停区分） */
+  recordingInterrupted: boolean;
 
   setStatus: (status: RecordingStatus) => void;
   setAudioMode: (mode: AudioMode) => void;
@@ -52,6 +54,7 @@ interface RecordingState {
   setAudioGainLive: (gain: number) => void;
   setAutoGainEnabled: (enabled: boolean) => void;
   setNoiseSuppressionEnabled: (enabled: boolean) => void;
+  setRecordingInterrupted: (interrupted: boolean) => void;
   clearDraft: () => void;
   reset: () => void;
   setTranscript: (text: string | string[]) => void;
@@ -71,6 +74,7 @@ export const useRecordingStore = create<RecordingState>((set) => ({
   audioGain: persistedAudio.audioGain,
   autoGainEnabled: persistedAudio.autoGainEnabled,
   noiseSuppressionEnabled: persistedAudio.noiseSuppressionEnabled,
+  recordingInterrupted: false,
 
   setStatus: (status) => set({ status }),
   setAudioMode: (mode) => set({ audioMode: mode }),
@@ -98,6 +102,7 @@ export const useRecordingStore = create<RecordingState>((set) => ({
     const next = saveAudioSettings({ noiseSuppressionEnabled: enabled });
     set({ noiseSuppressionEnabled: next.noiseSuppressionEnabled });
   },
+  setRecordingInterrupted: (interrupted) => set({ recordingInterrupted: interrupted }),
   clearDraft: () => set({ draftId: null, draftTitle: null }),
   reset: () => set({
     status: 'idle',
@@ -109,6 +114,7 @@ export const useRecordingStore = create<RecordingState>((set) => ({
     draftId: null,
     draftTitle: null,
     activeOrgId: null,
+    recordingInterrupted: false,
   }),
 
   setTranscript: (text) => set({

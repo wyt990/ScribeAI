@@ -79,6 +79,8 @@ export const managerApi = {
         total24h: number;
         errors24h: number;
         recordingStarts: number;
+        recordingInterruptions: number;
+        recordingRecoveries: number;
         vadSegmentCount: number;
         avgSttSegmentMs: number | null;
         avgSummaryGenerateMs: number | null;

@@ -1,8 +1,19 @@
 import { Play, Pause, Square, Loader2, Mic, MicOff, Loader } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { useRecordingStore } from '@/lib/store';
 import { useAudioRecorder } from '@/hooks/use-audio-recorder';
+import { isIOSDevice } from '@/lib/screen-wake';
 
 /** VAD 状态指示器：显示一个小圆点 + 文字 */
 function VADBadge({ status, error }: { status: 'inactive' | 'loading' | 'ready' | 'error'; error?: string | null }) {
@@ -69,14 +80,16 @@ type RecordingControlsProps = {
 };
 
 export function RecordingControls({ ensureDraft, flushDraft }: RecordingControlsProps) {
-  const { status } = useRecordingStore();
+  const { status, recordingInterrupted } = useRecordingStore();
   const {
     startRecording,
     pauseRecording,
     resumeRecording,
+    recoverRecording,
     stopRecording,
     isReady,
     isConnecting,
+    isRecovering,
     vadStatus,
     vadError,
     vadLoading,
@@ -137,7 +150,7 @@ export function RecordingControls({ ensureDraft, flushDraft }: RecordingControls
             </>
           )}
 
-          {isPaused && (
+          {isPaused && !recordingInterrupted && (
             <>
               <Button size="lg" className="flex-1" onClick={resumeRecording}>
                 <Play className="w-5 h-5 mr-2" />
@@ -150,6 +163,13 @@ export function RecordingControls({ ensureDraft, flushDraft }: RecordingControls
             </>
           )}
 
+          {isPaused && recordingInterrupted && (
+            <Button variant="destructive" size="lg" className="flex-1" onClick={stopRecording}>
+              <Square className="w-5 h-5 mr-2" />
+              停止录音
+            </Button>
+          )}
+
           {isProcessing && (
             <Button disabled size="lg" className="flex-1">
               <Loader2 className="w-5 h-5 mr-2 animate-spin" />
@@ -159,7 +179,43 @@ export function RecordingControls({ ensureDraft, flushDraft }: RecordingControls
         </div>
 
         {isRecording && <VolumeMeter level={audioLevel} />}
+
+        {(isRecording || isPaused) && isIOSDevice() && (
+          <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
+            iPhone 可能仍会按系统自动锁定熄屏。建议：设置 → 显示与亮度 → 自动锁定 → 永不（或较长时间），并关闭低电量模式；录音时尽量保持本页在前台。
+          </p>
+        )}
       </CardContent>
+
+      <AlertDialog open={recordingInterrupted}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>录音已中断</AlertDialogTitle>
+            <AlertDialogDescription>
+              录音已被系统中断（如来电抢占麦克风）。挂断后请点击「继续录音」重新获取麦克风，此前已转写的内容会保留在同一会话中。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={stopRecording}>停止录音</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={isRecovering || !isReady || vadLoading}
+              onClick={(e) => {
+                e.preventDefault();
+                void recoverRecording();
+              }}
+            >
+              {isRecovering ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  正在恢复...
+                </>
+              ) : (
+                '继续录音'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 }
