@@ -7,6 +7,7 @@ export type Draft = {
   status: DraftStatus;
   audioMode: string;
   recordingId: string | null;
+  hasRecording?: boolean;
   orgId: string | null;
   startedAt: string;
   lastSavedAt: string;

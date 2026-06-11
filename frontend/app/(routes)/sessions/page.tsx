@@ -17,12 +17,14 @@ import { resolveSummaryTemplate } from '@/lib/resolve-summary-template';
 import { TemplateSelectModal } from '@/components/template-select-modal';
 import { OrgIdentityModal, promptOrgIdentityIfNeeded } from '@/components/org-identity-modal';
 import type { SummaryTemplateItem } from '@/lib/summary-templates';
+import { RecordingPanel } from '@/components/recording-panel';
 
 interface SessionListItem {
   id: string;
   title: string;
   createdAt: string;
   hasSummary?: boolean;
+  hasRecording?: boolean;
   summaryTemplateIds?: string[];
   summaryTemplates?: { id: string; name: string }[];
 }
@@ -323,11 +325,18 @@ export default function SessionsPage() {
                   <span className="min-w-0 truncate">
                     {new Date(session.createdAt).toLocaleString()}
                   </span>
-                  {session.hasSummary && (
-                    <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-normal text-primary">
-                      已有纪要
-                    </span>
-                  )}
+                  <span className="shrink-0 flex gap-1">
+                    {session.hasRecording && (
+                      <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-normal text-muted-foreground">
+                        有录音
+                      </span>
+                    )}
+                    {session.hasSummary && (
+                      <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-normal text-primary">
+                        已有纪要
+                      </span>
+                    )}
+                  </span>
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -377,6 +386,14 @@ export default function SessionsPage() {
               className="w-full h-64 p-4 mt-4 border rounded"
               readOnly
               value={currentSession.fullText}
+            />
+
+            <RecordingPanel
+              scope="sessions"
+              id={currentSession.id}
+              onRetranscribed={(fullText) => {
+                setCurrentSession((prev) => (prev ? { ...prev, fullText } : prev));
+              }}
             />
 
             <div className="mt-4 space-y-3">

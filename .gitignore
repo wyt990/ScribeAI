@@ -3,6 +3,8 @@ docs/
 # Android 发布包（由 assembleRelease 后手动复制）
 backend/downloads/*.apk
 
+backend/uploads/*
+
 # Android Client 编译产物与缓存
 Android-Client/.gradle/
 Android-Client/**/build/

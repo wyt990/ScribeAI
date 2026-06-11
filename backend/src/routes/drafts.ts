@@ -3,6 +3,10 @@ import { prisma } from '../lib/prisma';
 import { verifyUser, AuthenticatedRequest } from '../middleware/authMiddleware';
 import { generateSummary } from '../lib/summary-llm';
 import { buildSuggestSessionTitlePrompt } from '../prompts/suggest-session-title';
+import { getRecordingMeta, removeRecordingAudio } from '../lib/audio-archive';
+import { respondRecordingMeta, retranscribeRecording, streamRecording } from '../lib/recording-http';
+import { getSttProviderLabel } from '../lib/asr-transcribe';
+import { writeOperationTrace } from '../lib/operation-trace';
 
 const router = express.Router();
 
@@ -29,11 +33,19 @@ router.get('/', verifyUser, async (req: AuthenticatedRequest, res) => {
         startedAt: true,
         lastSavedAt: true,
         orgId: true,
+        recordingId: true,
         createdAt: true,
         updatedAt: true,
       },
     });
-    res.json(drafts);
+    res.json(
+      drafts.map((draft) => ({
+        ...draft,
+        hasRecording: draft.recordingId
+          ? getRecordingMeta(userId, draft.recordingId).exists
+          : false,
+      }))
+    );
   } catch (err) {
     console.error('[Drafts] list error:', err);
     res.status(500).json({ error: 'Failed to fetch drafts' });
@@ -157,6 +169,93 @@ router.patch('/:id', verifyUser, async (req: AuthenticatedRequest, res) => {
   }
 });
 
+router.get('/:id/recording/meta', verifyUser, async (req: AuthenticatedRequest, res) => {
+  const userId = req.user!.id;
+  const { id } = req.params;
+  try {
+    const draft = await prisma.draft.findUnique({
+      where: { id },
+      select: { userId: true, recordingId: true },
+    });
+    if (!draft || draft.userId !== userId) {
+      return res.status(404).json({ error: 'Draft not found' });
+    }
+    respondRecordingMeta(res, userId, draft.recordingId);
+  } catch (err) {
+    console.error('[Drafts] recording meta', err);
+    res.status(500).json({ error: 'Failed to load recording meta' });
+  }
+});
+
+router.get('/:id/recording', verifyUser, async (req: AuthenticatedRequest, res) => {
+  const userId = req.user!.id;
+  const { id } = req.params;
+  try {
+    const draft = await prisma.draft.findUnique({
+      where: { id },
+      select: { userId: true, recordingId: true },
+    });
+    if (!draft || draft.userId !== userId) {
+      return res.status(404).json({ error: 'Draft not found' });
+    }
+    streamRecording(res, userId, draft.recordingId);
+  } catch (err) {
+    console.error('[Drafts] recording stream', err);
+    res.status(500).json({ error: 'Failed to stream recording' });
+  }
+});
+
+router.post('/:id/retranscribe', verifyUser, async (req: AuthenticatedRequest, res) => {
+  const userId = req.user!.id;
+  const { id } = req.params;
+  const started = Date.now();
+
+  try {
+    const draft = await prisma.draft.findUnique({
+      where: { id },
+      select: { id: true, userId: true, recordingId: true },
+    });
+    if (!draft || draft.userId !== userId) {
+      return res.status(404).json({ error: 'Draft not found' });
+    }
+
+    const { fullText, durationMs } = await retranscribeRecording(userId, draft.recordingId);
+    await prisma.draft.update({
+      where: { id },
+      data: { fullText, lastSavedAt: new Date() },
+    });
+
+    writeOperationTrace({
+      userId,
+      category: 'recording',
+      action: 'retranscribe',
+      target: id,
+      durationMs,
+      detail: { provider: getSttProviderLabel(), recordingId: draft.recordingId, scope: 'draft' },
+    });
+
+    res.json({ success: true, fullText, durationMs });
+  } catch (err) {
+    writeOperationTrace({
+      userId,
+      category: 'recording',
+      action: 'retranscribe',
+      status: 'error',
+      target: id,
+      durationMs: Date.now() - started,
+      detail: {
+        provider: getSttProviderLabel(),
+        scope: 'draft',
+        error: err instanceof Error ? err.message : String(err),
+      },
+    });
+    console.error('[Drafts] retranscribe', err);
+    res.status(500).json({
+      error: err instanceof Error ? err.message : 'Failed to retranscribe recording',
+    });
+  }
+});
+
 /** 删除草稿 */
 router.delete('/:id', verifyUser, async (req: AuthenticatedRequest, res) => {
   const userId = req.user!.id;
@@ -165,6 +264,9 @@ router.delete('/:id', verifyUser, async (req: AuthenticatedRequest, res) => {
     const draft = await prisma.draft.findUnique({ where: { id } });
     if (!draft || draft.userId !== userId) {
       return res.status(404).json({ error: 'Draft not found' });
+    }
+    if (draft.recordingId) {
+      removeRecordingAudio(userId, draft.recordingId);
     }
     await prisma.draft.delete({ where: { id } });
     res.json({ success: true });
@@ -237,6 +339,7 @@ router.post('/:id/promote', verifyUser, async (req: AuthenticatedRequest, res) =
           title: title.trim(),
           fullText,
           recordedAt: draft.startedAt,
+          recordingId: draft.recordingId,
           orgId: draft.orgId,
         },
       });

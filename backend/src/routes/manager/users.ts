@@ -4,6 +4,7 @@ import { prisma } from '../../lib/prisma';
 import { AuthenticatedRequest } from '../../middleware/authMiddleware';
 import { requireManager } from '../../middleware/managerMiddleware';
 import { writeAuditLog } from '../../lib/audit-log';
+import { removeUserRecordingDir } from '../../lib/audio-archive';
 
 const router = Router();
 router.use(requireManager);
@@ -156,6 +157,8 @@ router.delete('/:id', async (req: AuthenticatedRequest, res) => {
       await tx.summarySkill.deleteMany({ where: { userId: uid } });
       await tx.user.delete({ where: { id: uid } });
     });
+
+    removeUserRecordingDir(req.params.id);
 
     await writeAuditLog({
       userId: req.user!.id,

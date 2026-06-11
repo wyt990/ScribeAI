@@ -14,7 +14,8 @@ import downloads from "./routes/downloads"
 import organizations from "./routes/organizations"
 import { ensureSystemSummaryTemplates } from "./lib/summary-template-seed";
 import { ensureSystemSettingsSeeded, applySettingsToEnv } from "./lib/system-settings";
-import { createSocketServer, startStaleSessionCleanup } from "./socket/socket";
+import { createSocketServer } from "./socket/socket";
+import { startAudioCleanup } from "./lib/audio-cleanup";
 import { startDraftCleanup } from "./lib/draft-cleanup";
 import { startOperationTraceCleanup } from "./lib/operation-trace-cleanup";
 import {
@@ -42,8 +43,7 @@ server.keepAliveTimeout = 65_000;
 // Initialize socket server
 createSocketServer(server);
 
-// Start stale session cleanup timer (safety net for orphaned uploads)
-startStaleSessionCleanup();
+startAudioCleanup();
 startDraftCleanup();
 startOperationTraceCleanup();
 

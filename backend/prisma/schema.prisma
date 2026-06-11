@@ -122,17 +122,20 @@ model Draft {
 }
 
 model Transcript {
-  id        String   @id @default(uuid())
-  userId    String
-  title     String
-  fullText  String? // store entire transcript here
-  recordedAt DateTime? // 会议录音开始时间（从草稿 startedAt 同步）
-  orgId     String? // 从草稿带入的组织上下文
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(uuid())
+  userId      String
+  title       String
+  fullText    String? // store entire transcript here
+  recordedAt  DateTime? // 会议录音开始时间（从草稿 startedAt 同步）
+  recordingId String? // 完整录音归档 ID（uploads/{userId}/{recordingId}/recording.webm）
+  orgId       String? // 从草稿带入的组织上下文
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   user       User      @relation(fields: [userId], references: [id])
   summaries  Summary[]
+
+  @@index([recordingId])
 }
 
 model SummarySkill {

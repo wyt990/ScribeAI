@@ -20,6 +20,9 @@ import {
 } from '../lib/summary-template-service';
 import { parseSummaryType, DEFAULT_SUMMARY_TYPE } from '../prompts/build-summary-prompt';
 import { writeOperationTrace } from '../lib/operation-trace';
+import { getRecordingMeta, removeRecordingAudio } from '../lib/audio-archive';
+import { respondRecordingMeta, retranscribeRecording, streamRecording } from '../lib/recording-http';
+import { getSttProviderLabel } from '../lib/asr-transcribe';
 
 const router = express.Router();
 
@@ -92,6 +95,7 @@ router.get("/", verifyUser, async (req: AuthenticatedRequest, res) => {
         id: true,
         title: true,
         createdAt: true,
+        recordingId: true,
         summaries: {
           select: {
             summaryType: true,
@@ -102,8 +106,9 @@ router.get("/", verifyUser, async (req: AuthenticatedRequest, res) => {
       },
     });
     res.json(
-      transcripts.map(({ summaries, ...rest }) => ({
+      transcripts.map(({ summaries, recordingId, ...rest }) => ({
         ...rest,
+        hasRecording: recordingId ? getRecordingMeta(userId, recordingId).exists : false,
         hasSummary: summaries.length > 0,
         summaryTypes: summaries.map(
           (s) => s.template.legacySummaryType ?? s.summaryType
@@ -119,6 +124,92 @@ router.get("/", verifyUser, async (req: AuthenticatedRequest, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to fetch transcripts' });
+  }
+});
+
+router.get('/:id/recording/meta', verifyUser, async (req: AuthenticatedRequest, res) => {
+  const userId = req.user!.id;
+  const { id } = req.params;
+  try {
+    const transcript = await prisma.transcript.findUnique({
+      where: { id },
+      select: { userId: true, recordingId: true },
+    });
+    if (!transcript || transcript.userId !== userId) {
+      return res.status(404).json({ error: 'Transcript not found' });
+    }
+    respondRecordingMeta(res, userId, transcript.recordingId);
+  } catch (err) {
+    console.error('[Sessions] recording meta', err);
+    res.status(500).json({ error: 'Failed to load recording meta' });
+  }
+});
+
+router.get('/:id/recording', verifyUser, async (req: AuthenticatedRequest, res) => {
+  const userId = req.user!.id;
+  const { id } = req.params;
+  try {
+    const transcript = await prisma.transcript.findUnique({
+      where: { id },
+      select: { userId: true, recordingId: true },
+    });
+    if (!transcript || transcript.userId !== userId) {
+      return res.status(404).json({ error: 'Transcript not found' });
+    }
+    streamRecording(res, userId, transcript.recordingId);
+  } catch (err) {
+    console.error('[Sessions] recording stream', err);
+    res.status(500).json({ error: 'Failed to stream recording' });
+  }
+});
+
+router.post('/:id/retranscribe', verifyUser, async (req: AuthenticatedRequest, res) => {
+  const userId = req.user!.id;
+  const { id } = req.params;
+  const started = Date.now();
+
+  try {
+    const transcript = await prisma.transcript.findUnique({
+      where: { id },
+      select: { id: true, userId: true, recordingId: true },
+    });
+    if (!transcript || transcript.userId !== userId) {
+      return res.status(404).json({ error: 'Transcript not found' });
+    }
+
+    const { fullText, durationMs } = await retranscribeRecording(userId, transcript.recordingId);
+    await prisma.transcript.update({
+      where: { id },
+      data: { fullText },
+    });
+
+    writeOperationTrace({
+      userId,
+      category: 'recording',
+      action: 'retranscribe',
+      target: id,
+      durationMs,
+      detail: { provider: getSttProviderLabel(), recordingId: transcript.recordingId },
+    });
+
+    res.json({ success: true, fullText, durationMs });
+  } catch (err) {
+    writeOperationTrace({
+      userId,
+      category: 'recording',
+      action: 'retranscribe',
+      status: 'error',
+      target: id,
+      durationMs: Date.now() - started,
+      detail: {
+        provider: getSttProviderLabel(),
+        error: err instanceof Error ? err.message : String(err),
+      },
+    });
+    console.error('[Sessions] retranscribe', err);
+    res.status(500).json({
+      error: err instanceof Error ? err.message : 'Failed to retranscribe recording',
+    });
   }
 });
 
@@ -139,6 +230,7 @@ router.get("/:id", verifyUser, async (req: AuthenticatedRequest, res) => {
         fullText: true,
         createdAt: true,
         orgId: true,
+        recordingId: true,
         summaries: {
           select: {
             text: true,
@@ -167,6 +259,12 @@ router.get("/:id", verifyUser, async (req: AuthenticatedRequest, res) => {
       fullText: transcript.fullText,
       createdAt: transcript.createdAt,
       orgId: transcript.orgId,
+      hasRecording: transcript.recordingId
+        ? getRecordingMeta(userId, transcript.recordingId).exists
+        : false,
+      recordingFinalized: transcript.recordingId
+        ? getRecordingMeta(userId, transcript.recordingId).finalized
+        : false,
       summary: matched?.text ?? null,
       summaryType: matched
         ? matched.template.legacySummaryType ?? matched.summaryType
@@ -520,7 +618,7 @@ router.delete("/:id", verifyUser, async (req: AuthenticatedRequest, res) => {
   try {
     const transcript = await prisma.transcript.findUnique({
       where: { id },
-      select: { id: true, userId: true },
+      select: { id: true, userId: true, recordingId: true },
     });
 
     if (!transcript || transcript.userId !== userId) {
@@ -531,6 +629,10 @@ router.delete("/:id", verifyUser, async (req: AuthenticatedRequest, res) => {
       await tx.summary.deleteMany({ where: { transcriptId: id } });
       await tx.transcript.delete({ where: { id } });
     });
+
+    if (transcript.recordingId) {
+      removeRecordingAudio(transcript.userId, transcript.recordingId);
+    }
 
     res.json({ success: true });
   } catch (err) {

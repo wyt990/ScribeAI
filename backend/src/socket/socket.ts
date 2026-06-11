@@ -3,6 +3,8 @@ import fs from "fs";
 import path from "path";
 import { createClient, LiveTranscriptionEvents } from "@deepgram/sdk";
 import { STORAGE_CONFIG } from "../lib/storage-config";
+import { appendRecordingChunk, finalizeRecordingArchive } from "../lib/audio-archive";
+import { transcribeAudioBuffer } from "../lib/asr-transcribe";
 import { authenticateSocketHandshake } from "../lib/socket-auth";
 import { writeOperationTrace } from "../lib/operation-trace";
 import { assertSocketUser } from "./socket-types";
@@ -125,7 +127,7 @@ function handleDeepgram(socket: Socket) {
 
       // Save chunk to hierarchical storage
       if (currentUserId && currentRecordingId) {
-        saveAudioChunk(buffer, currentUserId, currentRecordingId);
+        appendRecordingChunk(currentUserId, currentRecordingId, buffer);
       }
     } catch (error) {
       console.error("Error processing audio chunk:", error);
@@ -160,6 +162,7 @@ function handleDeepgram(socket: Socket) {
   socket.on("stop-recording", () => {
     if (!assertSocketUser(socket, currentUserId ?? undefined)) return;
     if (currentUserId && currentRecordingId) {
+      finalizeRecordingArchive(currentUserId, currentRecordingId);
       writeOperationTrace({
         userId: currentUserId,
         category: "recording",
@@ -171,7 +174,6 @@ function handleDeepgram(socket: Socket) {
           transcriptEmitCount,
         },
       });
-      removeSessionDir(currentUserId, currentRecordingId);
       currentUserId = null;
       currentRecordingId = null;
       recordingStartedAt = null;
@@ -182,9 +184,6 @@ function handleDeepgram(socket: Socket) {
   socket.on("disconnect", () => {
     if (deepgramLive && isDeepgramOpen) {
       deepgramLive.finish();
-    }
-    if (currentUserId && currentRecordingId) {
-      removeSessionDir(currentUserId, currentRecordingId);
     }
   });
 }
@@ -207,11 +206,6 @@ const VAD_CONFIG = {
 // OpenAI ASR (VAD-driven or timer-based)
 // ============================================================
 function handleOpenAIASR(socket: Socket) {
-  const apiKey = process.env.OPENAI_ASR_API_KEY || "";
-  const baseUrl = process.env.OPENAI_ASR_BASE_URL || "http://10.100.0.130:8000/v1";
-  const model = process.env.OPENAI_ASR_MODEL || "funasr-nano";
-  const language = process.env.OPENAI_ASR_LANGUAGE || "zh";
-
   // Buffer management
   let accumulatedChunks: Buffer[] = [];
   let lastFlushedChunkIndex = 0;         // non-VAD / final tail fallback
@@ -254,7 +248,7 @@ function handleOpenAIASR(socket: Socket) {
         audioBuffer = Buffer.concat(accumulatedChunks);
       }
 
-      const text = await transcribeAudio(audioBuffer, baseUrl, apiKey, model, language);
+      const text = await transcribeAudioBuffer(audioBuffer);
       if (!text?.trim()) return;
 
       const trimmed = text.trim();
@@ -360,7 +354,7 @@ function handleOpenAIASR(socket: Socket) {
 
       // Save chunk to hierarchical storage
       if (currentUserId && currentRecordingId) {
-        saveAudioChunk(buffer, currentUserId, currentRecordingId);
+        appendRecordingChunk(currentUserId, currentRecordingId, buffer);
       }
 
       // Fallback timer (only when VAD is disabled)
@@ -393,12 +387,8 @@ function handleOpenAIASR(socket: Socket) {
     // console.log(`[VAD] segment-end seq=${seq}, wav=${audio.byteLength}B`);
     const started = Date.now();
     try {
-      const text = await transcribeAudio(
+      const text = await transcribeAudioBuffer(
         Buffer.from(audio),
-        baseUrl,
-        apiKey,
-        model,
-        language,
         "audio/wav",
         "wav"
       );
@@ -462,6 +452,7 @@ function handleOpenAIASR(socket: Socket) {
 
     // Clean up session directory
     if (currentUserId && currentRecordingId) {
+      finalizeRecordingArchive(currentUserId, currentRecordingId);
       writeOperationTrace({
         userId: currentUserId,
         category: "recording",
@@ -474,7 +465,6 @@ function handleOpenAIASR(socket: Socket) {
           vadSegmentCount,
         },
       });
-      removeSessionDir(currentUserId, currentRecordingId);
       currentUserId = null;
       currentRecordingId = null;
       recordingStartedAt = null;
@@ -505,147 +495,5 @@ function handleOpenAIASR(socket: Socket) {
       safetyTimer = null;
     }
     resetSessionBuffers();
-    // Clean up if stop-recording wasn't called (page crash)
-    if (currentUserId && currentRecordingId) {
-      removeSessionDir(currentUserId, currentRecordingId);
-    }
   });
-}
-
-// ============================================================
-// Shared helpers
-// ============================================================
-
-/**
- * Send audio buffer to an OpenAI-compatible ASR endpoint.
- */
-async function transcribeAudio(
-  audioBuffer: Buffer,
-  baseUrl: string,
-  apiKey: string,
-  model: string,
-  language: string,
-  mimeType = "audio/webm;codecs=opus",
-  extension = "webm"
-): Promise<string> {
-  const formData = new FormData();
-  const blob = new Blob([new Uint8Array(audioBuffer)], { type: mimeType });
-  formData.append("file", blob, `audio-${Date.now()}.${extension}`);
-  formData.append("model", model);
-  formData.append("language", language);
-
-  const response = await fetch(`${baseUrl}/audio/transcriptions`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: formData,
-  });
-
-  if (!response.ok) {
-    const errBody = await response.text().catch(() => "");
-    throw new Error(`ASR API error ${response.status}: ${errBody}`);
-  }
-
-  const data = await response.json();
-  return data.text || "";
-}
-
-/**
- * Save audio chunk to hierarchical storage: uploads/{userId}/{recordingId}/
- */
-function saveAudioChunk(buffer: Buffer, userId: string, recordingId: string) {
-  try {
-    const sessionDir = path.join(STORAGE_CONFIG.uploadsDir, userId, recordingId);
-    if (!fs.existsSync(sessionDir)) {
-      fs.mkdirSync(sessionDir, { recursive: true });
-    }
-    const filePath = path.join(sessionDir, `chunk-${Date.now()}.webm`);
-    fs.writeFileSync(filePath, buffer);
-  } catch (error) {
-    console.error("Error saving audio chunk:", error);
-  }
-}
-
-/**
- * Remove an entire session directory.
- */
-function removeSessionDir(userId: string, recordingId: string) {
-  try {
-    const sessionDir = path.join(STORAGE_CONFIG.uploadsDir, userId, recordingId);
-    if (fs.existsSync(sessionDir)) {
-      fs.rmSync(sessionDir, { recursive: true, force: true });
-      // console.log(`[Cleanup] Removed session dir: ${userId}/${recordingId}`);
-    }
-  } catch (error) {
-    console.error("Error removing session dir:", error);
-  }
-}
-
-/**
- * Scan uploads/ and remove session directories that haven't been modified
- * within the stale threshold. Runs on a timer as a safety net for sessions
- * left behind after a page crash or server restart.
- */
-function cleanupStaleSessions() {
-  const { uploadsDir, staleThresholdMinutes } = STORAGE_CONFIG;
-  if (!fs.existsSync(uploadsDir)) return;
-
-  const now = Date.now();
-  const thresholdMs = staleThresholdMinutes * 60 * 1000;
-  let cleanedCount = 0;
-
-  try {
-    const userDirs = fs.readdirSync(uploadsDir);
-    for (const userId of userDirs) {
-      const userDir = path.join(uploadsDir, userId);
-      if (!fs.statSync(userDir).isDirectory()) continue;
-
-      const sessionDirs = fs.readdirSync(userDir);
-      for (const sessionId of sessionDirs) {
-        const sessionDir = path.join(userDir, sessionId);
-        if (!fs.statSync(sessionDir).isDirectory()) continue;
-
-        // Find the latest mtime across all files in the session dir
-        let latestMtime = fs.statSync(sessionDir).mtimeMs;
-        try {
-          const files = fs.readdirSync(sessionDir);
-          for (const file of files) {
-            const fileStat = fs.statSync(path.join(sessionDir, file));
-            if (fileStat.mtimeMs > latestMtime) latestMtime = fileStat.mtimeMs;
-          }
-        } catch { /* single file may be deleted during iteration */ }
-
-        if (now - latestMtime > thresholdMs) {
-          fs.rmSync(sessionDir, { recursive: true, force: true });
-          cleanedCount++;
-        }
-      }
-
-      // Remove empty user dirs
-      try {
-        if (fs.readdirSync(userDir).length === 0) {
-          fs.rmdirSync(userDir);
-        }
-      } catch { /* ignore */ }
-    }
-  } catch (error) {
-    console.error("[StaleCleanup] Error during scan:", error);
-  }
-
-  if (cleanedCount > 0) {
-    // console.log(`[StaleCleanup] Cleaned ${cleanedCount} stale session(s)`);
-  }
-}
-
-/**
- * Start periodic stale session cleanup. Called once at server startup.
- */
-export function startStaleSessionCleanup() {
-  const { cleanupIntervalMinutes } = STORAGE_CONFIG;
-  const intervalMs = cleanupIntervalMinutes * 60 * 1000;
-
-  cleanupStaleSessions(); // run once on startup
-  setInterval(cleanupStaleSessions, intervalMs);
-  // console.log(`[StaleCleanup] Scheduled every ${cleanupIntervalMinutes} minute(s)`);
 }

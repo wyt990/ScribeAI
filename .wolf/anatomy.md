@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-06-11T01:04:26.131Z
-> Files: 280 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-06-11T01:24:40.549Z
+> Files: 287 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../root/.claude/plans/
 
@@ -113,7 +113,7 @@
 
 ## backend/prisma/
 
-- `schema.prisma` (~1599 tok)
+- `schema.prisma` (~1632 tok)
 
 ## backend/prisma/migrations/
 
@@ -171,6 +171,10 @@
 
 - `migration.sql` — CreateTable (~228 tok)
 
+## backend/prisma/migrations/20260611160000_transcript_recording_id/
+
+- `migration.sql` — AlterTable (~47 tok)
+
 ## backend/scripts/
 
 - `migrate-manager-settings.sh` (~226 tok)
@@ -193,13 +197,17 @@
 
 ## backend/src/lib/
 
+- `asr-transcribe.ts` — 对音频 Buffer 执行批量转写（用于归档重跑 ASR） (~774 tok)
+- `audio-archive.ts` — 追加 MediaRecorder 音频块到完整 recording.webm (~1999 tok)
+- `audio-cleanup.ts` — Exports startAudioCleanup (~375 tok)
 - `audit-log.ts` — Exports writeAuditLog (~141 tok)
 - `openai-api-url.ts` — Join OpenAI-compatible API paths without duplicating slashes. (~239 tok)
 - `operation-trace-cleanup.ts` — Exports cleanupOperationTraces, startOperationTraceCleanup (~428 tok)
 - `operation-trace.ts` — 结构化写入运行 trace（异步，不阻塞主流程） (~672 tok)
 - `prisma.ts` — Declares prisma (~40 tok)
+- `recording-http.ts` — Exports respondRecordingMeta, streamRecording, retranscribeRecording (~506 tok)
 - `socket-auth.ts` — 校验 Socket 握手 token，与 REST verifyUser 逻辑一致 (~326 tok)
-- `storage-config.ts` — Exports STORAGE_CONFIG (~91 tok)
+- `storage-config.ts` — Exports STORAGE_CONFIG (~155 tok)
 - `summary-export-docx.ts` — Exports markdownToDocxBuffer (~53 tok)
 - `summary-export-pdf.ts` — Exports markdownToPdfBuffer (~1040 tok)
 - `summary-guardrails.ts` — 每次生成纪要时追加的系统级护栏（用户模板不可覆盖） (~74 tok)
@@ -209,7 +217,7 @@
 - `summary-template-constants.ts` — 系统内置模板固定 ID（与 migration seed 一致） (~243 tok)
 - `summary-template-seed.ts` — 确保系统内置 Skill/Template 存在（迁移未跑或内容需同步时） (~783 tok)
 - `summary-template-service.ts` — 解析生成纪要所用模板：templateId 优先，其次 legacy summaryType，最后用户默认或系统默认 (~2822 tok)
-- `system-settings.ts` — 启动时从 DB 覆盖 process.env（在 ensure 之后调用） (~2167 tok)
+- `system-settings.ts` — 启动时从 DB 覆盖 process.env（在 ensure 之后调用） (~2256 tok)
 
 ## backend/src/middleware/
 
@@ -231,32 +239,32 @@
 
 - `authroutes.ts` — routes/auth.js (~1393 tok)
 - `downloads.ts` — API routes: GET (2 endpoints) (~346 tok)
-- `drafts.ts` — 列表：用户所有未转正的草稿 (~2224 tok)
+- `drafts.ts` — 列表：用户所有未转正的草稿 (~3179 tok)
 - `organizations.ts` — 列出当前用户绑定的组织及职务/职责信息 (~2042 tok)
-- `sessions.ts` — API routes: GET, POST (6 endpoints) (~4833 tok)
+- `sessions.ts` — API routes: GET, POST (7 endpoints) (~5871 tok)
 - `templates.ts` — 列出可用模板（系统 + 我的 + 已审核公共） (~3250 tok)
 - `transcript.ts` — API routes: POST (1 endpoints) (~260 tok)
 
 ## backend/src/routes/manager/
 
 - `audit.ts` — API routes: GET (1 endpoints) (~194 tok)
-- `content.ts` — API routes: GET, DELETE (4 endpoints) (~742 tok)
+- `content.ts` — API routes: GET, DELETE, POST (10 endpoints) (~2317 tok)
 - `index.ts` — Declares router (~185 tok)
 - `observability.ts` — API routes: GET (2 endpoints) (~816 tok)
 - `settings.ts` — API routes: GET, PATCH, POST (3 endpoints) (~598 tok)
 - `stats.ts` — API routes: GET (1 endpoints) (~478 tok)
 - `templates.ts` — API routes: GET, PUT, POST (4 endpoints) (~1069 tok)
-- `users.ts` — API routes: GET, POST, PUT, DELETE (6 endpoints) (~1574 tok)
+- `users.ts` — API routes: GET, POST, PUT, DELETE (6 endpoints) (~1593 tok)
 
 ## backend/src/socket/
 
 - `socket-types.ts` — 校验当前 socket 已鉴权，且（若提供）payload userId 与 token 一致 (~190 tok)
-- `socket.ts` — Safety flush interval: flush accumulated audio to ASR every N ms even in VAD mode (~6135 tok)
+- `socket.ts` — Safety flush interval: flush accumulated audio to ASR every N ms even in VAD mode (~4744 tok)
 
 ## docs/
 
 - `会话纪要-Skills分析与集成建议.md` — ScribeAI 会话纪要 Skills 分析与集成建议 (~2839 tok)
-- `可扩展的功能或技术.md` — ScribeAI 可扩展的功能与技术建议 (~1043 tok)
+- `可扩展的功能或技术.md` — ScribeAI 可扩展的功能与技术建议 (~1092 tok)
 
 ## docs/skills/transcript-to-meeting-notes/
 
@@ -297,7 +305,7 @@
 
 ## frontend/app/(routes)/drafts/
 
-- `page.tsx` — STATUS_VARIANT — renders modal (~1599 tok)
+- `page.tsx` — STATUS_VARIANT — renders modal (~2003 tok)
 
 ## frontend/app/(routes)/manager/
 
@@ -310,7 +318,7 @@
 
 ## frontend/app/(routes)/manager/content/
 
-- `page.tsx` — ManagerContentPage (~746 tok)
+- `page.tsx` — ManagerContentPage — renders modal (~1296 tok)
 
 ## frontend/app/(routes)/manager/mobile/
 
@@ -362,7 +370,7 @@
 
 ## frontend/app/(routes)/sessions/
 
-- `page.tsx` — 执行实际的生成逻辑（模板与身份已确定后调用） (~4363 tok)
+- `page.tsx` — 执行实际的生成逻辑（模板与身份已确定后调用） (~4556 tok)
 
 ## frontend/app/(routes)/sessions/[id]/summary/
 
@@ -408,6 +416,7 @@
 - `org-identity-select.tsx` — 加载用户组织列表，供生成纪要前判断是否需要弹出身份选择 (~739 tok)
 - `promote-draft-button.tsx` — PromoteDraftButton — renders modal (~693 tok)
 - `recording-controls.tsx` — VAD 状态指示器：显示一个小圆点 + 文字 (~1546 tok)
+- `recording-panel.tsx` — RecordingPanel (~1294 tok)
 - `sidebar.tsx` — Sidebar (~442 tok)
 - `summary-markdown.tsx` — SummaryMarkdown (~189 tok)
 - `summary-template-select.tsx` — 标记已有纪要的模板 ID (~639 tok)
@@ -498,11 +507,12 @@
 - `auto-gain.ts` — Exports AutoGainController, createAutoGainController (~498 tok)
 - `copy-to-clipboard.ts` — 复制文本；移动端在异步操作后 clipboard API 常因失去用户手势而失败，提供 textarea 回退 (~243 tok)
 - `dashboard-nav.ts` — Exports DashboardNavItem, DASHBOARD_NAV_ITEMS (~151 tok)
-- `draft-api.ts` — Exports DraftStatus, Draft, fetchDrafts, fetchActiveDraft + 8 more (~1006 tok)
+- `draft-api.ts` — Exports DraftStatus, Draft, fetchDrafts, fetchActiveDraft + 8 more (~1013 tok)
 - `manager-api.ts` — Exports ManagerUser, ManagerSettingItem, managerApi (~1138 tok)
 - `navigation.ts` — Android WebView 壳应用（MainActivity 自定义 UA） (~358 tok)
 - `pcm-capture.ts` — Target frame size in samples (at 16kHz) (~1350 tok)
 - `promote-and-summarize.ts` — Exports PromoteAndSummarizeOptions, PromoteAndSummarizeResult, promoteDraftAndGenerateSummary (~382 tok)
+- `recording-api.ts` — Exports RecordingScope, RecordingMeta, fetchRecordingMeta, loadRecordingBlobUrl + 2 more (~777 tok)
 - `recording-duration.ts` — 格式化录音时长：23秒 / 1分23秒 / 1小时43分23秒 (~103 tok)
 - `resolve-summary-template.ts` — 最终确定的 templateId (~314 tok)
 - `session-storage.ts` — Exports Session, useSessionStore (~223 tok)

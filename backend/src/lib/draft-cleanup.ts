@@ -1,4 +1,5 @@
 import { prisma } from './prisma';
+import { removeRecordingAudio } from './audio-archive';
 
 const EXPIRE_DAYS = parseInt(process.env.DRAFT_EXPIRE_DAYS || '30', 10);
 
@@ -10,6 +11,20 @@ export async function cleanupExpiredDrafts() {
   cutoff.setDate(cutoff.getDate() - EXPIRE_DAYS);
 
   try {
+    const expired = await prisma.draft.findMany({
+      where: {
+        status: 'stopped',
+        lastSavedAt: { lt: cutoff },
+      },
+      select: { userId: true, recordingId: true },
+    });
+
+    for (const draft of expired) {
+      if (draft.recordingId) {
+        removeRecordingAudio(draft.userId, draft.recordingId);
+      }
+    }
+
     const result = await prisma.draft.deleteMany({
       where: {
         status: 'stopped',

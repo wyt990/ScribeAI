@@ -23,6 +23,7 @@ import {
   type Draft,
   type DraftStatus,
 } from '@/lib/draft-api';
+import { RecordingPanel } from '@/components/recording-panel';
 
 const STATUS_VARIANT: Record<DraftStatus, 'default' | 'secondary' | 'outline'> = {
   recording: 'default',
@@ -37,6 +38,7 @@ export default function DraftsPage() {
   const [promoteTarget, setPromoteTarget] = useState<Draft | null>(null);
   const [promoteTitle, setPromoteTitle] = useState('');
   const [promoting, setPromoting] = useState(false);
+  const [detailTarget, setDetailTarget] = useState<Draft | null>(null);
 
   const loadDrafts = async () => {
     try {
@@ -124,6 +126,9 @@ export default function DraftsPage() {
                   {draftPreviewText(draft.fullText)}
                 </p>
                 <div className="flex flex-row flex-wrap gap-2">
+                  <Button variant="outline" className="flex-1" onClick={() => setDetailTarget(draft)}>
+                    查看详情
+                  </Button>
                   {(draft.status === 'recording' || draft.status === 'paused' || draft.status === 'stopped') && (
                     <Button className="flex-1" onClick={() => handleContinue(draft.id)}>
                       继续录音
@@ -143,6 +148,36 @@ export default function DraftsPage() {
           ))}
         </div>
       )}
+
+      <Dialog open={!!detailTarget} onOpenChange={(open) => !open && setDetailTarget(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{detailTarget?.title}</DialogTitle>
+            <DialogDescription>
+              {detailTarget && `最后保存：${new Date(detailTarget.lastSavedAt).toLocaleString()}`}
+            </DialogDescription>
+          </DialogHeader>
+          {detailTarget && (
+            <>
+              <textarea
+                className="w-full h-48 p-3 border rounded text-sm"
+                readOnly
+                value={detailTarget.fullText || ''}
+              />
+              <RecordingPanel
+                scope="drafts"
+                id={detailTarget.id}
+                onRetranscribed={(fullText) => {
+                  setDetailTarget((prev) => (prev ? { ...prev, fullText } : prev));
+                  setDrafts((prev) =>
+                    prev.map((d) => (d.id === detailTarget.id ? { ...d, fullText } : d))
+                  );
+                }}
+              />
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={!!promoteTarget} onOpenChange={(open) => !open && setPromoteTarget(null)}>
         <DialogContent>
