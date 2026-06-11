@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-06-10T10:40:02.584Z
-> Files: 261 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-06-10T23:58:58.265Z
+> Files: 265 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../root/.claude/plans/
 
@@ -262,7 +262,7 @@
 - `eslint.config.mjs` — ESLint flat configuration (~124 tok)
 - `next.config.ts` — Declares buildId (~456 tok)
 - `package-lock.json` — npm lock file (~97635 tok)
-- `package.json` — Node.js package manifest (~707 tok)
+- `package.json` — Node.js package manifest (~812 tok)
 - `postcss.config.mjs` — Declares config (~26 tok)
 - `README.md` — Project documentation (~363 tok)
 - `tsconfig.json` — TypeScript configuration (~191 tok)
@@ -279,7 +279,7 @@
 
 ## frontend/app/(routes)/dashboard/
 
-- `page.tsx` — DashboardContent (~2212 tok)
+- `page.tsx` — DashboardContent (~2240 tok)
 
 ## frontend/app/(routes)/drafts/
 
@@ -372,6 +372,7 @@
 
 ## frontend/components/
 
+- `audio-gain-control.tsx` — AudioGainControl (~942 tok)
 - `audio-mode-selector.tsx` — AudioModeSelector (~792 tok)
 - `build-stamp.tsx` — 移动端右下角版本戳，便于确认 WebView 是否加载到最新构建 (~139 tok)
 - `dashboard-draft-actions.tsx` — 录音页：模板选择 + 生成会议纪要 + 保存为正式会话 (~412 tok)
@@ -454,7 +455,7 @@
 
 ## frontend/hooks/
 
-- `use-audio-recorder.ts` — 跨页面导航缓存服务端下发的 VAD 配置（socket 已连接时不会重发 vad-config） (~6542 tok)
+- `use-audio-recorder.ts` — /hooks/use-audio-recorder.ts (~6454 tok)
 - `use-can-promote.ts` — Exports useCanPromote (~155 tok)
 - `use-draft-sync.ts` — 草稿自动保存：转录追加防抖写入，状态变更立即写入，离开页面时刷盘 (~1201 tok)
 - `use-is-logged-in.ts` — 客户端检测是否已登录（localStorage 中有 token） (~83 tok)
@@ -467,8 +468,11 @@
 - `api.ts` — Exports api (~134 tok)
 - `app-config.ts` — 是否显示音频源选择器（麦克风/标签页切换） (~98 tok)
 - `app-version.ts` — 构建时注入，用于确认前端是否已部署到最新版本 (~29 tok)
+- `audio-pipeline.ts` — 预热 RNNoise worklet（浏览器会缓存脚本） (~1562 tok)
+- `audio-settings.ts` — Exports AudioSettings, GAIN_MIN, GAIN_MAX, GAIN_STEP + 5 more (~578 tok)
 - `audio-utils.ts` — 将 Float32 PCM（-1~1）编码为 16-bit mono WAV (~358 tok)
 - `auth-session.ts` — 清除网页端登录态 (~128 tok)
+- `auto-gain.ts` — Exports AutoGainController, createAutoGainController (~498 tok)
 - `copy-to-clipboard.ts` — 复制文本；移动端在异步操作后 clipboard API 常因失去用户手势而失败，提供 textarea 回退 (~243 tok)
 - `dashboard-nav.ts` — Exports DashboardNavItem, DASHBOARD_NAV_ITEMS (~151 tok)
 - `draft-api.ts` — Exports DraftStatus, Draft, fetchDrafts, fetchActiveDraft + 8 more (~1006 tok)
@@ -480,7 +484,7 @@
 - `session-storage.ts` — Exports Session, useSessionStore (~223 tok)
 - `session-summary.ts` — legacy 兼容 (~838 tok)
 - `socket.ts` — Flush buffered segment results in seq order; returns texts ready to display (~1371 tok)
-- `store.ts` — Exports RecordingStatus, AudioMode, useRecordingStore (~704 tok)
+- `store.ts` — 自动增益实时刷新显示，不写入 localStorage (~1110 tok)
 - `summary-export.ts` — API routes: GET (1 endpoints) (~405 tok)
 - `summary-templates.ts` — Exports SummaryTemplateItem, SummaryTemplateDetail, TemplateDraft, fetchSummaryTemplates + 11 more (~1474 tok)
 - `summary-types.ts` — Exports SUMMARY_TYPES, SummaryType, DEFAULT_SUMMARY_TYPE, SUMMARY_TYPE_LABELS, isSummaryType (~128 tok)

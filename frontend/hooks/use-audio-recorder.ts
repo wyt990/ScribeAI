@@ -9,18 +9,16 @@ import {
   DEFAULT_VAD_CONFIG, type VADConfig,
 } from '@/lib/socket';
 import { MicVAD } from '@ricky0123/vad-web';
+import { buildAudioPipeline, preloadRnnoiseWorklet, type AudioPipeline } from '@/lib/audio-pipeline';
 
-const VAD_ASSET_PATH = '/vad/';  // Silero VAD model files served from public/vad/
-const VAD_WASM_PATH = '/vad/';   // ONNX Runtime Web WASM files served from public/vad/
+const VAD_ASSET_PATH = '/vad/';
+const VAD_WASM_PATH = '/vad/';
 
-/** 跨页面导航缓存服务端下发的 VAD 配置（socket 已连接时不会重发 vad-config） */
 let lastVadConfig: VADConfig = DEFAULT_VAD_CONFIG;
 
-/** ONNX Runtime / Worker 噪音（含 Turbopack 多线程 WASM 兼容性警告） */
 const ONNX_RUNTIME_NOISE =
   /onnxruntime|CleanUnusedInitializers|worker sent an error|TURBOPACK__imported__module|ort-wasm-threaded/i;
 
-/** 在 VAD 初始化期间临时屏蔽 ONNX Runtime 控制台噪音 */
 async function suppressOnnxRuntimeNoise<T>(fn: () => Promise<T>): Promise<T> {
   const origError = console.error;
   const origWarn = console.warn;
@@ -39,7 +37,6 @@ async function suppressOnnxRuntimeNoise<T>(fn: () => Promise<T>): Promise<T> {
   }
 }
 
-/** 配置 ONNX Runtime：单线程 WASM + 静默日志（避免 Next.js/Turbopack 下 Worker 报错） */
 function configureOrtSilence(ort: {
   env: {
     logLevel: string;
@@ -52,10 +49,8 @@ function configureOrtSilence(ort: {
   InferenceSession: { create: (model: unknown, options?: Record<string, unknown>) => Promise<unknown> };
 }) {
   ort.env.logLevel = 'error';
-  // numThreads=1：不创建 Worker，规避 Turbopack 在 blob Worker 中缺少 process polyfill 的问题
   ort.env.wasm.numThreads = 1;
   ort.env.wasm.proxy = false;
-  // 仅映射非 threaded 的 wasm 文件，防止 ORT 自动选用 ort-wasm-threaded
   ort.env.wasm.wasmPaths = {
     'ort-wasm.wasm': `${VAD_WASM_PATH}ort-wasm.wasm`,
     'ort-wasm-simd.wasm': `${VAD_WASM_PATH}ort-wasm-simd.wasm`,
@@ -65,7 +60,6 @@ function configureOrtSilence(ort: {
     originalCreate(model, { ...options, logSeverityLevel: 3 });
 }
 
-/** 按当前音频模式获取 MediaStream */
 async function acquireAudioStream(mode: AudioMode): Promise<MediaStream> {
   if (mode === 'mic') {
     return navigator.mediaDevices!.getUserMedia({ audio: true });
@@ -77,36 +71,46 @@ async function acquireAudioStream(mode: AudioMode): Promise<MediaStream> {
   return stream;
 }
 
-/**
- * Robust audio recorder hook supporting:
- * - microphone (getUserMedia({ audio: true }))
- * - tab/system audio (getDisplayMedia({ video: true, audio: true }) -> stop video track)
- * - Silero VAD (browser-based, via @ricky0123/vad-web)
- *
- * VAD model is preloaded on page open (startOnLoad: false) so recording starts instantly.
- * Before recording: no mic access, no VAD detection, nothing sent to backend.
- * On start: getUserMedia + vad.start() + MediaRecorder in one user gesture.
- */
 type DraftSyncHelpers = {
   ensureDraft?: () => Promise<string | null>;
   flushDraft?: () => Promise<void>;
 };
 
 export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
-  const { status, audioMode, setStatus, setError, clearTranscript, userId, setRecordingId } = useRecordingStore();
+  const {
+    status,
+    audioMode,
+    audioGain,
+    autoGainEnabled,
+    noiseSuppressionEnabled,
+    setStatus,
+    setError,
+    setAudioGainLive,
+    clearTranscript,
+    userId,
+    setRecordingId,
+  } = useRecordingStore();
 
   const statusRef = useRef(status);
   statusRef.current = status;
   const draftSyncRef = useRef(draftSync);
   draftSyncRef.current = draftSync;
 
+  const audioGainRef = useRef(audioGain);
+  const autoGainRef = useRef(autoGainEnabled);
+  const noiseSuppressionRef = useRef(noiseSuppressionEnabled);
+  audioGainRef.current = audioGain;
+  autoGainRef.current = autoGainEnabled;
+  noiseSuppressionRef.current = noiseSuppressionEnabled;
+
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const rawStreamRef = useRef<MediaStream | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const pipelineRef = useRef<AudioPipeline | null>(null);
   const socketRef = useRef<ReturnType<typeof getSocket> | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const listenersAttachedRef = useRef(false);
 
-  // Wake Lock refs
   const wakeLockRef = useRef<WakeLockSentinel | null>(null);
 
   const requestWakeLock = useCallback(async () => {
@@ -119,7 +123,6 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
         wakeLockRef.current = null;
       };
     } catch (err) {
-      // Wake lock not granted — non-critical, proceed without it
       console.warn('[WakeLock] failed to acquire:', (err as Error)?.message);
     }
   }, []);
@@ -133,7 +136,6 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
     }
   }, []);
 
-  // Re-acquire wake lock when page becomes visible again while recording
   useEffect(() => {
     const handleVisibility = () => {
       if (document.visibilityState === 'visible' && status === 'recording') {
@@ -144,14 +146,10 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
     return () => document.removeEventListener('visibilitychange', handleVisibility);
   }, [status, requestWakeLock]);
 
-  // VAD refs
   const vadRef = useRef<any>(null);
   const vadConfigRef = useRef<VADConfig>(DEFAULT_VAD_CONFIG);
-  /** Stream supplied to MicVAD immediately before start()/resume */
   const vadPendingStreamRef = useRef<MediaStream | null>(null);
-  /** Tracks which config was used to build the preloaded instance */
   const vadPreloadConfigKeyRef = useRef<string | null>(null);
-  /** Incremented to ignore stale preload results */
   const vadPreloadGenRef = useRef(0);
 
   const [isResetting, setIsResetting] = useState(false);
@@ -161,10 +159,10 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
   const [vadStatus, setVadStatus] = useState<'inactive' | 'loading' | 'ready' | 'error'>('inactive');
   const [vadError, setVadError] = useState<string | null>(null);
   const [audioLevel, setAudioLevel] = useState(0);
+  const [rnnoiseReady, setRnnoiseReady] = useState(false);
 
   const audioContextRef = useRef<AudioContext | null>(null);
   const meterAnalyserRef = useRef<AnalyserNode | null>(null);
-  const meterSourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
   const meterRafRef = useRef<number | null>(null);
   const meterDataRef = useRef<Uint8Array<ArrayBuffer> | null>(null);
 
@@ -173,28 +171,17 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
       cancelAnimationFrame(meterRafRef.current);
       meterRafRef.current = null;
     }
-    meterSourceRef.current?.disconnect();
-    meterSourceRef.current = null;
     meterAnalyserRef.current = null;
     meterDataRef.current = null;
     setAudioLevel(0);
   }, []);
 
-  const startAudioMeter = useCallback((stream: MediaStream, audioContext: AudioContext) => {
+  const startAudioMeter = useCallback((analyser: AnalyserNode) => {
     stopAudioMeter();
-
-    const analyser = audioContext.createAnalyser();
-    analyser.fftSize = 256;
-    analyser.smoothingTimeConstant = 0.65;
-
-    const source = audioContext.createMediaStreamSource(stream);
-    source.connect(analyser);
 
     const data = new Uint8Array(new ArrayBuffer(analyser.fftSize));
     meterAnalyserRef.current = analyser;
-    meterSourceRef.current = source;
     meterDataRef.current = data;
-    audioContextRef.current = audioContext;
 
     const tick = () => {
       const node = meterAnalyserRef.current;
@@ -216,6 +203,19 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
     meterRafRef.current = requestAnimationFrame(tick);
   }, [stopAudioMeter]);
 
+  const destroyPipeline = useCallback(() => {
+    pipelineRef.current?.destroy();
+    pipelineRef.current = null;
+  }, []);
+
+  const stopRawStream = useCallback(() => {
+    if (rawStreamRef.current) {
+      rawStreamRef.current.getTracks().forEach((t) => t.stop());
+      rawStreamRef.current = null;
+    }
+    streamRef.current = null;
+  }, []);
+
   const buildMicVADOptions = useCallback((config: VADConfig) => ({
     startOnLoad: false,
     baseAssetPath: VAD_ASSET_PATH,
@@ -233,7 +233,6 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
       if (!s) throw new Error('[VAD] stream not set before start');
       return s;
     },
-    // 仅断开 VAD 管线，不停止音轨（MediaRecorder 可能仍在使用同一 stream）
     pauseStream: async (_s: MediaStream) => { /* no-op */ },
     resumeStream: async (_oldStream: MediaStream) => {
       const s = vadPendingStreamRef.current;
@@ -253,7 +252,6 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
     },
   }), []);
 
-  /** 释放 VAD：未 start 的预加载实例只能 release 模型，不能调 destroy() */
   const teardownVAD = useCallback(async (vad: {
     initializationState?: string;
     listening?: boolean;
@@ -286,7 +284,6 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
     }
   }, [teardownVAD]);
 
-  /** Preload ONNX model on page open — no mic, no detection, no backend traffic */
   const preloadVAD = useCallback(async (retryCount = 0) => {
     const config = vadConfigRef.current;
     const configKey = JSON.stringify(config);
@@ -342,7 +339,6 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
     }
   }, [buildMicVADOptions, destroyVAD, teardownVAD]);
 
-  /** Pause VAD listening but keep the loaded model in memory */
   const pauseVAD = useCallback(async () => {
     try {
       if (vadRef.current?.listening) {
@@ -353,7 +349,6 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
     }
   }, []);
 
-  /** Attach mic stream and start VAD detection (must run inside user gesture) */
   const startVAD = useCallback(async (stream: MediaStream, audioContext: AudioContext) => {
     if (!vadRef.current || vadStatus === 'error') return;
 
@@ -410,6 +405,11 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
       listenersAttachedRef.current = true;
     }
 
+    void preloadRnnoiseWorklet().then((ok) => {
+      setRnnoiseReady(ok);
+      if (ok) console.log('[RNNoise] worklet preloaded');
+    });
+
     if (socket.connected) {
       setIsReady(true);
       setIsConnecting(false);
@@ -425,6 +425,18 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
     setIsConnecting(true);
     socket.connect();
   }, [preloadVAD]);
+
+  // 录音中同步自动增益开关
+  useEffect(() => {
+    if (status !== 'recording' || !pipelineRef.current) return;
+    pipelineRef.current.setAutoGain(autoGainEnabled);
+  }, [autoGainEnabled, status]);
+
+  // 录音中同步手动增益
+  useEffect(() => {
+    if (status !== 'recording' || !pipelineRef.current || autoGainEnabled) return;
+    pipelineRef.current.setManualGain(audioGain);
+  }, [audioGain, autoGainEnabled, status]);
 
   const startRecording = useCallback(async () => {
     if (isResetting) {
@@ -463,10 +475,8 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
       if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
         mediaRecorderRef.current.stop();
       }
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach((t) => t.stop());
-        streamRef.current = null;
-      }
+      destroyPipeline();
+      stopRawStream();
       await pauseVAD();
 
       resetSegmentSeq();
@@ -479,8 +489,8 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
       }
       await draftSync?.ensureDraft?.();
 
-      const stream = await acquireAudioStream(audioMode);
-      streamRef.current = stream;
+      const rawStream = await acquireAudioStream(audioMode);
+      rawStreamRef.current = rawStream;
 
       const audioContext = new AudioContext();
       audioContextRef.current = audioContext;
@@ -488,13 +498,26 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
         await audioContext.resume();
       }
 
+      const pipeline = await buildAudioPipeline({
+        rawStream,
+        audioContext,
+        gain: audioGainRef.current,
+        autoGain: autoGainRef.current,
+        noiseSuppression: noiseSuppressionRef.current,
+        onGainChange: (gain) => setAudioGainLive(gain),
+      });
+      pipelineRef.current = pipeline;
+
+      const processedStream = pipeline.processedStream;
+      streamRef.current = processedStream;
+
       const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
         ? 'audio/webm;codecs=opus'
         : MediaRecorder.isTypeSupported('audio/webm')
         ? 'audio/webm'
         : '';
 
-      const mediaRecorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
+      const mediaRecorder = new MediaRecorder(processedStream, mimeType ? { mimeType } : undefined);
       mediaRecorderRef.current = mediaRecorder;
       chunksRef.current = [];
 
@@ -526,19 +549,39 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
       if (!socketRef.current) initSocket();
       if (socketRef.current && !socketRef.current.connected) socketRef.current.connect();
 
-      // Start VAD + recording together (model already preloaded)
-      await startVAD(stream, audioContext);
+      await startVAD(processedStream, audioContext);
 
       mediaRecorder.start(1000);
-      startAudioMeter(stream, audioContext);
+      startAudioMeter(pipeline.outputAnalyser);
       requestWakeLock();
       setStatus('recording');
     } catch (err) {
       console.error('[useAudioRecorder] startRecording error', err);
+      destroyPipeline();
+      stopRawStream();
       setStatus('idle');
       setError?.('Failed to start recording: ' + (err as Error).message);
     }
-  }, [audioMode, initSocket, isReady, isResetting, setError, setStatus, userId, setRecordingId, pauseVAD, startVAD, startAudioMeter, vadLoading, vadStatus, draftSync, preloadVAD]);
+  }, [
+    audioMode,
+    initSocket,
+    isReady,
+    isResetting,
+    setError,
+    setStatus,
+    setAudioGainLive,
+    userId,
+    setRecordingId,
+    pauseVAD,
+    startVAD,
+    startAudioMeter,
+    vadLoading,
+    vadStatus,
+    draftSync,
+    preloadVAD,
+    destroyPipeline,
+    stopRawStream,
+  ]);
 
   const pauseRecording = useCallback(() => {
     if (mediaRecorderRef.current?.state === 'recording') {
@@ -562,8 +605,8 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
           vadPendingStreamRef.current = streamRef.current;
           void vadRef.current.start();
         }
-        if (streamRef.current && audioContextRef.current) {
-          startAudioMeter(streamRef.current, audioContextRef.current);
+        if (pipelineRef.current) {
+          startAudioMeter(pipelineRef.current.outputAnalyser);
         }
         setStatus('recording');
       } catch (err) {
@@ -572,7 +615,6 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
     }
   }, [setStatus, startAudioMeter]);
 
-  /** 释放录音硬件与后端会话；与点「停止」及组件卸载时共用 */
   const finalizeActiveRecording = useCallback(
     (opts?: { notifyBackend?: boolean }) => {
       const recorderActive =
@@ -584,10 +626,8 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
           mediaRecorderRef.current!.stop();
         }
 
-        if (streamRef.current) {
-          streamRef.current.getTracks().forEach((t) => t.stop());
-          streamRef.current = null;
-        }
+        destroyPipeline();
+        stopRawStream();
         vadPendingStreamRef.current = null;
         audioContextRef.current = null;
 
@@ -608,7 +648,7 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
         setStatus('idle');
       }
     },
-    [pauseVAD, stopAudioMeter, releaseWakeLock, setStatus]
+    [pauseVAD, stopAudioMeter, releaseWakeLock, setStatus, destroyPipeline, stopRawStream]
   );
 
   const stopRecording = useCallback(() => {
@@ -667,10 +707,8 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
         }
       } catch { /* ignore */ }
 
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach((t) => t.stop());
-        streamRef.current = null;
-      }
+      destroyPipeline();
+      stopRawStream();
       vadPendingStreamRef.current = null;
       audioContextRef.current = null;
 
@@ -692,7 +730,7 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
     };
 
     cleanup();
-  }, [setStatus, clearTranscript, setRecordingId, pauseVAD, stopAudioMeter]);
+  }, [setStatus, clearTranscript, setRecordingId, pauseVAD, stopAudioMeter, destroyPipeline, stopRawStream]);
 
   return {
     startRecording,
@@ -710,5 +748,6 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
     vadStatus,
     vadError,
     audioLevel,
+    rnnoiseReady,
   };
 };

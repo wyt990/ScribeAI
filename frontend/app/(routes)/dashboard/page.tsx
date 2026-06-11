@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { AudioModeSelector } from "@/components/audio-mode-selector";
+import { AudioGainControl } from "@/components/audio-gain-control";
 import { RecordingControls } from "@/components/recording-controls";
 import { useRecordingStore } from "@/lib/store";
 import { TranscriptFeed } from "@/components/transcript-feed";
@@ -232,6 +233,7 @@ function DashboardContent() {
         <div className="lg:col-span-1 flex flex-col gap-2 md:gap-6 shrink-0 min-h-0">
           <AudioModeSelector />
           <RecordingControls ensureDraft={ensureDraft} flushDraft={flushDraft} />
+          <AudioGainControl />
         </div>
 
         <div className="min-h-0 h-full overflow-hidden flex flex-col lg:col-span-2">
