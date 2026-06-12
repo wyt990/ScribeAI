@@ -1568,3 +1568,283 @@
 | 12:43 | Session end: 236 writes across 55 files (c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-f2c88af0-8692-427f-8cf3-edd43eba31d9.png, recording-duration.ts, use-recording-duration.ts, transcript-feed.tsx, features_audio_processing.md) | 93 reads | ~886141 tok |
 | 12:59 | Created ../../root/.cursor/projects/apps-ScribeAI/assets/c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-c73e1fd3-6e31-4d65-9934-bc9b49d96d14.png | — | ~0 |
 | 13:00 | Session end: 237 writes across 56 files (c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-f2c88af0-8692-427f-8cf3-edd43eba31d9.png, recording-duration.ts, use-recording-duration.ts, transcript-feed.tsx, features_audio_processing.md) | 93 reads | ~886141 tok |
+| 13:17 | Created backend/src/routes/app-config.ts | — | ~186 |
+| 13:17 | Created backend/src/lib/system-settings.ts | — | ~2309 |
+| 13:17 | Created backend/src/index.ts | — | ~743 |
+| 13:17 | Created frontend/lib/app-config.ts | — | ~174 |
+| 13:17 | Created frontend/hooks/use-app-config.ts | — | ~304 |
+| 13:17 | Created frontend/components/audio-gain-control.tsx | — | ~958 |
+| 13:17 | Created frontend/app/(routes)/manager/mobile/page.tsx | — | ~348 |
+| 13:17 | Created backend/src/index.ts | — | ~754 |
+| 13:17 | Created frontend/components/audio-gain-control.tsx | — | ~974 |
+| 13:18 | Created frontend/components/audio-gain-control.tsx | — | ~990 |
+| 13:18 | Session end: 247 writes across 59 files (c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-f2c88af0-8692-427f-8cf3-edd43eba31d9.png, recording-duration.ts, use-recording-duration.ts, transcript-feed.tsx, features_audio_processing.md) | 98 reads | ~895695 tok |
+| 13:30 | Session end: 247 writes across 59 files (c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-f2c88af0-8692-427f-8cf3-edd43eba31d9.png, recording-duration.ts, use-recording-duration.ts, transcript-feed.tsx, features_audio_processing.md) | 98 reads | ~895695 tok |
+| 13:31 | Session end: 247 writes across 59 files (c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-f2c88af0-8692-427f-8cf3-edd43eba31d9.png, recording-duration.ts, use-recording-duration.ts, transcript-feed.tsx, features_audio_processing.md) | 98 reads | ~895695 tok |
+| 14:30 | Session end: 247 writes across 59 files (c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-f2c88af0-8692-427f-8cf3-edd43eba31d9.png, recording-duration.ts, use-recording-duration.ts, transcript-feed.tsx, features_audio_processing.md) | 98 reads | ~895695 tok |
+| 14:36 | Created Android-Client/app/src/main/java/com/scribeai/client/NativeRecordingCoordinator.kt | — | ~414 |
+| 14:36 | Created Android-Client/app/src/main/java/com/scribeai/client/ChunkedMediaRecorder.kt | — | ~738 |
+| 14:36 | Created Android-Client/app/src/main/java/com/scribeai/client/RecordingForegroundService.kt | — | ~1127 |
+| 14:36 | Created Android-Client/app/src/main/java/com/scribeai/client/ScribeAINativeBridge.kt | — | ~466 |
+| 14:36 | Created Android-Client/app/src/main/AndroidManifest.xml | — | ~631 |
+| 14:37 | Created Android-Client/app/src/main/AndroidManifest.xml | — | ~675 |
+| 14:37 | Created Android-Client/app/src/main/res/values/strings.xml | — | ~113 |
+| 14:37 | Created Android-Client/app/src/main/java/com/scribeai/client/MainActivity.kt | — | ~3215 |
+| 14:37 | Created Android-Client/app/src/main/java/com/scribeai/client/MainActivity.kt | — | ~3221 |
+| 14:37 | Created Android-Client/app/src/main/java/com/scribeai/client/MainActivity.kt | — | ~3258 |
+| 14:37 | Created Android-Client/app/src/main/java/com/scribeai/client/MainActivity.kt | — | ~3270 |
+| 14:37 | Created Android-Client/app/src/main/java/com/scribeai/client/MainActivity.kt | — | ~3259 |
+| 14:38 | Created frontend/lib/native-recording.ts | — | ~865 |
+| 14:39 | Created frontend/lib/socket.ts | — | ~1691 |
+| 14:39 | Created backend/src/socket/socket.ts | — | ~4916 |
+| 14:39 | Created backend/src/socket/socket.ts | — | ~4920 |
+| 14:39 | Created backend/src/socket/socket.ts | — | ~5037 |
+| 14:39 | Created backend/src/socket/socket.ts | — | ~4989 |
+| 14:39 | Created backend/src/socket/socket.ts | — | ~4991 |
+| 14:39 | Created backend/src/socket/socket.ts | — | ~5015 |
+| 14:39 | Created backend/src/socket/socket.ts | — | ~5030 |
+| 14:39 | Created frontend/hooks/use-audio-recorder.ts | — | ~10328 |
+| 14:39 | Created frontend/hooks/use-audio-recorder.ts | — | ~10346 |
+| 14:39 | Created frontend/hooks/use-audio-recorder.ts | — | ~10401 |
+| 14:39 | Created frontend/hooks/use-audio-recorder.ts | — | ~10835 |
+| 14:39 | Created frontend/hooks/use-audio-recorder.ts | — | ~10884 |
+| 14:40 | Created frontend/hooks/use-audio-recorder.ts | — | ~10893 |
+| 14:40 | Created frontend/hooks/use-audio-recorder.ts | — | ~11140 |
+| 14:40 | Created frontend/hooks/use-audio-recorder.ts | — | ~11292 |
+| 14:40 | Created frontend/hooks/use-audio-recorder.ts | — | ~11351 |
+| 14:40 | Created frontend/hooks/use-audio-recorder.ts | — | ~11395 |
+| 14:40 | Created frontend/hooks/use-audio-recorder.ts | — | ~11477 |
+| 14:40 | Created frontend/hooks/use-audio-recorder.ts | — | ~11520 |
+| 14:40 | Created frontend/hooks/use-audio-recorder.ts | — | ~11544 |
+| 14:40 | Created frontend/hooks/use-audio-recorder.ts | — | ~11572 |
+| 14:40 | Created frontend/hooks/use-audio-recorder.ts | — | ~11279 |
+| 14:41 | Created frontend/hooks/use-audio-recorder.ts | — | ~11572 |
+| 14:49 | Session end: 284 writes across 67 files (c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-f2c88af0-8692-427f-8cf3-edd43eba31d9.png, recording-duration.ts, use-recording-duration.ts, transcript-feed.tsx, features_audio_processing.md) | 106 reads | ~1135567 tok |
+| 15:36 | Session end: 284 writes across 67 files (c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-f2c88af0-8692-427f-8cf3-edd43eba31d9.png, recording-duration.ts, use-recording-duration.ts, transcript-feed.tsx, features_audio_processing.md) | 114 reads | ~1135695 tok |
+| 15:51 | Created frontend/components/recording-controls.tsx | — | ~2146 |
+| 15:52 | Created frontend/components/recording-controls.tsx | — | ~2222 |
+| 15:52 | Created frontend/components/recording-controls.tsx | — | ~2253 |
+| 15:52 | Created frontend/components/recording-controls.tsx | — | ~2259 |
+| 15:52 | Session end: 288 writes across 67 files (c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-f2c88af0-8692-427f-8cf3-edd43eba31d9.png, recording-duration.ts, use-recording-duration.ts, transcript-feed.tsx, features_audio_processing.md) | 114 reads | ~1145966 tok |
+| 15:58 | Created frontend/lib/socket.ts | — | ~1947 |
+| 15:58 | Created frontend/hooks/use-audio-recorder.ts | — | ~11578 |
+| 15:58 | Created frontend/hooks/use-audio-recorder.ts | — | ~11599 |
+| 15:58 | Created frontend/hooks/use-audio-recorder.ts | — | ~11683 |
+| 15:58 | Created backend/src/socket/socket.ts | — | ~5050 |
+| 15:59 | Created backend/src/socket/socket.ts | — | ~5563 |
+| 15:59 | Created backend/src/socket/socket.ts | — | ~5590 |
+| 15:59 | Created backend/src/socket/socket.ts | — | ~5608 |
+| 15:59 | Created backend/src/socket/socket.ts | — | ~5662 |
+| 15:59 | Created backend/src/socket/socket.ts | — | ~5672 |
+| 16:00 | Session end: 298 writes across 67 files (c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-f2c88af0-8692-427f-8cf3-edd43eba31d9.png, recording-duration.ts, use-recording-duration.ts, transcript-feed.tsx, features_audio_processing.md) | 114 reads | ~1217371 tok |
+| 16:10 | Created Android-Client/app/src/main/java/com/scribeai/client/NativeAudioSettings.kt | — | ~124 |
+| 16:10 | Created Android-Client/app/src/main/java/com/scribeai/client/NativeAudioEnhancer.kt | — | ~259 |
+| 16:10 | Created Android-Client/app/src/main/java/com/scribeai/client/NativeGainProcessor.kt | — | ~501 |
+| 16:10 | Created Android-Client/app/src/main/java/com/scribeai/client/WavEncoder.kt | — | ~281 |
+| 16:10 | Created Android-Client/app/src/main/java/com/scribeai/client/ChunkedPcmRecorder.kt | — | ~1150 |
+| 16:10 | Created Android-Client/app/src/main/java/com/scribeai/client/RecordingForegroundService.kt | — | ~1127 |
+| 16:10 | Created Android-Client/app/src/main/java/com/scribeai/client/RecordingForegroundService.kt | — | ~1119 |
+| 16:10 | Created Android-Client/app/src/main/java/com/scribeai/client/ScribeAINativeBridge.kt | — | ~542 |
+| 16:10 | Created frontend/lib/native-recording.ts | — | ~927 |
+| 16:11 | Created frontend/lib/native-recording.ts | — | ~1021 |
+| 16:11 | Created frontend/hooks/use-audio-recorder.ts | — | ~11692 |
+| 16:11 | Created frontend/hooks/use-audio-recorder.ts | — | ~11947 |
+| 16:11 | Created backend/src/socket/socket.ts | — | ~5759 |
+| 16:11 | Created frontend/hooks/use-audio-recorder.ts | — | ~11995 |
+| 16:11 | Created backend/src/socket/socket.ts | — | ~5784 |
+| 16:11 | Created Android-Client/app/src/main/java/com/scribeai/client/ScribeAINativeBridge.kt | — | ~542 |
+| 16:12 | Session end: 314 writes across 72 files (c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-f2c88af0-8692-427f-8cf3-edd43eba31d9.png, recording-duration.ts, use-recording-duration.ts, transcript-feed.tsx, features_audio_processing.md) | 119 reads | ~1277091 tok |
+| 16:14 | Created Android-Client/app/src/main/java/com/scribeai/client/NativeRecordingCoordinator.kt | — | ~481 |
+| 16:14 | Created Android-Client/app/src/main/java/com/scribeai/client/ChunkedPcmRecorder.kt | — | ~1160 |
+| 16:14 | Created Android-Client/app/src/main/java/com/scribeai/client/ChunkedPcmRecorder.kt | — | ~1221 |
+| 16:14 | Created Android-Client/app/src/main/java/com/scribeai/client/ChunkedPcmRecorder.kt | — | ~1313 |
+| 16:14 | Created frontend/lib/native-recording.ts | — | ~1042 |
+| 16:14 | Created frontend/lib/native-recording.ts | — | ~1156 |
+| 16:14 | Created frontend/hooks/use-audio-recorder.ts | — | ~12032 |
+| 16:15 | Session end: 321 writes across 72 files (c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-f2c88af0-8692-427f-8cf3-edd43eba31d9.png, recording-duration.ts, use-recording-duration.ts, transcript-feed.tsx, features_audio_processing.md) | 119 reads | ~1296207 tok |
+| 16:23 | Session end: 321 writes across 72 files (c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-f2c88af0-8692-427f-8cf3-edd43eba31d9.png, recording-duration.ts, use-recording-duration.ts, transcript-feed.tsx, features_audio_processing.md) | 119 reads | ~1296207 tok |
+| 16:24 | Created Android-Client/app/src/main/java/com/scribeai/client/NativeGainProcessor.kt | — | ~583 |
+| 16:24 | Created Android-Client/app/src/main/java/com/scribeai/client/NativeAudioEnhancer.kt | — | ~235 |
+| 16:24 | Created Android-Client/app/src/main/java/com/scribeai/client/NativeAudioSettings.kt | — | ~124 |
+| 16:25 | Created Android-Client/app/src/main/java/com/scribeai/client/ChunkedPcmRecorder.kt | — | ~1561 |
+| 16:25 | Created Android-Client/app/src/main/java/com/scribeai/client/NativeRecordingCoordinator.kt | — | ~586 |
+| 16:25 | Created Android-Client/app/src/main/java/com/scribeai/client/RecordingForegroundService.kt | — | ~1140 |
+| 16:25 | Created Android-Client/app/src/main/java/com/scribeai/client/ScribeAINativeBridge.kt | — | ~559 |
+| 16:25 | Created Android-Client/app/src/main/java/com/scribeai/client/RecordingForegroundService.kt | — | ~1188 |
+| 16:25 | Created frontend/lib/native-recording.ts | — | ~1210 |
+| 16:25 | Created frontend/lib/native-recording.ts | — | ~1209 |
+| 16:25 | Created frontend/hooks/use-audio-recorder.ts | — | ~12040 |
+| 16:25 | Created frontend/hooks/use-audio-recorder.ts | — | ~12067 |
+| 16:25 | Created frontend/hooks/use-audio-recorder.ts | — | ~12117 |
+| 16:25 | Created frontend/components/audio-gain-control.tsx | — | ~1009 |
+| 16:25 | Created frontend/hooks/use-audio-recorder.ts | — | ~12126 |
+| 16:25 | Created frontend/components/recording-controls.tsx | — | ~2272 |
+| 16:26 | Created frontend/hooks/use-audio-recorder.ts | — | ~12132 |
+| 16:26 | Created frontend/components/audio-gain-control.tsx | — | ~1033 |
+| 16:26 | Created frontend/components/audio-gain-control.tsx | — | ~1056 |
+| 16:26 | Created frontend/components/audio-gain-control.tsx | — | ~1107 |
+| 16:26 | Created frontend/components/recording-controls.tsx | — | ~2414 |
+| 16:26 | Session end: 342 writes across 72 files (c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-f2c88af0-8692-427f-8cf3-edd43eba31d9.png, recording-duration.ts, use-recording-duration.ts, transcript-feed.tsx, features_audio_processing.md) | 119 reads | ~1377302 tok |
+| 16:31 | Created frontend/components/recording-controls.tsx | — | ~2413 |
+| 16:31 | Created frontend/components/recording-controls.tsx | — | ~2412 |
+| 16:31 | Created frontend/components/recording-controls.tsx | — | ~2412 |
+| 16:31 | Created frontend/components/recording-controls.tsx | — | ~2411 |
+| 16:31 | Created frontend/components/recording-controls.tsx | — | ~2411 |
+| 16:31 | Session end: 347 writes across 72 files (c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-f2c88af0-8692-427f-8cf3-edd43eba31d9.png, recording-duration.ts, use-recording-duration.ts, transcript-feed.tsx, features_audio_processing.md) | 119 reads | ~1389361 tok |
+| 16:38 | Session end: 347 writes across 72 files (c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-f2c88af0-8692-427f-8cf3-edd43eba31d9.png, recording-duration.ts, use-recording-duration.ts, transcript-feed.tsx, features_audio_processing.md) | 121 reads | ~1389361 tok |
+| 16:41 | Session end: 347 writes across 72 files (c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-f2c88af0-8692-427f-8cf3-edd43eba31d9.png, recording-duration.ts, use-recording-duration.ts, transcript-feed.tsx, features_audio_processing.md) | 121 reads | ~1389361 tok |
+| 16:46 | Created ../../root/.cursor/projects/apps-ScribeAI/agent-tools/639040bc-a70e-4fe0-b7e3-7a2352c40653.txt | — | ~6910 |
+| 16:46 | Session end: 348 writes across 73 files (c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-f2c88af0-8692-427f-8cf3-edd43eba31d9.png, recording-duration.ts, use-recording-duration.ts, transcript-feed.tsx, features_audio_processing.md) | 121 reads | ~1396765 tok |
+| 16:52 | Created ../../root/.cursor/projects/apps-ScribeAI/agent-tools/3746bffe-b175-4616-babd-ea492a46705c.txt | — | ~6828 |
+| 16:52 | Created ../../root/.cursor/projects/apps-ScribeAI/agent-tools/732cc105-6a91-4e74-a3ff-93a4d488419f.txt | — | ~8028 |
+| 16:55 | Created Android-Client/scripts/download-dtln-models.sh | — | ~103 |
+| 16:55 | Created Android-Client/app/src/main/java/com/scribeai/client/DtlnRealFft.kt | — | ~804 |
+| 16:56 | Created Android-Client/app/src/main/java/com/scribeai/client/DtlnNoiseSuppressor.kt | — | ~1745 |
+| 16:56 | Created Android-Client/app/src/main/java/com/scribeai/client/NativeAudioEnhancer.kt | — | ~460 |
+| 16:56 | Created Android-Client/app/src/main/java/com/scribeai/client/DtlnNoiseSuppressor.kt | — | ~1706 |
+| 16:57 | Created Android-Client/app/src/main/java/com/scribeai/client/ChunkedPcmRecorder.kt | — | ~1802 |
+| 16:57 | Created Android-Client/app/src/main/java/com/scribeai/client/NativeAudioEnhancer.kt | — | ~474 |
+| 16:57 | Created Android-Client/app/src/main/java/com/scribeai/client/ChunkedPcmRecorder.kt | — | ~1797 |
+| 16:57 | Created Android-Client/app/src/main/java/com/scribeai/client/ChunkedPcmRecorder.kt | — | ~1798 |
+| 16:57 | Created Android-Client/app/src/main/java/com/scribeai/client/RecordingForegroundService.kt | — | ~1196 |
+| 16:57 | Created Android-Client/app/src/main/java/com/scribeai/client/NativeRecordingCoordinator.kt | — | ~647 |
+| 16:57 | Created Android-Client/app/build.gradle.kts | — | ~415 |
+| 16:57 | Created Android-Client/app/src/main/java/com/scribeai/client/ChunkedPcmRecorder.kt | — | ~1767 |
+| 16:57 | Created frontend/lib/native-recording.ts | — | ~1228 |
+| 16:57 | Created frontend/components/recording-controls.tsx | — | ~2418 |
+| 16:57 | Created frontend/components/recording-controls.tsx | — | ~2514 |
+| 16:57 | Created frontend/components/recording-controls.tsx | — | ~2496 |
+| 16:57 | Created frontend/components/audio-gain-control.tsx | — | ~1108 |
+| 16:59 | Session end: 368 writes across 79 files (c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-f2c88af0-8692-427f-8cf3-edd43eba31d9.png, recording-duration.ts, use-recording-duration.ts, transcript-feed.tsx, features_audio_processing.md) | 124 reads | ~1439105 tok |
+| 17:12 | Created backend/src/middleware/authMiddleware.ts | — | ~598 |
+| 17:12 | Created backend/src/middleware/authMiddleware.ts | — | ~674 |
+| 17:13 | Created backend/src/routes/downloads.ts | — | ~356 |
+| 17:13 | Created backend/src/routes/downloads.ts | — | ~359 |
+| 17:13 | Created frontend/lib/android-download.ts | — | ~302 |
+| 17:13 | Created frontend/app/(routes)/profile/page.tsx | — | ~5040 |
+| 17:13 | Created frontend/app/(routes)/profile/page.tsx | — | ~4987 |
+| 17:13 | Created frontend/app/(routes)/profile/page.tsx | — | ~4916 |
+| 17:13 | Session end: 376 writes across 82 files (c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-f2c88af0-8692-427f-8cf3-edd43eba31d9.png, recording-duration.ts, use-recording-duration.ts, transcript-feed.tsx, features_audio_processing.md) | 127 reads | ~1462121 tok |
+| 17:20 | Created Android-Client/app/src/main/java/com/scribeai/client/ChunkedPcmRecorder.kt | — | ~2058 |
+| 17:20 | Created backend/src/socket/socket.ts | — | ~5786 |
+| 17:21 | Created Android-Client/app/src/main/java/com/scribeai/client/DtlnNoiseSuppressor.kt | — | ~1711 |
+| 17:21 | Created Android-Client/app/src/main/java/com/scribeai/client/DtlnNoiseSuppressor.kt | — | ~1715 |
+| 17:21 | Created Android-Client/app/src/main/java/com/scribeai/client/ChunkedPcmRecorder.kt | — | ~2077 |
+| 17:22 | Session end: 381 writes across 82 files (c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-f2c88af0-8692-427f-8cf3-edd43eba31d9.png, recording-duration.ts, use-recording-duration.ts, transcript-feed.tsx, features_audio_processing.md) | 127 reads | ~1478237 tok |
+| 17:27 | Created backend/src/lib/system-settings.ts | — | ~2354 |
+| 17:27 | Created backend/src/routes/app-config.ts | — | ~254 |
+| 17:27 | Created backend/src/routes/app-config.ts | — | ~291 |
+| 17:27 | Created frontend/hooks/use-app-config.ts | — | ~319 |
+| 17:27 | Created frontend/lib/app-config.ts | — | ~244 |
+| 17:27 | Created frontend/hooks/use-app-config.ts | — | ~396 |
+| 17:27 | Created frontend/lib/app-config.ts | — | ~253 |
+| 17:27 | Created Android-Client/app/src/main/java/com/scribeai/client/NativeAudioSettings.kt | — | ~153 |
+| 17:27 | Created Android-Client/app/src/main/java/com/scribeai/client/ChunkedPcmRecorder.kt | — | ~2082 |
+| 17:27 | Created Android-Client/app/src/main/java/com/scribeai/client/ScribeAINativeBridge.kt | — | ~644 |
+| 17:27 | Created Android-Client/app/src/main/java/com/scribeai/client/ChunkedPcmRecorder.kt | — | ~2158 |
+| 17:28 | Created frontend/lib/native-recording.ts | — | ~1235 |
+| 17:28 | Created Android-Client/app/src/main/java/com/scribeai/client/ChunkedPcmRecorder.kt | — | ~2201 |
+| 17:28 | Created Android-Client/app/src/main/java/com/scribeai/client/ChunkedPcmRecorder.kt | — | ~2218 |
+| 17:28 | Created Android-Client/app/src/main/java/com/scribeai/client/ChunkedPcmRecorder.kt | — | ~2220 |
+| 17:28 | Created frontend/lib/native-recording.ts | — | ~1264 |
+| 17:28 | Created frontend/hooks/use-audio-recorder.ts | — | ~12148 |
+| 17:28 | Created frontend/hooks/use-audio-recorder.ts | — | ~12162 |
+| 17:28 | Created frontend/hooks/use-audio-recorder.ts | — | ~12186 |
+| 17:28 | Created frontend/components/audio-gain-control.tsx | — | ~1118 |
+| 17:28 | Created frontend/app/(routes)/manager/mobile/page.tsx | — | ~365 |
+| 17:28 | Created frontend/hooks/use-audio-recorder.ts | — | ~12216 |
+| 17:28 | Created frontend/hooks/use-audio-recorder.ts | — | ~12262 |
+| 17:29 | Created frontend/hooks/use-audio-recorder.ts | — | ~12282 |
+| 17:29 | Created frontend/components/audio-gain-control.tsx | — | ~1143 |
+| 17:29 | Created frontend/components/audio-gain-control.tsx | — | ~1195 |
+| 17:29 | Session end: 407 writes across 82 files (c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-f2c88af0-8692-427f-8cf3-edd43eba31d9.png, recording-duration.ts, use-recording-duration.ts, transcript-feed.tsx, features_audio_processing.md) | 128 reads | ~1575748 tok |
+| 17:36 | Created Android-Client/app/src/main/java/com/scribeai/client/NativeSpeechSegmenter.kt | — | ~919 |
+| 17:37 | Created Android-Client/app/src/main/java/com/scribeai/client/ChunkedPcmRecorder.kt | — | ~2505 |
+| 17:37 | Created Android-Client/app/src/main/java/com/scribeai/client/NativeAudioSettings.kt | — | ~257 |
+| 17:37 | Created Android-Client/app/src/main/java/com/scribeai/client/ScribeAINativeBridge.kt | — | ~1004 |
+| 17:37 | Created backend/src/lib/system-settings.ts | — | ~2451 |
+| 17:37 | Created backend/src/routes/app-config.ts | — | ~573 |
+| 17:37 | Created frontend/lib/app-config.ts | — | ~333 |
+| 17:37 | Created frontend/hooks/use-app-config.ts | — | ~420 |
+| 17:37 | Created frontend/lib/app-config.ts | — | ~412 |
+| 17:37 | Created frontend/hooks/use-app-config.ts | — | ~802 |
+| 17:37 | Created frontend/lib/native-recording.ts | — | ~1264 |
+| 17:37 | Created frontend/app/(routes)/manager/mobile/page.tsx | — | ~379 |
+| 17:38 | Created frontend/hooks/use-audio-recorder.ts | — | ~12290 |
+| 17:38 | Created backend/src/socket/socket.ts | — | ~5787 |
+| 17:38 | Created frontend/lib/native-recording.ts | — | ~1414 |
+| 17:38 | Created frontend/hooks/use-audio-recorder.ts | — | ~12304 |
+| 17:38 | Created frontend/hooks/use-audio-recorder.ts | — | ~12334 |
+| 17:39 | Session end: 423 writes across 83 files (c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-f2c88af0-8692-427f-8cf3-edd43eba31d9.png, recording-duration.ts, use-recording-duration.ts, transcript-feed.tsx, features_audio_processing.md) | 129 reads | ~1631635 tok |
+| 17:55 | Created backend/src/lib/audio-archive.ts | — | ~3202 |
+| 17:55 | Created backend/src/lib/recording-http.ts | — | ~510 |
+| 17:55 | Created backend/src/lib/recording-http.ts | — | ~538 |
+| 17:56 | Created backend/src/lib/asr-transcribe.ts | — | ~805 |
+| 17:56 | Created backend/src/socket/socket.ts | — | ~5805 |
+| 17:56 | Created backend/src/socket/socket.ts | — | ~5816 |
+| 17:56 | Created backend/src/socket/socket.ts | — | ~5844 |
+| 17:56 | Created backend/src/socket/socket.ts | — | ~5868 |
+| 17:57 | Session end: 431 writes across 83 files (c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-f2c88af0-8692-427f-8cf3-edd43eba31d9.png, recording-duration.ts, use-recording-duration.ts, transcript-feed.tsx, features_audio_processing.md) | 129 reads | ~1662882 tok |
+| 18:08 | Session end: 431 writes across 83 files (c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-f2c88af0-8692-427f-8cf3-edd43eba31d9.png, recording-duration.ts, use-recording-duration.ts, transcript-feed.tsx, features_audio_processing.md) | 129 reads | ~1664346 tok |
+| 18:13 | Created backend/src/lib/recording-orphan-cleanup.ts | — | ~808 |
+| 18:13 | Created backend/src/lib/recording-orphan-cleanup.ts | — | ~814 |
+| 18:13 | Created backend/src/routes/drafts.ts | — | ~3264 |
+| 18:13 | Created backend/src/routes/drafts.ts | — | ~3342 |
+| 18:13 | Created backend/src/routes/drafts.ts | — | ~3370 |
+| 18:14 | Created backend/src/lib/recording-orphan-cleanup.ts | — | ~1018 |
+| 18:14 | Created backend/src/routes/drafts.ts | — | ~3381 |
+| 18:14 | Created backend/src/routes/drafts.ts | — | ~3382 |
+| 18:14 | Created backend/src/lib/audio-cleanup.ts | — | ~397 |
+| 18:14 | Created backend/src/lib/audio-cleanup.ts | — | ~478 |
+| 18:14 | Created frontend/hooks/use-draft-sync.ts | — | ~1338 |
+| 18:14 | Created frontend/hooks/use-audio-recorder.ts | — | ~12351 |
+| 18:14 | Created frontend/app/(routes)/dashboard/page.tsx | — | ~2237 |
+| 18:14 | Created frontend/app/(routes)/dashboard/page.tsx | — | ~2251 |
+| 18:14 | Created frontend/app/(routes)/dashboard/page.tsx | — | ~2255 |
+| 18:14 | Created frontend/app/(routes)/dashboard/page.tsx | — | ~2263 |
+| 18:15 | Created backend/src/routes/manager/content.ts | — | ~2343 |
+| 18:15 | Created backend/src/routes/manager/content.ts | — | ~2361 |
+| 18:16 | Session end: 449 writes across 85 files (c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-f2c88af0-8692-427f-8cf3-edd43eba31d9.png, recording-duration.ts, use-recording-duration.ts, transcript-feed.tsx, features_audio_processing.md) | 132 reads | ~1714156 tok |
+| 18:20 | Created frontend/hooks/use-audio-recorder.ts | — | ~12359 |
+| 18:20 | Created frontend/components/recording-controls.tsx | — | ~2504 |
+| 18:20 | Session end: 451 writes across 85 files (c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-f2c88af0-8692-427f-8cf3-edd43eba31d9.png, recording-duration.ts, use-recording-duration.ts, transcript-feed.tsx, features_audio_processing.md) | 132 reads | ~1729107 tok |
+| 18:26 | Created backend/src/lib/audio-archive.ts | — | ~3211 |
+| 18:26 | Created backend/src/lib/recording-orphan-cleanup.ts | — | ~1024 |
+| 18:26 | Created backend/src/lib/audio-archive.ts | — | ~3213 |
+| 18:26 | Created backend/src/lib/recording-orphan-cleanup.ts | — | ~1032 |
+| 18:27 | Session end: 455 writes across 85 files (c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-f2c88af0-8692-427f-8cf3-edd43eba31d9.png, recording-duration.ts, use-recording-duration.ts, transcript-feed.tsx, features_audio_processing.md) | 132 reads | ~1738605 tok |
+| 18:31 | Session end: 455 writes across 85 files (c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-f2c88af0-8692-427f-8cf3-edd43eba31d9.png, recording-duration.ts, use-recording-duration.ts, transcript-feed.tsx, features_audio_processing.md) | 132 reads | ~1738605 tok |
+| 18:32 | Created frontend/hooks/use-audio-recorder.ts | — | ~12393 |
+| 18:32 | Created frontend/hooks/use-audio-recorder.ts | — | ~12408 |
+| 18:32 | Created frontend/hooks/use-audio-recorder.ts | — | ~12455 |
+| 18:32 | Created frontend/components/recording-controls.tsx | — | ~2545 |
+| 18:33 | Session end: 459 writes across 85 files (c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-f2c88af0-8692-427f-8cf3-edd43eba31d9.png, recording-duration.ts, use-recording-duration.ts, transcript-feed.tsx, features_audio_processing.md) | 132 reads | ~1778439 tok |
+| 18:40 | Session end: 459 writes across 85 files (c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-f2c88af0-8692-427f-8cf3-edd43eba31d9.png, recording-duration.ts, use-recording-duration.ts, transcript-feed.tsx, features_audio_processing.md) | 132 reads | ~1778642 tok |
+| 18:46 | Created frontend/components/audio-mode-selector.tsx | — | ~806 |
+| 18:46 | Created frontend/hooks/use-app-config.ts | — | ~861 |
+| 18:46 | Created frontend/hooks/use-app-config.ts | — | ~890 |
+| 18:46 | Created frontend/components/draft-restore-banner.tsx | — | ~326 |
+| 18:46 | Created frontend/app/(routes)/dashboard/page.tsx | — | ~2244 |
+| 18:47 | Created frontend/app/(routes)/dashboard/page.tsx | — | ~2238 |
+| 18:47 | Created frontend/app/(routes)/dashboard/page.tsx | — | ~2232 |
+| 18:47 | Created frontend/app/(routes)/dashboard/page.tsx | — | ~2317 |
+| 18:47 | Created frontend/app/(routes)/dashboard/page.tsx | — | ~2298 |
+| 18:47 | Created frontend/components/recording-controls.tsx | — | ~2560 |
+| 18:47 | Created frontend/components/recording-controls.tsx | — | ~2573 |
+| 18:47 | Created frontend/components/recording-controls.tsx | — | ~2634 |
+| 18:47 | Created frontend/components/recording-controls.tsx | — | ~2633 |
+| 18:47 | Created frontend/components/recording-controls.tsx | — | ~2675 |
+| 18:47 | Created frontend/lib/socket.ts | — | ~1988 |
+| 18:47 | Created frontend/lib/native-recording.ts | — | ~1448 |
+| 18:47 | Created frontend/lib/native-recording.ts | — | ~1484 |
+| 18:47 | Created frontend/lib/native-recording.ts | — | ~1565 |
+| 18:47 | Created frontend/lib/native-recording.ts | — | ~1597 |
+| 18:47 | Created frontend/hooks/use-audio-recorder.ts | — | ~12461 |
+| 18:47 | Created frontend/hooks/use-audio-recorder.ts | — | ~12462 |
+| 18:47 | Created Android-Client/app/src/main/java/com/scribeai/client/NativeRecordingCoordinator.kt | — | ~849 |
+| 18:47 | Created backend/src/routes/sessions.ts | — | ~5888 |
+| 18:47 | Created backend/src/routes/manager/content.ts | — | ~2387 |
+| 18:47 | Created backend/src/routes/sessions.ts | — | ~5908 |
+| 18:48 | Created backend/src/routes/manager/content.ts | — | ~2407 |
+| 18:48 | Created backend/src/routes/manager/content.ts | — | ~2380 |
+| 18:48 | Session end: 486 writes across 87 files (c__Users_Administrator_AppData_Roaming_Cursor_User_workspaceStorage_111313c45aa6c7d388f26bfd11d0f901_images_image-f2c88af0-8692-427f-8cf3-edd43eba31d9.png, recording-duration.ts, use-recording-duration.ts, transcript-feed.tsx, features_audio_processing.md) | 132 reads | ~1860089 tok |

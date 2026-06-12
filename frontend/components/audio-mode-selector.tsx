@@ -6,11 +6,13 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useRecordingStore, AudioMode } from '@/lib/store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { APP_CONFIG } from '@/lib/app-config';
+import { getPreferredCaptureMode } from '@/lib/native-recording';
 
 export function AudioModeSelector() {
   const { audioMode, setAudioMode, status } = useRecordingStore();
 
   if (!APP_CONFIG.showAudioSource) return null;
+  if (getPreferredCaptureMode() === 'native') return null;
   const isDisabled = status !== 'idle';
 
   const handleModeChange = (value: string) => {

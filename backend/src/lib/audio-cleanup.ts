@@ -1,4 +1,5 @@
 import { cleanupExpiredRecordings, cleanupIncompleteSessions } from './audio-archive';
+import { cleanupOrphanRecordingArchives } from './recording-orphan-cleanup';
 import { STORAGE_CONFIG } from './storage-config';
 
 export function startAudioCleanup(): void {
@@ -24,10 +25,20 @@ export function startAudioCleanup(): void {
     }
   };
 
+  const runOrphans = () => {
+    void cleanupOrphanRecordingArchives().then((r) => {
+      if (r.removed > 0) {
+        console.log(`[AudioCleanup] Removed ${r.removed} orphan recording dir(s)`);
+      }
+    });
+  };
+
   runIncomplete();
   runExpired();
+  runOrphans();
   setInterval(runIncomplete, incompleteIntervalMs);
   setInterval(runExpired, retentionIntervalMs);
+  setInterval(runOrphans, incompleteIntervalMs);
 
   console.log(
     `[AudioCleanup] Incomplete scan every ${STORAGE_CONFIG.incompleteAudioCleanupIntervalHours}h (${STORAGE_CONFIG.incompleteAudioRetentionDays}d); complete retention scan every ${STORAGE_CONFIG.audioCleanupIntervalHours}h (${STORAGE_CONFIG.audioRetentionDays}d)`

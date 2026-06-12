@@ -42,7 +42,6 @@ export default function ProfilePage() {
   const [success, setSuccess] = useState('');
   const [apkInfo, setApkInfo] = useState<AndroidApkInfo | null>(null);
   const [apkLoading, setApkLoading] = useState(true);
-  const [apkDownloading, setApkDownloading] = useState(false);
   const router = useRouter();
 
   // --- 组织管理 State ---
@@ -250,20 +249,13 @@ export default function ProfilePage() {
 
   const hasChanges = name !== profile.name || email !== profile.email;
 
-  const handleDownloadApk = async () => {
+  const handleDownloadApk = () => {
     const token = localStorage.getItem('token');
     if (!token) {
       router.replace('/login');
       return;
     }
-    setApkDownloading(true);
-    try {
-      await downloadAndroidApk(token);
-    } catch (err) {
-      alert(err instanceof Error ? err.message : '下载失败');
-    } finally {
-      setApkDownloading(false);
-    }
+    downloadAndroidApk(token);
   };
 
   return (
@@ -432,16 +424,8 @@ export default function ProfilePage() {
                   ? ` · 更新于 ${new Date(apkInfo.updatedAt).toLocaleString('zh-CN')}`
                   : ''}
               </p>
-              <Button
-                variant="outline"
-                onClick={() => void handleDownloadApk()}
-                disabled={apkDownloading}
-              >
-                {apkDownloading ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <Download className="mr-2 h-4 w-4" />
-                )}
+              <Button variant="outline" onClick={handleDownloadApk}>
+                <Download className="mr-2 h-4 w-4" />
                 下载 Android 安装包
               </Button>
             </>

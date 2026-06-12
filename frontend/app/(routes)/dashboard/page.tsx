@@ -33,6 +33,7 @@ function DashboardContent() {
     setTranscript,
     setDraftId,
     setDraftTitle,
+    setRecordingId,
     clearDraft,
     clearTranscript,
     draftId,
@@ -46,11 +47,11 @@ function DashboardContent() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<{ id: string; name: string; email: string } | null>(null);
   const [pendingRestore, setPendingRestore] = useState<Draft | null>(null);
-  const [restoreDismissed, setRestoreDismissed] = useState(false);
 
   const applyDraft = useCallback((draft: Draft) => {
     setDraftId(draft.id);
     setDraftTitle(draft.title);
+    setRecordingId(draft.recordingId ?? null);
     if (draft.fullText?.trim()) {
       setTranscript([draft.fullText.trim()]);
     }
@@ -59,7 +60,7 @@ function DashboardContent() {
     }
     // 从服务端恢复后本地无 MediaRecorder，统一为 idle，由用户点「开始录音」续录
     setStatus('idle');
-  }, [setDraftId, setDraftTitle, setTranscript, setAudioMode, setStatus]);
+  }, [setDraftId, setDraftTitle, setRecordingId, setTranscript, setAudioMode, setStatus]);
 
   // --- Verify user ---
   useEffect(() => {
@@ -117,7 +118,7 @@ function DashboardContent() {
         if (draftId) return;
 
         const active = await fetchActiveDraft();
-        if (active && !restoreDismissed) {
+        if (active) {
           setPendingRestore(active);
         }
       } catch (err) {
@@ -126,7 +127,7 @@ function DashboardContent() {
     };
 
     void loadDraftContext();
-  }, [loading, draftIdParam, draftId, restoreDismissed, applyDraft, router]);
+  }, [loading, draftIdParam, draftId, applyDraft, router]);
 
   // --- Socket listeners for live transcription ---
   useEffect(() => {
@@ -166,10 +167,23 @@ function DashboardContent() {
     if (!draftId) return;
     if (!confirm('确定放弃当前草稿？内容将永久删除。')) return;
     try {
+      await flushDraft();
       await deleteDraft(draftId);
       clearDraft();
       clearTranscript();
       setStatus('idle');
+    } catch (err) {
+      console.error(err);
+      alert('删除草稿失败');
+    }
+  };
+
+  const handleDiscardPendingRestore = async () => {
+    if (!pendingRestore) return;
+    if (!confirm('确定放弃该草稿？内容将永久删除。')) return;
+    try {
+      await deleteDraft(pendingRestore.id);
+      setPendingRestore(null);
     } catch (err) {
       console.error(err);
       alert('删除草稿失败');
@@ -199,10 +213,7 @@ function DashboardContent() {
         <DraftRestoreBanner
           draft={pendingRestore}
           onRestore={handleRestore}
-          onDismiss={() => {
-            setRestoreDismissed(true);
-            setPendingRestore(null);
-          }}
+          onDiscard={handleDiscardPendingRestore}
         />
       )}
 

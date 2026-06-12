@@ -13,7 +13,11 @@ export function respondRecordingMeta(
     return;
   }
   const meta = getRecordingMeta(userId, recordingId);
-  res.json({ hasRecording: meta.exists, recordingId, ...meta });
+  res.json({
+    hasRecording: meta.exists,
+    recordingId,
+    ...meta,
+  });
 }
 
 export function streamRecording(
@@ -31,8 +35,12 @@ export function streamRecording(
     return;
   }
 
-  res.setHeader('Content-Type', 'audio/webm');
-  res.setHeader('Content-Disposition', `inline; filename="recording-${recordingId}.webm"`);
+  const isWav = filePath.endsWith('.wav');
+  res.setHeader('Content-Type', isWav ? 'audio/wav' : 'audio/webm');
+  res.setHeader(
+    'Content-Disposition',
+    `inline; filename="recording-${recordingId}.${isWav ? 'wav' : 'webm'}"`
+  );
   fs.createReadStream(filePath).pipe(res);
 }
 

@@ -1,7 +1,11 @@
 import fs from "fs";
 import path from "path";
 import { Router } from "express";
-import { verifyUser, AuthenticatedRequest } from "../middleware/authMiddleware";
+import {
+  verifyUser,
+  verifyUserBearerOrQuery,
+  AuthenticatedRequest,
+} from "../middleware/authMiddleware";
 
 const router = Router();
 
@@ -29,7 +33,7 @@ router.get("/android/info", verifyUser, (_req: AuthenticatedRequest, res) => {
   return res.json({ available: true, ...meta });
 });
 
-router.get("/android", verifyUser, (_req: AuthenticatedRequest, res) => {
+router.get("/android", verifyUserBearerOrQuery, (_req: AuthenticatedRequest, res) => {
   if (!fs.existsSync(APK_PATH)) {
     return res.status(404).json({ error: "Android 安装包暂未发布" });
   }

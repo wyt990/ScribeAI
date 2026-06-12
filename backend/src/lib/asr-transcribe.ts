@@ -77,7 +77,12 @@ export async function transcribeAudioBuffer(
 /** 对归档录音文件执行批量转写 */
 export async function transcribeRecordingFile(filePath: string): Promise<string> {
   const buffer = fs.readFileSync(filePath);
-  return transcribeAudioBuffer(buffer, 'audio/webm;codecs=opus', 'webm');
+  const isWav = filePath.toLowerCase().endsWith('.wav');
+  return transcribeAudioBuffer(
+    buffer,
+    isWav ? 'audio/wav' : 'audio/webm;codecs=opus',
+    isWav ? 'wav' : 'webm'
+  );
 }
 
 export function getSttProviderLabel(): string {

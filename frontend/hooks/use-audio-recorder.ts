@@ -4,7 +4,7 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { useRecordingStore, AudioMode } from '@/lib/store';
 import {
-  getSocket, connectSocket, emitAudioChunk, emitStopRecording, emitStartRecording,
+  getSocket, connectSocket, ensureSocketConnected, emitAudioChunk, emitAudioChunkBuffer, emitStopRecording, emitStartRecording,
   emitRecordingInterrupted, emitRecordingRecovered, emitRecordingStale,
   incrementSegmentSeq, emitSegmentEnd, resetSegmentSeq, resetSegmentDisplay,
   DEFAULT_VAD_CONFIG, type VADConfig,
@@ -16,6 +16,18 @@ import {
   releaseScreenWake,
   reacquireScreenWakeIfNeeded,
 } from '@/lib/screen-wake';
+import {
+  getPreferredCaptureMode,
+  isNativeCaptureAvailable,
+  nativeRecoverRecording,
+  nativeStartRecording,
+  nativeStopRecording,
+  nativeSyncAudioEnhancement,
+  subscribeNativeRecording,
+  type CaptureMode,
+  type NativeLevelPayload,
+} from '@/lib/native-recording';
+import { useAppConfig } from '@/hooks/use-app-config';
 
 const VAD_ASSET_PATH = '/vad/';
 const VAD_WASM_PATH = '/vad/';
@@ -28,6 +40,8 @@ const SPEECH_MS_WITHOUT_SEGMENT = 7000;
 const HEALTH_POLL_MS = 3000;
 /** 轻量自动恢复失败后，才弹窗要求用户介入 */
 const MAX_LIGHTWEIGHT_RECOVER_ATTEMPTS = 2;
+/** 原生持麦：超过此时间未收到分片视为异常 */
+const NATIVE_CHUNK_STALL_MS = 15000;
 
 let lastVadConfig: VADConfig = DEFAULT_VAD_CONFIG;
 
@@ -87,11 +101,12 @@ async function acquireAudioStream(mode: AudioMode): Promise<MediaStream> {
 }
 
 type DraftSyncHelpers = {
-  ensureDraft?: () => Promise<string | null>;
+  ensureDraft?: (recordingIdOverride?: string) => Promise<string | null>;
   flushDraft?: () => Promise<void>;
 };
 
 export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
+  const { nativeChunkMode, nativeChunkSeconds, nativeVad } = useAppConfig();
   const {
     status,
     audioMode,
@@ -122,6 +137,8 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
   const audioGainRef = useRef(audioGain);
   const autoGainRef = useRef(autoGainEnabled);
   const noiseSuppressionRef = useRef(noiseSuppressionEnabled);
+  /** 原生电平上报触发的增益更新，避免回写壳内 manualGain */
+  const nativeGainEchoRef = useRef(false);
   audioGainRef.current = audioGain;
   autoGainRef.current = autoGainEnabled;
   noiseSuppressionRef.current = noiseSuppressionEnabled;
@@ -140,6 +157,9 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
   const audioLevelRef = useRef(0);
   const lightweightRecoverAttemptsRef = useRef(0);
   const healthPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const captureModeRef = useRef<CaptureMode>(getPreferredCaptureMode());
+  const nativeUnsubRef = useRef<(() => void) | null>(null);
+  const lastNativeChunkAtRef = useRef<number | null>(null);
 
   const vadRef = useRef<any>(null);
   const vadConfigRef = useRef<VADConfig>(DEFAULT_VAD_CONFIG);
@@ -156,6 +176,7 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
   const [audioLevel, setAudioLevel] = useState(0);
   const [rnnoiseReady, setRnnoiseReady] = useState(false);
   const [isRecovering, setIsRecovering] = useState(false);
+  const [nativeAudioStatus, setNativeAudioStatus] = useState<NativeLevelPayload | null>(null);
 
   const audioContextRef = useRef<AudioContext | null>(null);
   const meterAnalyserRef = useRef<AnalyserNode | null>(null);
@@ -295,6 +316,12 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
   }, [teardownVAD]);
 
   const preloadVAD = useCallback(async (retryCount = 0) => {
+    if (isNativeCaptureAvailable()) {
+      setVadLoading(false);
+      setVadStatus('inactive');
+      return;
+    }
+
     const config = vadConfigRef.current;
     const configKey = JSON.stringify(config);
 
@@ -406,7 +433,9 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
       console.log('[Socket] vad-config received:', config);
       lastVadConfig = config;
       vadConfigRef.current = config;
-      void preloadVAD();
+      if (!isNativeCaptureAvailable()) {
+        void preloadVAD();
+      }
     };
 
     if (!listenersAttachedRef.current) {
@@ -418,16 +447,21 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
       listenersAttachedRef.current = true;
     }
 
-    void preloadRnnoiseWorklet().then((ok) => {
-      setRnnoiseReady(ok);
-      if (ok) console.log('[RNNoise] worklet preloaded');
-    });
+    if (!isNativeCaptureAvailable()) {
+      void preloadRnnoiseWorklet().then((ok) => {
+        setRnnoiseReady(ok);
+        if (ok) console.log('[RNNoise] worklet preloaded');
+      });
+    }
 
     if (socket.connected) {
       setIsReady(true);
       setIsConnecting(false);
       vadConfigRef.current = lastVadConfig;
-      if (!vadRef.current) {
+      if (isNativeCaptureAvailable()) {
+        setVadLoading(false);
+        setVadStatus('inactive');
+      } else if (!vadRef.current) {
         void preloadVAD();
       } else {
         setVadStatus('ready');
@@ -445,15 +479,47 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
 
   // 录音中同步自动增益开关
   useEffect(() => {
-    if (status !== 'recording' || !pipelineRef.current) return;
+    if (status !== 'recording') return;
+    if (captureModeRef.current === 'native') {
+      nativeSyncAudioEnhancement({
+        audioGain: audioGainRef.current,
+        autoGainEnabled: autoGainRef.current,
+        noiseSuppressionEnabled: noiseSuppressionRef.current,
+      });
+      return;
+    }
+    if (!pipelineRef.current) return;
     pipelineRef.current.setAutoGain(autoGainEnabled);
   }, [autoGainEnabled, status]);
 
   // 录音中同步手动增益
   useEffect(() => {
-    if (status !== 'recording' || !pipelineRef.current || autoGainEnabled) return;
+    if (status !== 'recording') return;
+    if (captureModeRef.current === 'native') {
+      if (nativeGainEchoRef.current) {
+        nativeGainEchoRef.current = false;
+        return;
+      }
+      nativeSyncAudioEnhancement({
+        audioGain: audioGainRef.current,
+        autoGainEnabled: autoGainRef.current,
+        noiseSuppressionEnabled: noiseSuppressionRef.current,
+      });
+      return;
+    }
+    if (!pipelineRef.current || autoGainEnabled) return;
     pipelineRef.current.setManualGain(audioGain);
   }, [audioGain, autoGainEnabled, status]);
+
+  // 录音中同步降噪（原生持麦）
+  useEffect(() => {
+    if (status !== 'recording' || captureModeRef.current !== 'native') return;
+    nativeSyncAudioEnhancement({
+      audioGain: audioGainRef.current,
+      autoGainEnabled: autoGainRef.current,
+      noiseSuppressionEnabled: noiseSuppressionRef.current,
+    });
+  }, [noiseSuppressionEnabled, status]);
 
   const isCapturePipelineHealthy = useCallback((): boolean => {
     const raw = rawStreamRef.current;
@@ -479,9 +545,25 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
     return true;
   }, [vadStatus]);
 
+  const isNativePipelineHealthy = useCallback((): boolean => {
+    const last = lastNativeChunkAtRef.current;
+    if (!last) return true;
+    return Date.now() - last < NATIVE_CHUNK_STALL_MS;
+  }, []);
+
   const isPipelineHealthy = useCallback((): boolean => {
+    if (captureModeRef.current === 'native') {
+      return isNativePipelineHealthy();
+    }
     return isCapturePipelineHealthy() && isTranscriptionPipelineHealthy();
-  }, [isCapturePipelineHealthy, isTranscriptionPipelineHealthy]);
+  }, [isCapturePipelineHealthy, isTranscriptionPipelineHealthy, isNativePipelineHealthy]);
+
+  const teardownNativeRecording = useCallback(() => {
+    nativeUnsubRef.current?.();
+    nativeUnsubRef.current = null;
+    lastNativeChunkAtRef.current = null;
+    setNativeAudioStatus(null);
+  }, []);
 
   const ensureAudioContextRunning = useCallback(async (): Promise<boolean> => {
     const ctx = audioContextRef.current;
@@ -554,6 +636,49 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
     }
   }, [pauseVAD, stopAudioMeter, setRecordingInterrupted, setTranscriptionWarning, setStatus]);
 
+  const setupNativeRecording = useCallback(() => {
+    teardownNativeRecording();
+    lastNativeChunkAtRef.current = Date.now();
+
+    nativeUnsubRef.current = subscribeNativeRecording(
+      (buf) => {
+        lastNativeChunkAtRef.current = Date.now();
+        lastSegmentAtRef.current = Date.now();
+        emitAudioChunkBuffer(buf);
+      },
+      (state, reason) => {
+        if (state === 'error') {
+          handleSystemInterruption(reason || 'native-error');
+          return;
+        }
+        if (state === 'recording' && reason === 'recovered') {
+          interruptionHandledRef.current = false;
+          setRecordingInterrupted(false);
+          setStatus('recording');
+          lastNativeChunkAtRef.current = Date.now();
+          const rid = recordingIdRef.current;
+          const uid = userIdRef.current;
+          if (rid && uid) {
+            emitRecordingRecovered(rid, uid);
+          }
+        }
+      },
+      (payload) => {
+        lastNativeChunkAtRef.current = Date.now();
+        audioLevelRef.current = payload.level;
+        setAudioLevel((prev) => prev * 0.35 + payload.level * 0.65);
+        if (typeof payload.gain === 'number') {
+          const prev = audioGainRef.current;
+          if (Math.abs(payload.gain - prev) >= 0.01) {
+            nativeGainEchoRef.current = true;
+            setAudioGainLive(payload.gain);
+          }
+        }
+        setNativeAudioStatus(payload);
+      }
+    );
+  }, [teardownNativeRecording, handleSystemInterruption, setRecordingInterrupted, setStatus, setAudioGainLive]);
+
   const tryLightweightRecover = useCallback(async (): Promise<boolean> => {
     console.warn('[useAudioRecorder] attempting lightweight transcription recover');
     setTranscriptionWarning('检测到语音但未产生转写，正在尝试自动恢复…');
@@ -612,6 +737,13 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
 
     refreshSegmentAge();
 
+    if (captureModeRef.current === 'native') {
+      if (!isNativePipelineHealthy()) {
+        handleSystemInterruption('native-chunk-stall');
+      }
+      return;
+    }
+
     if (!isCapturePipelineHealthy()) {
       handleSystemInterruption('capture-unhealthy');
       return;
@@ -640,6 +772,7 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
     }
   }, [
     refreshSegmentAge,
+    isNativePipelineHealthy,
     isCapturePipelineHealthy,
     ensureAudioContextRunning,
     restartVADListening,
@@ -840,6 +973,33 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
       setError?.('转录服务未连接，请稍候后重试');
       return;
     }
+
+    if (captureModeRef.current === 'native' || isNativeCaptureAvailable()) {
+      setIsRecovering(true);
+      try {
+        setError?.(null);
+        interruptionHandledRef.current = false;
+        nativeRecoverRecording();
+        setRecordingInterrupted(false);
+        lastNativeChunkAtRef.current = Date.now();
+        lastSegmentAtRef.current = Date.now();
+        setStatus('recording');
+        const rid = recordingIdRef.current;
+        const uid = userIdRef.current;
+        if (rid && uid) {
+          emitRecordingRecovered(rid, uid);
+        }
+      } catch (err) {
+        console.error('[useAudioRecorder] native recoverRecording error', err);
+        setError?.('无法恢复录音：' + (err as Error).message);
+        setRecordingInterrupted(true);
+        setStatus('paused');
+      } finally {
+        setIsRecovering(false);
+      }
+      return;
+    }
+
     if (vadLoading || vadStatus === 'loading') {
       setError?.('VAD 模型仍在加载，请稍候...');
       return;
@@ -920,19 +1080,25 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
       setError?.('Still connecting — please wait until connection is ready.');
       return;
     }
-    if (vadLoading || vadStatus === 'loading') {
-      setError?.('VAD 模型仍在加载，请稍候...');
-      return;
-    }
 
-    if (!vadRef.current && vadStatus !== 'error') {
-      vadConfigRef.current = lastVadConfig;
-      await preloadVAD();
-    }
+    const useNative = isNativeCaptureAvailable();
+    captureModeRef.current = useNative ? 'native' : 'web';
 
-    if (!vadRef.current && vadStatus !== 'error') {
-      setError?.('VAD 尚未就绪，请稍候后重试');
-      return;
+    if (!useNative) {
+      if (vadLoading || vadStatus === 'loading') {
+        setError?.('VAD 模型仍在加载，请稍候...');
+        return;
+      }
+
+      if (!vadRef.current && vadStatus !== 'error') {
+        vadConfigRef.current = lastVadConfig;
+        await preloadVAD();
+      }
+
+      if (!vadRef.current && vadStatus !== 'error') {
+        setError?.('VAD 尚未就绪，请稍候后重试');
+        return;
+      }
     }
 
     try {
@@ -945,13 +1111,14 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
       setTranscriptionWarning(null);
       setLastSegmentAgeSec(null);
 
-      if (!navigator.mediaDevices?.getUserMedia) {
+      if (!useNative && !navigator.mediaDevices?.getUserMedia) {
         setError?.('您的浏览器不支持录音功能，请使用最新版 Chrome 或 Edge，并通过 HTTPS 访问。');
         setStatus('idle');
         return;
       }
 
       await teardownCapturePipeline();
+      teardownNativeRecording();
       chunksRef.current = [];
 
       resetSegmentSeq();
@@ -959,18 +1126,44 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
 
       const newRecordingId = crypto.randomUUID();
       setRecordingId(newRecordingId);
-      if (userId) {
-        emitStartRecording(newRecordingId, userId);
-      }
-      await draftSync?.ensureDraft?.();
+      recordingIdRef.current = newRecordingId;
+      await draftSync?.ensureDraft?.(newRecordingId);
 
       if (!socketRef.current) initSocket();
-      if (socketRef.current && !socketRef.current.connected) {
-        if (!connectSocket()) {
-          setError?.('未登录，无法开始录音');
-          setStatus('idle');
-          return;
-        }
+      const socketOk = await ensureSocketConnected();
+      if (!socketOk) {
+        setError?.('未登录或转录服务未连接，无法开始录音');
+        setStatus('idle');
+        return;
+      }
+
+      if (userId) {
+        emitStartRecording(newRecordingId, userId, useNative ? 'native' : 'web');
+      } else {
+        setError?.('用户信息未加载，请刷新页面后重试');
+        setStatus('idle');
+        return;
+      }
+
+      if (useNative) {
+        setupNativeRecording();
+        nativeStartRecording(
+          newRecordingId,
+          {
+            audioGain: audioGainRef.current,
+            autoGainEnabled: autoGainRef.current,
+            noiseSuppressionEnabled: noiseSuppressionRef.current,
+          },
+          {
+            mode: nativeChunkMode,
+            chunkSeconds: nativeChunkSeconds,
+            vad: nativeVad,
+          }
+        );
+        void acquireScreenWake();
+        setStatus('recording');
+        console.log('[useAudioRecorder] started native capture');
+        return;
       }
 
       await setupCapturePipeline();
@@ -979,6 +1172,7 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
     } catch (err) {
       console.error('[useAudioRecorder] startRecording error', err);
       await teardownCapturePipeline();
+      teardownNativeRecording();
       setStatus('idle');
       setError?.('Failed to start recording: ' + (err as Error).message);
     }
@@ -996,10 +1190,16 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
     draftSync,
     preloadVAD,
     teardownCapturePipeline,
+    teardownNativeRecording,
     setupCapturePipeline,
+    setupNativeRecording,
   ]);
 
   const pauseRecording = useCallback(() => {
+    if (captureModeRef.current === 'native') {
+      console.warn('[useAudioRecorder] pause not supported in native capture mode');
+      return;
+    }
     if (mediaRecorderRef.current?.state === 'recording') {
       try {
         mediaRecorderRef.current.pause();
@@ -1014,6 +1214,10 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
   }, [setStatus, pauseVAD, stopAudioMeter, draftSync]);
 
   const resumeRecording = useCallback(() => {
+    if (captureModeRef.current === 'native') {
+      console.warn('[useAudioRecorder] resume not supported in native capture mode');
+      return;
+    }
     if (mediaRecorderRef.current?.state === 'paused') {
       try {
         mediaRecorderRef.current.resume();
@@ -1033,14 +1237,22 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
 
   const finalizeActiveRecording = useCallback(
     (opts?: { notifyBackend?: boolean }) => {
+      const nativeActive =
+        captureModeRef.current === 'native' && statusRef.current !== 'idle';
       const recorderActive =
         mediaRecorderRef.current != null &&
         mediaRecorderRef.current.state !== 'inactive';
+      const wasActive = nativeActive || recorderActive;
 
       try {
         detachStreamMonitor();
         interruptionHandledRef.current = false;
         setRecordingInterrupted(false);
+
+        if (nativeActive) {
+          nativeStopRecording();
+          teardownNativeRecording();
+        }
 
         if (recorderActive) {
           mediaRecorderRef.current!.stop();
@@ -1060,7 +1272,7 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
           setVadStatus('ready');
         }
 
-        if (opts?.notifyBackend && recorderActive) {
+        if (opts?.notifyBackend && wasActive) {
           emitStopRecording();
         }
       } catch (err) {
@@ -1068,19 +1280,31 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
         setStatus('idle');
       }
     },
-    [pauseVAD, stopAudioMeter, setStatus, destroyPipeline, stopRawStream, detachStreamMonitor, setRecordingInterrupted]
+    [pauseVAD, stopAudioMeter, setStatus, destroyPipeline, stopRawStream, detachStreamMonitor, setRecordingInterrupted, teardownNativeRecording]
   );
 
   const stopRecording = useCallback(() => {
+    const nativeActive =
+      captureModeRef.current === 'native' && statusRef.current !== 'idle';
     const recorderActive =
       mediaRecorderRef.current != null &&
       mediaRecorderRef.current.state !== 'inactive';
+    const wasActive = nativeActive || recorderActive;
 
     finalizeActiveRecording();
-    if (recorderActive) {
+
+    if (nativeActive) {
+      interruptionHandledRef.current = false;
+      setRecordingInterrupted(false);
+      setTranscriptionWarning(null);
+      setLastSegmentAgeSec(null);
+      setStatus('idle');
+    }
+
+    if (wasActive) {
       setTimeout(() => emitStopRecording(), 200);
     }
-  }, [finalizeActiveRecording]);
+  }, [finalizeActiveRecording, setStatus, setRecordingInterrupted, setTranscriptionWarning, setLastSegmentAgeSec]);
 
   useEffect(() => {
     initSocket();
@@ -1092,6 +1316,7 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
         const wasActive =
           statusRef.current === 'recording' ||
           statusRef.current === 'paused' ||
+          (captureModeRef.current === 'native' && statusRef.current !== 'idle') ||
           (mediaRecorderRef.current != null &&
             mediaRecorderRef.current.state !== 'inactive');
 
@@ -1175,5 +1400,8 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
     vadError,
     audioLevel,
     rnnoiseReady,
+    captureMode: captureModeRef.current,
+    isNativeCapture: captureModeRef.current === 'native',
+    nativeAudioStatus,
   };
 };

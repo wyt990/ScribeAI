@@ -21,6 +21,7 @@ import {
 import { parseSummaryType, DEFAULT_SUMMARY_TYPE } from '../prompts/build-summary-prompt';
 import { writeOperationTrace } from '../lib/operation-trace';
 import { getRecordingMeta, removeRecordingAudio } from '../lib/audio-archive';
+import { cleanupOrphanRecordingArchivesForUser } from '../lib/recording-orphan-cleanup';
 import { respondRecordingMeta, retranscribeRecording, streamRecording } from '../lib/recording-http';
 import { getSttProviderLabel } from '../lib/asr-transcribe';
 import { searchUserSessions } from '../lib/session-search';
@@ -652,6 +653,7 @@ router.delete("/:id", verifyUser, async (req: AuthenticatedRequest, res) => {
     if (transcript.recordingId) {
       removeRecordingAudio(transcript.userId, transcript.recordingId);
     }
+    await cleanupOrphanRecordingArchivesForUser(transcript.userId);
 
     res.json({ success: true });
   } catch (err) {

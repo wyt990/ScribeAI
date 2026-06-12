@@ -15,26 +15,19 @@ export async function fetchAndroidApkInfo(
   return res.json();
 }
 
-export async function downloadAndroidApk(token: string) {
-  const res = await fetch('/api/downloads/android', {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error || '下载失败');
-  }
+/** 直链 URL，由浏览器原生下载，避免大 APK 整文件进内存 */
+export function getAndroidApkDownloadUrl(token: string): string {
+  const params = new URLSearchParams({ token });
+  return `/api/downloads/android?${params.toString()}`;
+}
 
-  const blob = await res.blob();
-  const disposition = res.headers.get('Content-Disposition') || '';
-  const match = disposition.match(/filename="?([^"]+)"?/);
-  const filename = match?.[1] || 'ScribeAI-android.apk';
-
-  const url = URL.createObjectURL(blob);
+export function downloadAndroidApk(token: string): void {
   const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
+  a.href = getAndroidApkDownloadUrl(token);
+  a.rel = 'noopener noreferrer';
+  document.body.appendChild(a);
   a.click();
-  URL.revokeObjectURL(url);
+  document.body.removeChild(a);
 }
 
 export function formatApkSize(bytes?: number) {

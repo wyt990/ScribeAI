@@ -27,6 +27,8 @@ export default function ManagerMobilePage() {
       <ManagerSettingsForm group="mobile" />
       <p className="text-xs text-muted-foreground">
         将编译好的 APK 放到配置路径后，用户可在个人资料页下载。上传功能后续可扩展。
+        「显示录音页音频增强面板」填 true 或 false；隐藏后用户界面不显示增益/降噪控件，但已保存的音频增强设置仍会在录音时生效。
+        「原生分片模式」：auto=说完一句（静音后）再发送，timer=按固定秒数切分。定时节间隔、静音分句 RMS 阈值及 STT 页的 VAD 宽限/最短语音/前置填充参数，均在下次开始录音时生效。
       </p>
     </div>
   );

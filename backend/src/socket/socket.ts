@@ -3,7 +3,12 @@ import fs from "fs";
 import path from "path";
 import { createClient, LiveTranscriptionEvents } from "@deepgram/sdk";
 import { STORAGE_CONFIG } from "../lib/storage-config";
-import { appendRecordingChunk, finalizeRecordingArchive } from "../lib/audio-archive";
+import {
+  appendRecordingChunk,
+  finalizeRecordingArchive,
+  prepareRecordingArchive,
+  type RecordingArchiveFormat,
+} from "../lib/audio-archive";
 import { transcribeAudioBuffer } from "../lib/asr-transcribe";
 import { authenticateSocketHandshake } from "../lib/socket-auth";
 import { writeOperationTrace } from "../lib/operation-trace";
@@ -224,6 +229,11 @@ function handleOpenAIASR(socket: Socket) {
   let currentRecordingId: string | null = null;
   let recordingStartedAt: number | null = null;
   let vadSegmentCount = 0;
+  let sessionCaptureMode: "native" | "web" = "web";
+  let nativeFlushDebounce: ReturnType<typeof setTimeout> | null = null;
+
+  const usesVadSegments = () => VAD_ENABLED && sessionCaptureMode !== "native";
+  const usesTimerSlices = () => sessionCaptureMode === "native" || !VAD_ENABLED;
 
   const resetSessionBuffers = () => {
     accumulatedChunks = [];
@@ -238,17 +248,84 @@ function handleOpenAIASR(socket: Socket) {
   socket.emit("vad-config", VAD_CONFIG);
   console.log(`[VAD] enabled=${VAD_ENABLED}, model=${VAD_CONFIG.model}, config sent to ${socket.id}`);
 
+  function nativeChunkFormat(chunkBuf: Buffer): { mimeType: string; extension: string } {
+    if (chunkBuf.length >= 4 && chunkBuf.toString("ascii", 0, 4) === "RIFF") {
+      return { mimeType: "audio/wav", extension: "wav" };
+    }
+    return { mimeType: "audio/webm;codecs=opus", extension: "webm" };
+  }
+
+  // 原生持麦：每片独立 WAV（定时或静音分句），须逐片转写（不可 Buffer.concat）
+  async function flushNativePendingChunks() {
+    const pending = accumulatedChunks.slice(lastFlushedChunkIndex);
+    if (pending.length === 0) return;
+
+    for (const chunkBuf of pending) {
+      const started = Date.now();
+      const { mimeType, extension } = nativeChunkFormat(chunkBuf);
+      try {
+        const text = await transcribeAudioBuffer(chunkBuf, mimeType, extension);
+        if (!text?.trim()) continue;
+
+        writeOperationTrace({
+          userId: currentUserId,
+          category: "recording",
+          action: "stt.segment",
+          target: currentRecordingId ?? undefined,
+          durationMs: Date.now() - started,
+          detail: {
+            provider: "openai_asr",
+            mode: "native_chunk",
+            captureMode: "native",
+            audioBytes: chunkBuf.length,
+          },
+        });
+        socket.emit("transcript", text.trim());
+      } catch (err) {
+        console.error(`[OpenAI ASR] Native chunk error for ${socket.id}:`, err);
+        writeOperationTrace({
+          userId: currentUserId,
+          category: "recording",
+          action: "stt.error",
+          status: "error",
+          target: currentRecordingId ?? undefined,
+          durationMs: Date.now() - started,
+          detail: {
+            provider: "openai_asr",
+            mode: "native_chunk",
+            error: err instanceof Error ? err.message : String(err),
+          },
+        });
+      }
+    }
+
+    lastFlushedChunkIndex = accumulatedChunks.length;
+  }
+
+  function scheduleNativeFlush() {
+    if (nativeFlushDebounce) clearTimeout(nativeFlushDebounce);
+    nativeFlushDebounce = setTimeout(() => {
+      nativeFlushDebounce = null;
+      void flushNativePendingChunks();
+    }, 600);
+  }
+
   // ---- Flush audio to ASR ----
   // VAD mode: transcribe only NEW chunks since last flush; emit full segment text.
   // Timer mode: transcribe all audio; emit length-based incremental delta.
   async function flushToASR(seq?: number) {
     if (accumulatedChunks.length === 0) return;
 
+    if (sessionCaptureMode === "native") {
+      await flushNativePendingChunks();
+      return;
+    }
+
     const started = Date.now();
     try {
       let audioBuffer: Buffer;
 
-      if (VAD_ENABLED) {
+      if (usesVadSegments()) {
         const pending = accumulatedChunks.slice(lastFlushedChunkIndex);
         if (pending.length === 0) return;
         audioBuffer = Buffer.concat(pending);
@@ -261,7 +338,7 @@ function handleOpenAIASR(socket: Socket) {
 
       const trimmed = text.trim();
 
-      if (VAD_ENABLED) {
+      if (usesVadSegments()) {
         lastFlushedChunkIndex = accumulatedChunks.length;
 
         if (seq !== undefined) {
@@ -328,7 +405,15 @@ function handleOpenAIASR(socket: Socket) {
   }
 
   // ---- Start recording: set up session context ----
-  socket.on("start-recording", ({ recordingId, userId }: { recordingId: string; userId?: string }) => {
+  socket.on("start-recording", ({
+    recordingId,
+    userId,
+    captureMode,
+  }: {
+    recordingId: string;
+    userId?: string;
+    captureMode?: "native" | "web";
+  }) => {
     const authUserId = assertSocketUser(socket, userId);
     if (!authUserId || !recordingId) {
       socket.emit("socket-error", { code: "FORBIDDEN", message: "Invalid recording session" });
@@ -336,21 +421,37 @@ function handleOpenAIASR(socket: Socket) {
     }
     if (sliceTimer) { clearInterval(sliceTimer); sliceTimer = null; }
     if (safetyTimer) { clearInterval(safetyTimer); safetyTimer = null; }
+    if (nativeFlushDebounce) { clearTimeout(nativeFlushDebounce); nativeFlushDebounce = null; }
     resetSessionBuffers();
 
+    sessionCaptureMode = captureMode === "native" ? "native" : "web";
     currentRecordingId = recordingId;
     currentUserId = authUserId;
     recordingStartedAt = Date.now();
     vadSegmentCount = 0;
-    const sessionDir = path.join(STORAGE_CONFIG.uploadsDir, authUserId, recordingId);
-    fs.mkdirSync(sessionDir, { recursive: true });
+    const archiveFormat: RecordingArchiveFormat =
+      sessionCaptureMode === "native" ? "wav" : "webm";
+    prepareRecordingArchive(authUserId, recordingId, archiveFormat);
     writeOperationTrace({
       userId: authUserId,
       category: "recording",
       action: "recording.start",
       target: recordingId,
-      detail: { provider: "openai_asr", vadEnabled: VAD_ENABLED },
+      detail: {
+        provider: "openai_asr",
+        vadEnabled: VAD_ENABLED,
+        captureMode: sessionCaptureMode,
+      },
     });
+
+    if (usesTimerSlices() && sessionCaptureMode !== "native") {
+      startSliceTimer();
+      if (!safetyTimer) {
+        safetyTimer = setInterval(async () => {
+          await flushToASR();
+        }, SAFETY_FLUSH_MS);
+      }
+    }
   });
 
   // ---- Receive audio chunks ----
@@ -362,20 +463,28 @@ function handleOpenAIASR(socket: Socket) {
 
       // Save chunk to hierarchical storage
       if (currentUserId && currentRecordingId) {
-        appendRecordingChunk(currentUserId, currentRecordingId, buffer);
+        appendRecordingChunk(
+          currentUserId,
+          currentRecordingId,
+          buffer,
+          sessionCaptureMode === "native" ? "wav" : "webm"
+        );
       }
 
-      // Fallback timer (only when VAD is disabled)
-      if (!sliceTimer && !VAD_ENABLED) {
+      if (sessionCaptureMode === "native") {
+        scheduleNativeFlush();
+        return;
+      }
+
+      // Timer slices: non-VAD web mode
+      if (!sliceTimer && usesTimerSlices()) {
         startSliceTimer();
       }
 
-      // Safety timer only for non-VAD mode (VAD uses segment-end; safety flush caused duplicate fragments)
-      if (!safetyTimer && !VAD_ENABLED) {
+      if (!safetyTimer && usesTimerSlices()) {
         safetyTimer = setInterval(async () => {
           await flushToASR();
         }, SAFETY_FLUSH_MS);
-        // console.log(`[Safety] safety flush timer started (${SAFETY_FLUSH_MS}ms interval)`);
       }
     } catch (error) {
       console.error("Error processing audio chunk:", error);
@@ -384,7 +493,7 @@ function handleOpenAIASR(socket: Socket) {
 
   // ---- VAD-triggered segment end: transcribe WAV audio from frontend VAD ----
   socket.on("segment-end", async ({ seq, audio }: { seq: number; audio?: ArrayBuffer }) => {
-    if (!VAD_ENABLED) return;
+    if (!usesVadSegments()) return;
     if (!assertSocketUser(socket, currentUserId ?? undefined) || !currentRecordingId) return;
 
     if (!audio || audio.byteLength === 0) {
@@ -450,17 +559,30 @@ function handleOpenAIASR(socket: Socket) {
       clearInterval(safetyTimer);
       safetyTimer = null;
     }
+    if (nativeFlushDebounce) {
+      clearTimeout(nativeFlushDebounce);
+      nativeFlushDebounce = null;
+    }
 
-    // Non-VAD mode: final full-buffer flush. VAD mode uses per-segment WAV from frontend.
-    if (!VAD_ENABLED) {
+    // Native: flush remaining chunks. Web timer-slice: final full-buffer flush.
+    if (sessionCaptureMode === "native") {
+      await flushNativePendingChunks();
+    } else if (usesTimerSlices()) {
       await flushToASR();
     }
 
     resetSessionBuffers();
 
+    const stoppedCaptureMode = sessionCaptureMode;
+    sessionCaptureMode = "web";
+
     // Clean up session directory
     if (currentUserId && currentRecordingId) {
-      finalizeRecordingArchive(currentUserId, currentRecordingId);
+      finalizeRecordingArchive(
+        currentUserId,
+        currentRecordingId,
+        stoppedCaptureMode === "native" ? "wav" : "webm"
+      );
       writeOperationTrace({
         userId: currentUserId,
         category: "recording",
@@ -470,6 +592,7 @@ function handleOpenAIASR(socket: Socket) {
         detail: {
           provider: "openai_asr",
           vadEnabled: VAD_ENABLED,
+          captureMode: stoppedCaptureMode,
           vadSegmentCount,
         },
       });

@@ -11,12 +11,16 @@ import {
   GAIN_STEP,
   formatGainLabel,
 } from '@/lib/audio-settings';
+import { useAppConfig } from '@/hooks/use-app-config';
+import { getPreferredCaptureMode } from '@/lib/native-recording';
+import { cn } from '@/lib/utils';
 
 type AudioGainControlProps = {
   disabled?: boolean;
 };
 
 export function AudioGainControl({ disabled = false }: AudioGainControlProps) {
+  const { showAudioEnhancementPanel } = useAppConfig();
   const {
     status,
     audioMode,
@@ -29,7 +33,14 @@ export function AudioGainControl({ disabled = false }: AudioGainControlProps) {
   } = useRecordingStore();
 
   const isRecording = status === 'recording' || status === 'paused';
-  const controlsDisabled = disabled || isRecording;
+  const isNativeShell = getPreferredCaptureMode() === 'native';
+  const controlsDisabled = disabled || (isRecording && !isNativeShell);
+  /** 自动增益时滑条只作指示，避免 disabled 导致拇指不随电平移动 */
+  const gainSliderReadOnly = autoGainEnabled;
+
+  if (!showAudioEnhancementPanel) {
+    return null;
+  }
 
   return (
     <Card>
@@ -68,9 +79,11 @@ export function AudioGainControl({ disabled = false }: AudioGainControlProps) {
             max={GAIN_MAX}
             step={GAIN_STEP}
             value={[audioGain]}
-            onValueChange={([v]) => setAudioGain(v)}
-            disabled={controlsDisabled || autoGainEnabled}
-            aria-label="音量增益"
+            onValueChange={gainSliderReadOnly ? undefined : ([v]) => setAudioGain(v)}
+            disabled={controlsDisabled}
+            className={cn(gainSliderReadOnly && 'pointer-events-none opacity-90')}
+            aria-label={gainSliderReadOnly ? '当前增益（自动）' : '音量增益'}
+            aria-readonly={gainSliderReadOnly}
           />
           <div className="flex justify-between text-[10px] text-muted-foreground">
             <span>0（静音）</span>
@@ -85,7 +98,9 @@ export function AudioGainControl({ disabled = false }: AudioGainControlProps) {
               AI 降噪
             </Label>
             <p className="text-xs text-muted-foreground">
-              {audioMode === 'tab'
+              {isNativeShell
+                ? '壳内使用 DTLN 深度学习降噪（ONNX，录音中可实时调节）'
+                : audioMode === 'tab'
                 ? '标签页音频建议关闭，麦克风模式效果更佳'
                 : 'RNNoise 降噪，提升小声说话识别率'}
             </p>
@@ -98,9 +113,14 @@ export function AudioGainControl({ disabled = false }: AudioGainControlProps) {
           />
         </div>
 
-        {isRecording && (
+        {isRecording && !isNativeShell && (
           <p className="text-xs text-muted-foreground">
             录音中无法修改音频设置，停止后可调整
+          </p>
+        )}
+        {isRecording && isNativeShell && (
+          <p className="text-xs text-muted-foreground">
+            壳内录音中可实时调节；音量条反映增强后的电平
           </p>
         )}
       </CardContent>

@@ -68,18 +68,69 @@ export const disconnectSocket = () => {
   }
 };
 
-export const emitStartRecording = (recordingId: string, userId: string) => {
+export type CaptureMode = 'native' | 'web';
+
+/** 等待 Socket 连接（安卓 WebView 上 connect 常为异步） */
+export const ensureSocketConnected = (timeoutMs = 15000): Promise<boolean> => {
+  if (!connectSocket()) return Promise.resolve(false);
   const s = getSocket();
+  if (s.connected) return Promise.resolve(true);
+
+  return new Promise((resolve) => {
+    const timer = setTimeout(() => {
+      cleanup();
+      resolve(false);
+    }, timeoutMs);
+
+    const onConnect = () => {
+      cleanup();
+      resolve(true);
+    };
+
+    const cleanup = () => {
+      clearTimeout(timer);
+      s.off('connect', onConnect);
+    };
+
+    s.on('connect', onConnect);
+  });
+};
+
+export const emitStartRecording = (
+  recordingId: string,
+  userId: string,
+  captureMode: CaptureMode = 'web'
+) => {
+  const s = getSocket();
+  const payload = { recordingId, userId, captureMode };
+  const send = () => s.emit('start-recording', payload);
   if (s.connected) {
-    s.emit('start-recording', { recordingId, userId });
+    send();
+  } else {
+    s.once('connect', send);
   }
+};
+
+export const emitAudioChunkBuffer = (buf: ArrayBuffer) => {
+  const s = getSocket();
+  if (!s.connected) return;
+  s.emit('audio-chunk', buf);
 };
 
 export const emitAudioChunk = (blob: Blob) => {
   const s = getSocket();
-  if (s.connected) {
-    s.emit('audio-chunk', blob);
-  }
+  if (!s.connected) return;
+
+  void blob
+    .arrayBuffer()
+    .then((buf) => {
+      if (s.connected) {
+        emitAudioChunkBuffer(buf);
+      }
+    })
+    .catch((err) => {
+      console.error('[Socket] audio-chunk encode failed', err);
+    });
 };
 
 export const emitStopRecording = () => {

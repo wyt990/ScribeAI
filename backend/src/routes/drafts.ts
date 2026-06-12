@@ -4,6 +4,10 @@ import { verifyUser, AuthenticatedRequest } from '../middleware/authMiddleware';
 import { generateSummary } from '../lib/summary-llm';
 import { buildSuggestSessionTitlePrompt } from '../prompts/suggest-session-title';
 import { getRecordingMeta, removeRecordingAudio } from '../lib/audio-archive';
+import {
+  cleanupOrphanRecordingArchivesForUser,
+  releaseRecordingIfUnreferenced,
+} from '../lib/recording-orphan-cleanup';
 import { respondRecordingMeta, retranscribeRecording, streamRecording } from '../lib/recording-http';
 import { getSttProviderLabel } from '../lib/asr-transcribe';
 import { writeOperationTrace } from '../lib/operation-trace';
@@ -149,6 +153,7 @@ router.patch('/:id', verifyUser, async (req: AuthenticatedRequest, res) => {
       return res.status(400).json({ error: 'Invalid status' });
     }
 
+    const previousRecordingId = draft.recordingId;
     const updated = await prisma.draft.update({
       where: { id },
       data: {
@@ -161,6 +166,14 @@ router.patch('/:id', verifyUser, async (req: AuthenticatedRequest, res) => {
         lastSavedAt: new Date(),
       },
     });
+
+    if (
+      recordingId !== undefined &&
+      previousRecordingId &&
+      previousRecordingId !== recordingId
+    ) {
+      await releaseRecordingIfUnreferenced(userId, previousRecordingId, { draftId: id });
+    }
 
     res.json(updated);
   } catch (err) {
@@ -269,6 +282,8 @@ router.delete('/:id', verifyUser, async (req: AuthenticatedRequest, res) => {
       removeRecordingAudio(userId, draft.recordingId);
     }
     await prisma.draft.delete({ where: { id } });
+    // recordingId 未落库或同草稿多次开录时，顺带清理该用户无引用目录
+    await cleanupOrphanRecordingArchivesForUser(userId);
     res.json({ success: true });
   } catch (err) {
     console.error('[Drafts] delete error:', err);

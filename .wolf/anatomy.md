@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-06-11T04:59:29.052Z
-> Files: 303 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-06-11T10:48:34.554Z
+> Files: 323 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../root/.claude/plans/
 
@@ -19,11 +19,14 @@
 
 - `28f00ecf-78f3-405b-b1c9-a27f433f69f9.txt` — Skill authoring best practices (~9943 tok)
 - `2d0d2800-7d38-42fd-acc2-6de63c75acec.txt` — withBundleAnalyzer: middleware (~9468 tok)
+- `3746bffe-b175-4616-babd-ea492a46705c.txt` (~6401 tok)
 - `46c71987-2cd1-4fa9-82a8-9f82400e6038.txt` — Issue: vercel/next.js #36251 (~6000 tok)
 - `51fcb130-51a6-40b3-8482-daa977721c1e.txt` — File: anthropics/skills/skills/skill-creator/SKILL.md (~8263 tok)
 - `5d5e746b-aa2e-4ae2-a2ff-13bece07f457.txt` — File: openclaw/skills/skills/jeffjhunter/ai-meeting-notes/SKILL.md (~6028 tok)
+- `639040bc-a70e-4fe0-b7e3-7a2352c40653.txt` — Mobile AI with ONNX Runtime: How to Build Real-Time Noise Suppression That Works (~6478 tok)
 - `67145384-edf8-4cd6-bc29-f8e9d5132897.txt` — File: daymade/claude-code-skills/suites/daymade-docs/meeting-minutes-taker/SKILL.md (~7727 tok)
 - `67a15260-99bf-45a8-8a74-fbaa1ddd0f06.txt` — Repository: spencerpauly/awesome-cursor-skills (~6777 tok)
+- `732cc105-6a91-4e74-a3ff-93a4d488419f.txt` (~7526 tok)
 - `74a67932-35cd-4abf-890f-a723668d3cb5.txt` (~7633 tok)
 - `98523a23-7366-4678-b9b0-61565f304a9d.txt` — Repository: ComposioHQ/awesome-claude-skills (~9903 tok)
 - `d4dbccee-6f82-422e-af30-1c9736653053.txt` — Declares serve (~10424 tok)
@@ -69,17 +72,29 @@
 
 ## Android-Client/app/
 
-- `build.gradle.kts` (~395 tok)
+- `build.gradle.kts` (~415 tok)
 - `proguard-rules.pro` — ScribeAI WebView client — 默认无混淆规则 (~10 tok)
 
 ## Android-Client/app/src/main/
 
-- `AndroidManifest.xml` (~566 tok)
+- `AndroidManifest.xml` (~675 tok)
 
 ## Android-Client/app/src/main/java/com/scribeai/client/
 
 - `AuthSessionStore.kt` — 将 Web 端 JWT 备份到原生存储，避免 WebView 重启后 localStorage 丢失 (~306 tok)
-- `MainActivity.kt` — 页面加载完成后：必要时从原生恢复 token，校验有效性，无效则双向清除； (~3205 tok)
+- `ChunkedMediaRecorder.kt` — 每秒切一段 webm，通过回调交给网页上传（与浏览器 MediaRecorder 分片节奏接近）。 (~738 tok)
+- `ChunkedPcmRecorder.kt` — 16kHz PCM 采音 + DTLN 降噪 + 软件增益。 (~2505 tok)
+- `DtlnNoiseSuppressor.kt` — DTLN 实时降噪（ONNX Runtime，breizhn/DTLN 预训练模型）。 (~1715 tok)
+- `DtlnRealFft.kt` — 512 点实数 FFT（DTLN：block_len=512 → 257 频点） (~804 tok)
+- `MainActivity.kt` — 页面加载完成后：必要时从原生恢复 token，校验有效性，无效则双向清除； (~3259 tok)
+- `NativeAudioEnhancer.kt` — 原生音频增强：DTLN（ONNX）降噪 + 由 [NativeGainProcessor] 负责增益。 (~474 tok)
+- `NativeAudioSettings.kt` — 网页「音频增强」面板同步到原生采音 (~257 tok)
+- `NativeGainProcessor.kt` — 软件增益（与网页 auto-gain.ts / 手动滑条对齐）。 (~583 tok)
+- `NativeRecordingCoordinator.kt` — 原生录音 → WebView 事件桥（自定义 DOM 事件，网页端监听） (~849 tok)
+- `NativeSpeechSegmenter.kt` — 能量 VAD：检测到静音宽限后输出一整句 PCM（与网页 Silero VAD 分句节奏接近）。 (~919 tok)
+- `RecordingForegroundService.kt` — RecordingForegroundService: onBind, onStartCommand, onDestroy, startCapture (~1196 tok)
+- `ScribeAINativeBridge.kt` — WebView JavaScript 桥：网页通过 window.ScribeAINative 调用。 (~1004 tok)
+- `WavEncoder.kt` — pcm16ToWav (~281 tok)
 
 ## Android-Client/app/src/main/res/drawable/
 
@@ -101,7 +116,11 @@
 ## Android-Client/app/src/main/res/values/
 
 - `colors.xml` (~33 tok)
-- `strings.xml` (~62 tok)
+- `strings.xml` (~113 tok)
+
+## Android-Client/scripts/
+
+- `download-dtln-models.sh` — 下载 DTLN ONNX 模型到 app/src/main/assets/dtln（构建前执行一次即可） (~103 tok)
 
 ## backend/
 
@@ -205,19 +224,20 @@
 
 ## backend/src/
 
-- `index.ts` — Declares app (~768 tok)
+- `index.ts` — Declares app (~779 tok)
 
 ## backend/src/lib/
 
-- `asr-transcribe.ts` — 对音频 Buffer 执行批量转写（用于归档重跑 ASR） (~774 tok)
-- `audio-archive.ts` — 追加 MediaRecorder 音频块到完整 recording.webm (~1999 tok)
-- `audio-cleanup.ts` — Exports startAudioCleanup (~375 tok)
+- `asr-transcribe.ts` — 对音频 Buffer 执行批量转写（用于归档重跑 ASR） (~805 tok)
+- `audio-archive.ts` — 修正 WAV 头中的文件长度字段（追加 PCM 后必须更新） (~3213 tok)
+- `audio-cleanup.ts` — Exports startAudioCleanup (~478 tok)
 - `audit-log.ts` — Exports writeAuditLog (~141 tok)
 - `openai-api-url.ts` — Join OpenAI-compatible API paths without duplicating slashes. (~239 tok)
 - `operation-trace-cleanup.ts` — Exports cleanupOperationTraces, startOperationTraceCleanup (~428 tok)
 - `operation-trace.ts` — 结构化写入运行 trace（异步，不阻塞主流程） (~672 tok)
 - `prisma.ts` — Declares prisma (~40 tok)
-- `recording-http.ts` — Exports respondRecordingMeta, streamRecording, retranscribeRecording (~506 tok)
+- `recording-http.ts` — Exports respondRecordingMeta, streamRecording, retranscribeRecording (~538 tok)
+- `recording-orphan-cleanup.ts` — 若 recordingId 已无草稿/会话引用，则删除磁盘归档 (~1032 tok)
 - `search-snippet.ts` — 提取命中关键词附近的摘要片段 (~552 tok)
 - `session-search-fallback.ts` — LIKE 回退检索（无 FULLTEXT 索引或查询失败时使用） (~974 tok)
 - `session-search.ts` — Exports SearchHitField, SessionSearchHit, SessionSearchResult, searchUserSessions (~1745 tok)
@@ -232,12 +252,12 @@
 - `summary-template-constants.ts` — 系统内置模板固定 ID（与 migration seed 一致） (~243 tok)
 - `summary-template-seed.ts` — 确保系统内置 Skill/Template 存在（迁移未跑或内容需同步时） (~783 tok)
 - `summary-template-service.ts` — 解析生成纪要所用模板：templateId 优先，其次 legacy summaryType，最后用户默认或系统默认 (~2822 tok)
-- `system-settings.ts` — 启动时从 DB 覆盖 process.env（在 ensure 之后调用） (~2256 tok)
+- `system-settings.ts` — 启动时从 DB 覆盖 process.env（在 ensure 之后调用） (~2451 tok)
 
 ## backend/src/middleware/
 
 - `adminMiddleware.ts` — Exports requireAdmin (~187 tok)
-- `authMiddleware.ts` — Exports AuthenticatedRequest, verifyUser (~389 tok)
+- `authMiddleware.ts` — 支持 Authorization 头或 ?token=，供浏览器直链下载大文件 (~698 tok)
 - `managerMiddleware.ts` — Exports requireManager (~199 tok)
 - `summaryShareAuth.ts` — Bearer JWT 或 ?shareToken= 分享令牌 (~386 tok)
 
@@ -252,18 +272,19 @@
 
 ## backend/src/routes/
 
+- `app-config.ts` — 客户端 UI 配置（公开，无需登录） (~573 tok)
 - `authroutes.ts` — routes/auth.js (~1393 tok)
-- `downloads.ts` — API routes: GET (2 endpoints) (~346 tok)
-- `drafts.ts` — 列表：用户所有未转正的草稿 (~3240 tok)
+- `downloads.ts` — API routes: GET (2 endpoints) (~359 tok)
+- `drafts.ts` — 列表：用户所有未转正的草稿 (~3382 tok)
 - `organizations.ts` — 列出当前用户绑定的组织及职务/职责信息 (~2042 tok)
-- `sessions.ts` — API routes: GET, POST (8 endpoints) (~6052 tok)
+- `sessions.ts` — API routes: GET, POST (8 endpoints) (~6098 tok)
 - `templates.ts` — 列出可用模板（系统 + 我的 + 已审核公共） (~3250 tok)
 - `transcript.ts` — API routes: POST (1 endpoints) (~260 tok)
 
 ## backend/src/routes/manager/
 
 - `audit.ts` — API routes: GET (1 endpoints) (~194 tok)
-- `content.ts` — API routes: GET, DELETE, POST (10 endpoints) (~2317 tok)
+- `content.ts` — API routes: GET, DELETE, POST (10 endpoints) (~2380 tok)
 - `index.ts` — Declares router (~185 tok)
 - `observability.ts` — API routes: GET (2 endpoints) (~889 tok)
 - `settings.ts` — API routes: GET, PATCH, POST (3 endpoints) (~598 tok)
@@ -275,7 +296,7 @@
 
 - `recording-trace-handlers.ts` — 来电/系统抢占等录音中断与恢复的可观测性埋点 (~820 tok)
 - `socket-types.ts` — 校验当前 socket 已鉴权，且（若提供）payload userId 与 token 一致 (~190 tok)
-- `socket.ts` — Safety flush interval: flush accumulated audio to ASR every N ms even in VAD mode (~4811 tok)
+- `socket.ts` — Safety flush interval: flush accumulated audio to ASR every N ms even in VAD mode (~5868 tok)
 
 ## docs/
 
@@ -318,7 +339,7 @@
 
 ## frontend/app/(routes)/dashboard/
 
-- `page.tsx` — DashboardContent (~2232 tok)
+- `page.tsx` — DashboardContent (~2298 tok)
 
 ## frontend/app/(routes)/drafts/
 
@@ -339,7 +360,7 @@
 
 ## frontend/app/(routes)/manager/mobile/
 
-- `page.tsx` — ManagerMobilePage (~327 tok)
+- `page.tsx` — ManagerMobilePage (~379 tok)
 
 ## frontend/app/(routes)/manager/settings/llm/
 
@@ -383,7 +404,7 @@
 
 ## frontend/app/(routes)/profile/
 
-- `page.tsx` — ProfilePage (~5058 tok)
+- `page.tsx` — ProfilePage (~4916 tok)
 
 ## frontend/app/(routes)/sessions/
 
@@ -415,13 +436,13 @@
 
 ## frontend/components/
 
-- `audio-gain-control.tsx` — AudioGainControl (~942 tok)
-- `audio-mode-selector.tsx` — AudioModeSelector (~792 tok)
+- `audio-gain-control.tsx` — 自动增益时滑条只作指示，避免 disabled 导致拇指不随电平移动 (~1195 tok)
+- `audio-mode-selector.tsx` — AudioModeSelector (~829 tok)
 - `build-stamp.tsx` — 移动端右下角版本戳，便于确认 WebView 是否加载到最新构建 (~139 tok)
 - `dashboard-draft-actions.tsx` — 录音页：模板选择 + 生成会议纪要 + 保存为正式会话 (~412 tok)
 - `dashboard-nav-links.tsx` — DashboardNavLinks (~423 tok)
 - `dashboard-shell.tsx` — 会议录音页需要锁高度、内部弹性布局；其余页面允许纵向滚动 (~369 tok)
-- `draft-restore-banner.tsx` — DraftRestoreBanner (~333 tok)
+- `draft-restore-banner.tsx` — DraftRestoreBanner (~326 tok)
 - `generate-meeting-summary-button.tsx` — GenerateMeetingSummaryButton (~1212 tok)
 - `manager-nav.tsx` — NAV (~408 tok)
 - `manager-settings-form.tsx` — ManagerSettingsForm (~812 tok)
@@ -432,7 +453,7 @@
 - `org-identity-modal.tsx` — 若用户有组织则弹出身份选择，否则直接返回 null (~852 tok)
 - `org-identity-select.tsx` — 加载用户组织列表，供生成纪要前判断是否需要弹出身份选择 (~739 tok)
 - `promote-draft-button.tsx` — PromoteDraftButton — renders modal (~693 tok)
-- `recording-controls.tsx` — VAD 状态指示器：显示一个小圆点 + 文字 (~2182 tok)
+- `recording-controls.tsx` — VAD 状态指示器：显示一个小圆点 + 文字 (~2753 tok)
 - `recording-panel.tsx` — RecordingPanel (~1294 tok)
 - `session-search-results.tsx` — SessionSearchResults (~681 tok)
 - `sidebar.tsx` — Sidebar (~442 tok)
@@ -505,9 +526,10 @@
 
 ## frontend/hooks/
 
-- `use-audio-recorder.ts` — 音量超过此阈值视为「可能有语音」 (~10265 tok)
+- `use-app-config.ts` — 加载客户端 UI 配置：服务端系统设置优先，其次 .env.local，最后代码默认值。 (~890 tok)
+- `use-audio-recorder.ts` — 音量超过此阈值视为「可能有语音」 (~12462 tok)
 - `use-can-promote.ts` — Exports useCanPromote (~155 tok)
-- `use-draft-sync.ts` — 草稿自动保存：转录追加防抖写入，状态变更立即写入，离开页面时刷盘 (~1201 tok)
+- `use-draft-sync.ts` — 草稿自动保存：转录追加防抖写入，状态变更立即写入，离开页面时刷盘 (~1338 tok)
 - `use-is-logged-in.ts` — 客户端检测是否已登录（localStorage 中有 token） (~83 tok)
 - `use-is-manager.ts` — Exports useIsManager (~228 tok)
 - `use-mobile.ts` — Exports useIsMobile (~162 tok)
@@ -515,9 +537,9 @@
 
 ## frontend/lib/
 
-- `android-download.ts` — API routes: GET (1 endpoints) (~359 tok)
+- `android-download.ts` — 直链 URL，由浏览器原生下载，避免大 APK 整文件进内存 (~302 tok)
 - `api.ts` — Exports api (~134 tok)
-- `app-config.ts` — 是否显示音频源选择器（麦克风/标签页切换） (~98 tok)
+- `app-config.ts` — 是否显示音频源选择器（麦克风/标签页切换） (~412 tok)
 - `app-version.ts` — 构建时注入，用于确认前端是否已部署到最新版本 (~29 tok)
 - `audio-pipeline.ts` — 预热 RNNoise worklet（浏览器会缓存脚本） (~1562 tok)
 - `audio-settings.ts` — Exports AudioSettings, DEFAULT_AUDIO_SETTINGS, loadAudioSettings, saveAudioSettings, formatGainLabel (~586 tok)
@@ -528,6 +550,7 @@
 - `dashboard-nav.ts` — Exports DashboardNavItem, DASHBOARD_NAV_ITEMS (~151 tok)
 - `draft-api.ts` — Exports DraftStatus, Draft, fetchDrafts, fetchActiveDraft + 8 more (~1013 tok)
 - `manager-api.ts` — Exports ManagerUser, ManagerSettingItem, managerApi (~1160 tok)
+- `native-recording.ts` — 安卓壳内原生持麦；浏览器访问时走 getUserMedia（web 模式） (~1597 tok)
 - `navigation.ts` — Android WebView 壳应用（MainActivity 自定义 UA） (~358 tok)
 - `pcm-capture.ts` — Target frame size in samples (at 16kHz) (~1350 tok)
 - `promote-and-summarize.ts` — Exports PromoteAndSummarizeOptions, PromoteAndSummarizeResult, promoteDraftAndGenerateSummary (~382 tok)
@@ -539,7 +562,7 @@
 - `session-search-api.ts` — Exports SessionSearchHit, SessionSearchResult, searchSessions, SEARCH_FIELD_LABEL (~310 tok)
 - `session-storage.ts` — Exports Session, useSessionStore (~223 tok)
 - `session-summary.ts` — legacy 兼容 (~838 tok)
-- `socket.ts` — 携带 JWT 连接 Socket（未登录或无 token 时不连接） (~1732 tok)
+- `socket.ts` — 携带 JWT 连接 Socket（未登录或无 token 时不连接） (~2072 tok)
 - `store.ts` — 来电等系统抢占麦克风导致的中断（与手动暂停区分） (~1367 tok)
 - `summary-export.ts` — API routes: GET (1 endpoints) (~405 tok)
 - `summary-templates.ts` — Exports SummaryTemplateItem, SummaryTemplateDetail, TemplateDraft, fetchSummaryTemplates + 11 more (~1474 tok)

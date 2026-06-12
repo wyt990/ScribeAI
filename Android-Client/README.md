@@ -47,11 +47,17 @@ sdk.dir=.android-sdk
 命令行：
 
 ```bash
+
 cd Android-Client
 ./gradlew assembleDebug
 
 ./gradlew assembleRelease
+
+./gradlew assembleRelease --offline
 ```
+#  Release 还需要签名密码
+export ANDROID_KEYSTORE_PASSWORD='你的密码'
+export ANDROID_KEY_PASSWORD='你的密码'
 
 输出 APK：
 - Debug：`app/build/outputs/apk/debug/app-debug.apk`

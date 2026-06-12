@@ -4,6 +4,7 @@ import { AuthenticatedRequest } from '../../middleware/authMiddleware';
 import { requireManager } from '../../middleware/managerMiddleware';
 import { writeAuditLog } from '../../lib/audit-log';
 import { getRecordingMeta, removeRecordingAudio } from '../../lib/audio-archive';
+import { cleanupOrphanRecordingArchivesForUser } from '../../lib/recording-orphan-cleanup';
 import { respondRecordingMeta, retranscribeRecording, streamRecording } from '../../lib/recording-http';
 import { getSttProviderLabel } from '../../lib/asr-transcribe';
 
@@ -56,6 +57,7 @@ router.delete('/transcripts/:id', async (req: AuthenticatedRequest, res) => {
     if (transcript.recordingId) {
       removeRecordingAudio(transcript.userId, transcript.recordingId);
     }
+    await cleanupOrphanRecordingArchivesForUser(transcript.userId);
     await writeAuditLog({
       userId: req.user!.id,
       action: 'transcript.delete',
@@ -110,6 +112,7 @@ router.delete('/drafts/:id', async (req: AuthenticatedRequest, res) => {
       removeRecordingAudio(draft.userId, draft.recordingId);
     }
     await prisma.draft.delete({ where: { id: req.params.id } });
+    await cleanupOrphanRecordingArchivesForUser(draft.userId);
     await writeAuditLog({
       userId: req.user!.id,
       action: 'draft.delete',

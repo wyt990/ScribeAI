@@ -14,25 +14,29 @@ export function useDraftSync() {
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastSavedTextRef = useRef('');
   const draftIdRef = useRef(draftId);
+  const recordingIdRef = useRef(recordingId);
   draftIdRef.current = draftId;
+  recordingIdRef.current = recordingId;
 
   const getFullText = useCallback(() => {
     return Array.isArray(transcript) ? transcript.join(' ') : String(transcript || '');
   }, [transcript]);
 
   const persistDraft = useCallback(
-    async (opts?: { fullText?: string; status?: string; force?: boolean }) => {
+    async (opts?: { fullText?: string; status?: string; force?: boolean; recordingId?: string }) => {
       const id = draftIdRef.current;
       if (!id) return;
 
       const fullText = opts?.fullText ?? getFullText();
       if (!opts?.force && fullText === lastSavedTextRef.current && !opts?.status) return;
 
+      const rid = opts?.recordingId ?? recordingIdRef.current;
+
       try {
         await updateDraft(id, {
           fullText,
           ...(opts?.status ? { status: opts.status as 'recording' | 'paused' | 'stopped' } : {}),
-          ...(recordingId ? { recordingId } : {}),
+          ...(rid ? { recordingId: rid } : {}),
           audioMode,
         });
         lastSavedTextRef.current = fullText;
@@ -40,7 +44,7 @@ export function useDraftSync() {
         console.error('[DraftSync] save failed:', err);
       }
     },
-    [getFullText, recordingId, audioMode]
+    [getFullText, audioMode]
   );
 
   const flushDraft = useCallback(async () => {
@@ -55,30 +59,45 @@ export function useDraftSync() {
     const draftStatus =
       status === 'recording' ? 'recording' : status === 'paused' ? 'paused' : 'stopped';
 
-    await persistDraft({ fullText, status: draftStatus, force: true });
+    await persistDraft({
+      fullText,
+      status: draftStatus,
+      force: true,
+      recordingId: recordingIdRef.current || undefined,
+    });
   }, [getFullText, status, persistDraft]);
 
-  const ensureDraft = useCallback(async () => {
-    if (draftIdRef.current) {
-      await updateDraft(draftIdRef.current, { status: 'recording', recordingId: recordingId || undefined });
-      return draftIdRef.current;
-    }
+  const ensureDraft = useCallback(
+    async (recordingIdOverride?: string) => {
+      const rid = recordingIdOverride ?? recordingIdRef.current;
 
-    try {
-      const draft = await createDraft({
-        audioMode,
-        recordingId: recordingId || undefined,
-      });
-      setDraftId(draft.id);
-      setDraftTitle(draft.title);
-      draftIdRef.current = draft.id;
-      lastSavedTextRef.current = '';
-      return draft.id;
-    } catch (err) {
-      console.error('[DraftSync] create failed:', err);
-      return null;
-    }
-  }, [audioMode, recordingId, setDraftId, setDraftTitle]);
+      if (draftIdRef.current) {
+        await updateDraft(draftIdRef.current, {
+          status: 'recording',
+          ...(rid ? { recordingId: rid } : {}),
+        });
+        if (rid) recordingIdRef.current = rid;
+        return draftIdRef.current;
+      }
+
+      try {
+        const draft = await createDraft({
+          audioMode,
+          recordingId: rid || undefined,
+        });
+        setDraftId(draft.id);
+        setDraftTitle(draft.title);
+        draftIdRef.current = draft.id;
+        if (rid) recordingIdRef.current = rid;
+        lastSavedTextRef.current = '';
+        return draft.id;
+      } catch (err) {
+        console.error('[DraftSync] create failed:', err);
+        return null;
+      }
+    },
+    [audioMode, setDraftId, setDraftTitle]
+  );
 
   // 转录变化：防抖保存
   useEffect(() => {
@@ -126,4 +145,4 @@ export function useDraftSync() {
   }, [flushDraft]);
 
   return { ensureDraft, flushDraft, persistDraft };
-}
+};

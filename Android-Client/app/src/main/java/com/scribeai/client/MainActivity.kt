@@ -98,7 +98,7 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    @SuppressLint("SetJavaScriptEnabled")
+    @SuppressLint("SetJavaScriptEnabled", "JavascriptInterface")
     private fun setupWebView() {
         CookieManager.getInstance().setAcceptCookie(true)
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true)
@@ -116,6 +116,9 @@ class MainActivity : AppCompatActivity() {
             cacheMode = WebSettings.LOAD_NO_CACHE
             userAgentString = "$userAgentString ScribeAI-Android"
         }
+
+        NativeRecordingCoordinator.attach(webView)
+        webView.addJavascriptInterface(ScribeAINativeBridge(this), "ScribeAINative")
 
         webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(
@@ -326,6 +329,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        NativeRecordingCoordinator.detach()
         window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         webView.stopLoading()
         webView.destroy()

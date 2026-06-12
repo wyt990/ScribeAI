@@ -13,7 +13,9 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useRecordingStore } from '@/lib/store';
 import { useAudioRecorder } from '@/hooks/use-audio-recorder';
+import { useAppConfig } from '@/hooks/use-app-config';
 import { isIOSDevice } from '@/lib/screen-wake';
+import { getPreferredCaptureMode, type NativeLevelPayload } from '@/lib/native-recording';
 
 /** VAD 状态指示器：显示一个小圆点 + 文字 */
 function VADBadge({ status, error }: { status: 'inactive' | 'loading' | 'ready' | 'error'; error?: string | null }) {
@@ -40,6 +42,15 @@ function VADBadge({ status, error }: { status: 'inactive' | 'loading' | 'ready' 
 }
 
 const METER_SEGMENTS = 28;
+
+function formatNativeDenoiseStatus(status: NativeLevelPayload): string {
+  if (!status.noiseSuppressionEnabled) return '降噪关';
+  if (status.noiseSuppressionActive && status.noiseSuppressionEngine) {
+    return `降噪${status.noiseSuppressionEngine}已启用`;
+  }
+  if (status.noiseSuppressionError) return '降噪DTLN加载失败';
+  return '降噪DTLN启动中…';
+}
 
 /** 分段式音量指示器：绿 → 黄 → 红，仅在录音时显示 */
 function VolumeMeter({ level }: { level: number }) {
@@ -75,11 +86,12 @@ function VolumeMeter({ level }: { level: number }) {
 }
 
 type RecordingControlsProps = {
-  ensureDraft?: () => Promise<string | null>;
+  ensureDraft?: (recordingIdOverride?: string) => Promise<string | null>;
   flushDraft?: () => Promise<void>;
 };
 
 export function RecordingControls({ ensureDraft, flushDraft }: RecordingControlsProps) {
+  const { isConfigReady } = useAppConfig();
   const { status, recordingInterrupted, transcriptionWarning } = useRecordingStore();
   const {
     startRecording,
@@ -94,19 +106,35 @@ export function RecordingControls({ ensureDraft, flushDraft }: RecordingControls
     vadError,
     vadLoading,
     audioLevel,
+    isNativeCapture,
+    nativeAudioStatus,
   } = useAudioRecorder({ ensureDraft, flushDraft });
 
   const isIdle = status === 'idle';
   const isRecording = status === 'recording';
   const isPaused = status === 'paused';
   const isProcessing = status === 'processing';
+  const isNativeShell = getPreferredCaptureMode() === 'native';
+  const captureTag = isNativeShell ? 'C' : 'E';
+  const waitingForConfig = !isConfigReady;
+  const waitingForVad = !isNativeShell && (vadLoading || vadStatus === 'loading');
+  const canStartRecording = isReady && isConfigReady && !isConnecting && !waitingForVad;
 
   return (
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between gap-2">
-          <CardTitle className="shrink-0">录音控制</CardTitle>
-          <VADBadge status={vadStatus} error={vadError} />
+          <CardTitle
+            className="shrink-0"
+            title={isNativeShell ? '客户端原生持麦（ScribeAINative）' : '浏览器 getUserMedia 采音'}
+          >
+            录音控制({captureTag})
+          </CardTitle>
+          {isNativeShell ? (
+            <span className="text-xs text-muted-foreground">原生分句 · 无需网页 VAD</span>
+          ) : (
+            <VADBadge status={vadStatus} error={vadError} />
+          )}
         </div>
       </CardHeader>
       <CardContent>
@@ -116,14 +144,19 @@ export function RecordingControls({ ensureDraft, flushDraft }: RecordingControls
               size="lg"
               className="flex-1"
               onClick={startRecording}
-              disabled={!isReady || isConnecting || vadLoading || vadStatus === 'loading'}
+              disabled={!canStartRecording}
             >
               {isConnecting ? (
                 <>
                   <Loader2 className="w-5 h-5 mr-2 animate-spin" />
                   连接中...
                 </>
-              ) : vadLoading || vadStatus === 'loading' ? (
+              ) : waitingForConfig ? (
+                <>
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                  配置加载中...
+                </>
+              ) : waitingForVad ? (
                 <>
                   <Loader2 className="w-5 h-5 mr-2 animate-spin" />
                   VAD 加载中...
@@ -180,6 +213,16 @@ export function RecordingControls({ ensureDraft, flushDraft }: RecordingControls
 
         {isRecording && <VolumeMeter level={audioLevel} />}
 
+        {isRecording && isNativeCapture && nativeAudioStatus && (
+          <p className="text-[10px] text-muted-foreground mt-2 tabular-nums">
+            增益 {typeof nativeAudioStatus.gain === 'number' ? nativeAudioStatus.gain.toFixed(2) : '—'}
+            {' · '}
+            {nativeAudioStatus.autoGainEnabled ? '自动' : '手动'}
+            {' · '}
+            {formatNativeDenoiseStatus(nativeAudioStatus)}
+          </p>
+        )}
+
         {isRecording && transcriptionWarning && (
           <p className="text-xs text-amber-600 dark:text-amber-400 mt-3 leading-relaxed rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2">
             {transcriptionWarning}
@@ -198,13 +241,15 @@ export function RecordingControls({ ensureDraft, flushDraft }: RecordingControls
           <AlertDialogHeader>
             <AlertDialogTitle>录音已中断</AlertDialogTitle>
             <AlertDialogDescription>
-              转写管线已异常（可能因来电、VAD 停止工作或音频上下文挂起）。请点击「继续录音」尝试恢复；若仍无法转写，可停止录音后使用「重跑 ASR」补全。此前已转写的内容会保留在同一会话中。
+              {isNativeShell
+                ? '原生录音已中断（可能因来电、系统回收麦克风权限或后台服务异常）。请点击「继续录音」尝试恢复；若仍无法转写，可停止录音后使用「重跑 ASR」补全。此前已转写的内容会保留在同一会话中。'
+                : '转写管线已异常（可能因来电、VAD 停止工作或音频上下文挂起）。请点击「继续录音」尝试恢复；若仍无法转写，可停止录音后使用「重跑 ASR」补全。此前已转写的内容会保留在同一会话中。'}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={stopRecording}>停止录音</AlertDialogCancel>
             <AlertDialogAction
-              disabled={isRecovering || !isReady || vadLoading}
+              disabled={isRecovering || !isReady || (!isNativeShell && vadLoading)}
               onClick={(e) => {
                 e.preventDefault();
                 void recoverRecording();
