@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { getSettingValue } from '../lib/system-settings';
+import { getStartupSeedStatus } from '../lib/startup-seed';
 
 const router = Router();
 
@@ -31,12 +32,17 @@ function parseChunkMode(value: string): 'timer' | 'auto' {
 
 /** 客户端 UI 配置（公开，无需登录） */
 router.get('/', (_req, res) => {
+  const seed = getStartupSeedStatus();
   const raw = getSettingValue('mobile.show_audio_enhancement_panel');
   const chunkRaw = getSettingValue('mobile.native_chunk_seconds');
   const modeRaw = getSettingValue('mobile.native_chunk_mode');
   const rmsRaw = getSettingValue('mobile.native_vad_rms_threshold');
 
   res.json({
+    startupSeed: {
+      ready: seed.ready,
+      error: seed.error,
+    },
     showAudioEnhancementPanel: parseSettingBool(raw, true),
     nativeChunkMode: parseChunkMode(modeRaw),
     nativeChunkSeconds: parseSettingInt(chunkRaw, 3, 1, 30),

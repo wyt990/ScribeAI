@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-06-11T10:48:34.554Z
-> Files: 323 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-06-12T01:32:31.250Z
+> Files: 325 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ../../root/.claude/plans/
 
@@ -50,7 +50,7 @@
 ## ./
 
 - `.gitignore` — Git ignore rules (~79 tok)
-- `CLAUDE.md` — CLAUDE.md (~1052 tok)
+- `CLAUDE.md` — CLAUDE.md (~1812 tok)
 - `README.md` — Project documentation (~2896 tok)
 
 ## .claude/
@@ -224,7 +224,7 @@
 
 ## backend/src/
 
-- `index.ts` — Declares app (~779 tok)
+- `index.ts` — API routes: GET (1 endpoints) (~848 tok)
 
 ## backend/src/lib/
 
@@ -242,6 +242,7 @@
 - `session-search-fallback.ts` — LIKE 回退检索（无 FULLTEXT 索引或查询失败时使用） (~974 tok)
 - `session-search.ts` — Exports SearchHitField, SessionSearchHit, SessionSearchResult, searchUserSessions (~1745 tok)
 - `socket-auth.ts` — 校验 Socket 握手 token，与 REST verifyUser 逻辑一致 (~326 tok)
+- `startup-seed.ts` — 启动时写入系统模板/设置；失败时记录可读错误供 health / app-config 暴露 (~306 tok)
 - `storage-config.ts` — Exports STORAGE_CONFIG (~155 tok)
 - `summary-export-docx.ts` — Exports markdownToDocxBuffer (~53 tok)
 - `summary-export-pdf.ts` — Exports markdownToPdfBuffer (~1040 tok)
@@ -272,12 +273,12 @@
 
 ## backend/src/routes/
 
-- `app-config.ts` — 客户端 UI 配置（公开，无需登录） (~573 tok)
+- `app-config.ts` — 客户端 UI 配置（公开，无需登录） (~623 tok)
 - `authroutes.ts` — routes/auth.js (~1393 tok)
 - `downloads.ts` — API routes: GET (2 endpoints) (~359 tok)
 - `drafts.ts` — 列表：用户所有未转正的草稿 (~3382 tok)
 - `organizations.ts` — 列出当前用户绑定的组织及职务/职责信息 (~2042 tok)
-- `sessions.ts` — API routes: GET, POST (8 endpoints) (~6098 tok)
+- `sessions.ts` — API routes: GET, POST (8 endpoints) (~6086 tok)
 - `templates.ts` — 列出可用模板（系统 + 我的 + 已审核公共） (~3250 tok)
 - `transcript.ts` — API routes: POST (1 endpoints) (~260 tok)
 
@@ -296,10 +297,11 @@
 
 - `recording-trace-handlers.ts` — 来电/系统抢占等录音中断与恢复的可观测性埋点 (~820 tok)
 - `socket-types.ts` — 校验当前 socket 已鉴权，且（若提供）payload userId 与 token 一致 (~190 tok)
-- `socket.ts` — Safety flush interval: flush accumulated audio to ASR every N ms even in VAD mode (~5868 tok)
+- `socket.ts` — Safety flush interval: flush accumulated audio to ASR every N ms even in VAD mode (~6394 tok)
 
 ## docs/
 
+- `代码审查与BUG报告-2026-06-12.md` — 代码审查与 BUG 报告 (~2649 tok)
 - `会话纪要-Skills分析与集成建议.md` — ScribeAI 会话纪要 Skills 分析与集成建议 (~2839 tok)
 - `可扩展的功能或技术.md` — ScribeAI 可扩展的功能与技术建议 (~1110 tok)
 - `原生后台录音完整方案.md` — ScribeAI 原生后台录音完整方案 (~3259 tok)
@@ -339,7 +341,7 @@
 
 ## frontend/app/(routes)/dashboard/
 
-- `page.tsx` — DashboardContent (~2298 tok)
+- `page.tsx` — DashboardContent (~2183 tok)
 
 ## frontend/app/(routes)/drafts/
 
@@ -347,7 +349,7 @@
 
 ## frontend/app/(routes)/manager/
 
-- `layout.tsx` — ManagerLayout (~399 tok)
+- `layout.tsx` — ManagerLayout (~850 tok)
 - `page.tsx` — formatBytes (~508 tok)
 
 ## frontend/app/(routes)/manager/audit/
@@ -444,7 +446,7 @@
 - `dashboard-shell.tsx` — 会议录音页需要锁高度、内部弹性布局；其余页面允许纵向滚动 (~369 tok)
 - `draft-restore-banner.tsx` — DraftRestoreBanner (~326 tok)
 - `generate-meeting-summary-button.tsx` — GenerateMeetingSummaryButton (~1212 tok)
-- `manager-nav.tsx` — NAV (~408 tok)
+- `manager-nav.tsx` — MANAGER_NAV (~613 tok)
 - `manager-settings-form.tsx` — ManagerSettingsForm (~812 tok)
 - `manager-sidebar-link.tsx` — 侧栏/抽屉底部：系统设置入口（仅 manager） (~234 tok)
 - `mobile-promote-bar.tsx` — 移动端底栏：作为 shell 的 flex 子项，避免 WebView 裁切 fixed/portal (~278 tok)
@@ -527,7 +529,7 @@
 ## frontend/hooks/
 
 - `use-app-config.ts` — 加载客户端 UI 配置：服务端系统设置优先，其次 .env.local，最后代码默认值。 (~890 tok)
-- `use-audio-recorder.ts` — 音量超过此阈值视为「可能有语音」 (~12462 tok)
+- `use-audio-recorder.ts` — 音量超过此阈值视为「可能有语音」 (~12272 tok)
 - `use-can-promote.ts` — Exports useCanPromote (~155 tok)
 - `use-draft-sync.ts` — 草稿自动保存：转录追加防抖写入，状态变更立即写入，离开页面时刷盘 (~1338 tok)
 - `use-is-logged-in.ts` — 客户端检测是否已登录（localStorage 中有 token） (~83 tok)
@@ -562,7 +564,7 @@
 - `session-search-api.ts` — Exports SessionSearchHit, SessionSearchResult, searchSessions, SEARCH_FIELD_LABEL (~310 tok)
 - `session-storage.ts` — Exports Session, useSessionStore (~223 tok)
 - `session-summary.ts` — legacy 兼容 (~838 tok)
-- `socket.ts` — 携带 JWT 连接 Socket（未登录或无 token 时不连接） (~2072 tok)
+- `socket.ts` — 携带 JWT 连接 Socket（未登录或无 token 时不连接） (~1977 tok)
 - `store.ts` — 来电等系统抢占麦克风导致的中断（与手动暂停区分） (~1367 tok)
 - `summary-export.ts` — API routes: GET (1 endpoints) (~405 tok)
 - `summary-templates.ts` — Exports SummaryTemplateItem, SummaryTemplateDetail, TemplateDraft, fetchSummaryTemplates + 11 more (~1474 tok)

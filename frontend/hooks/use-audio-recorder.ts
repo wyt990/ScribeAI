@@ -38,6 +38,8 @@ const SPEECH_LEVEL_THRESHOLD = 0.06;
 const SPEECH_MS_WITHOUT_SEGMENT = 7000;
 /** 录音中健康巡检间隔 */
 const HEALTH_POLL_MS = 3000;
+/** VAD 启动宽限期：此期间跳过「VAD 未 listening」判定，避免 ONNX 初始化误报 */
+const VAD_HEALTH_GRACE_MS = 10000;
 /** 轻量自动恢复失败后，才弹窗要求用户介入 */
 const MAX_LIGHTWEIGHT_RECOVER_ATTEMPTS = 2;
 /** 原生持麦：超过此时间未收到分片视为异常 */
@@ -116,7 +118,6 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
     setStatus,
     setError,
     setAudioGainLive,
-    clearTranscript,
     userId,
     recordingId,
     setRecordingId,
@@ -157,6 +158,7 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
   const audioLevelRef = useRef(0);
   const lightweightRecoverAttemptsRef = useRef(0);
   const healthPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const healthGraceUntilRef = useRef(0);
   const captureModeRef = useRef<CaptureMode>(getPreferredCaptureMode());
   const nativeUnsubRef = useRef<(() => void) | null>(null);
   const lastNativeChunkAtRef = useRef<number | null>(null);
@@ -167,7 +169,6 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
   const vadPreloadConfigKeyRef = useRef<string | null>(null);
   const vadPreloadGenRef = useRef(0);
 
-  const [isResetting, setIsResetting] = useState(false);
   const [isReady, setIsReady] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [vadLoading, setVadLoading] = useState(false);
@@ -751,7 +752,13 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
 
     await ensureAudioContextRunning();
 
-    if (vadRef.current && !vadRef.current.listening && vadStatus !== 'error') {
+    const inVadStartupGrace = Date.now() < healthGraceUntilRef.current;
+    if (
+      !inVadStartupGrace &&
+      vadRef.current &&
+      !vadRef.current.listening &&
+      vadStatus !== 'error'
+    ) {
       console.warn('[useAudioRecorder] VAD not listening during recording');
       const ok = await restartVADListening();
       if (!ok) {
@@ -944,6 +951,7 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
 
   useEffect(() => {
     if (status !== 'recording') {
+      healthGraceUntilRef.current = 0;
       if (healthPollRef.current) {
         clearInterval(healthPollRef.current);
         healthPollRef.current = null;
@@ -955,12 +963,15 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
       return;
     }
 
-    void runPipelineHealthCheck();
+    const firstCheckTimer = setTimeout(() => {
+      void runPipelineHealthCheck();
+    }, HEALTH_POLL_MS);
     healthPollRef.current = setInterval(() => {
       void runPipelineHealthCheck();
     }, HEALTH_POLL_MS);
 
     return () => {
+      clearTimeout(firstCheckTimer);
       if (healthPollRef.current) {
         clearInterval(healthPollRef.current);
         healthPollRef.current = null;
@@ -969,15 +980,18 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
   }, [status, runPipelineHealthCheck, setTranscriptionWarning, setLastSegmentAgeSec]);
 
   const recoverRecording = useCallback(async () => {
-    if (!isReady) {
-      setError?.('转录服务未连接，请稍候后重试');
-      return;
-    }
-
     if (captureModeRef.current === 'native' || isNativeCaptureAvailable()) {
       setIsRecovering(true);
       try {
         setError?.(null);
+
+        if (!socketRef.current) initSocket();
+        const socketOk = await ensureSocketConnected();
+        if (!socketOk) {
+          setError?.('未登录或转录服务未连接，无法恢复录音');
+          return;
+        }
+
         interruptionHandledRef.current = false;
         nativeRecoverRecording();
         setRecordingInterrupted(false);
@@ -1022,11 +1036,10 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
       interruptionHandledRef.current = false;
 
       if (!socketRef.current) initSocket();
-      if (socketRef.current && !socketRef.current.connected) {
-        if (!connectSocket()) {
-          setError?.('未登录，无法恢复录音');
-          return;
-        }
+      const socketOk = await ensureSocketConnected();
+      if (!socketOk) {
+        setError?.('未登录或转录服务未连接，无法恢复录音');
+        return;
       }
 
       await setupCapturePipeline();
@@ -1036,6 +1049,7 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
       speechAccumMsRef.current = 0;
       lightweightRecoverAttemptsRef.current = 0;
       setTranscriptionWarning(null);
+      healthGraceUntilRef.current = Date.now() + VAD_HEALTH_GRACE_MS;
       setStatus('recording');
 
       const rid = recordingIdRef.current;
@@ -1059,7 +1073,6 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
       setIsRecovering(false);
     }
   }, [
-    isReady,
     vadLoading,
     vadStatus,
     teardownCapturePipeline,
@@ -1071,10 +1084,6 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
   ]);
 
   const startRecording = useCallback(async () => {
-    if (isResetting) {
-      console.warn('[useAudioRecorder] start prevented - resetting in progress');
-      return;
-    }
     if (!isReady) {
       console.warn('[useAudioRecorder] start prevented - socket not ready');
       setError?.('Still connecting — please wait until connection is ready.');
@@ -1168,6 +1177,7 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
 
       await setupCapturePipeline();
       void acquireScreenWake();
+      healthGraceUntilRef.current = Date.now() + VAD_HEALTH_GRACE_MS;
       setStatus('recording');
     } catch (err) {
       console.error('[useAudioRecorder] startRecording error', err);
@@ -1179,7 +1189,6 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
   }, [
     initSocket,
     isReady,
-    isResetting,
     setError,
     setStatus,
     userId,
@@ -1228,6 +1237,7 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
         if (pipelineRef.current) {
           startAudioMeter(pipelineRef.current.outputAnalyser);
         }
+        healthGraceUntilRef.current = Date.now() + VAD_HEALTH_GRACE_MS;
         setStatus('recording');
       } catch (err) {
         console.error('[useAudioRecorder] resume error', err);
@@ -1274,6 +1284,7 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
 
         if (opts?.notifyBackend && wasActive) {
           emitStopRecording();
+          setStatus('idle');
         }
       } catch (err) {
         console.error('[useAudioRecorder] finalizeActiveRecording error', err);
@@ -1341,57 +1352,15 @@ export const useAudioRecorder = (draftSync?: DraftSyncHelpers) => {
     };
   }, [initSocket, destroyVAD, finalizeActiveRecording]);
 
-  const resetRecording = useCallback(() => {
-    setIsResetting(true);
-
-    const cleanup = () => {
-      try {
-        if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-          mediaRecorderRef.current.onstop = null;
-          mediaRecorderRef.current.stop();
-        }
-      } catch { /* ignore */ }
-
-      destroyPipeline();
-      stopRawStream();
-      vadPendingStreamRef.current = null;
-      audioContextRef.current = null;
-
-      stopAudioMeter();
-      void pauseVAD();
-      void releaseScreenWake();
-      if (vadRef.current) {
-        setVadStatus('ready');
-      }
-
-      detachStreamMonitor();
-      interruptionHandledRef.current = false;
-      setRecordingInterrupted(false);
-
-      resetSegmentSeq();
-      resetSegmentDisplay();
-      mediaRecorderRef.current = null;
-      chunksRef.current = [];
-      setStatus('idle');
-      clearTranscript?.();
-      setRecordingId?.(null);
-      setIsResetting(false);
-    };
-
-    cleanup();
-  }, [setStatus, clearTranscript, setRecordingId, pauseVAD, stopAudioMeter, destroyPipeline, stopRawStream, detachStreamMonitor, setRecordingInterrupted]);
-
   return {
     startRecording,
     pauseRecording,
     resumeRecording,
     recoverRecording,
     stopRecording,
-    resetRecording,
     isRecording: status === 'recording',
     isPaused: status === 'paused',
     isProcessing: status === 'processing',
-    isResetting,
     isRecovering,
     isReady,
     isConnecting,

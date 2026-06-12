@@ -17,8 +17,7 @@ const manager_1 = __importDefault(require("./routes/manager"));
 const downloads_1 = __importDefault(require("./routes/downloads"));
 const organizations_1 = __importDefault(require("./routes/organizations"));
 const app_config_1 = __importDefault(require("./routes/app-config"));
-const summary_template_seed_1 = require("./lib/summary-template-seed");
-const system_settings_1 = require("./lib/system-settings");
+const startup_seed_1 = require("./lib/startup-seed");
 const socket_1 = require("./socket/socket");
 const audio_cleanup_1 = require("./lib/audio-cleanup");
 const draft_cleanup_1 = require("./lib/draft-cleanup");
@@ -55,24 +54,31 @@ app.use('/api/manager', manager_1.default);
 app.use('/api/downloads', downloads_1.default);
 app.use('/api/user-orgs', organizations_1.default);
 app.use('/api/app-config', app_config_1.default);
+app.get('/api/health', (_req, res) => {
+    const seed = (0, startup_seed_1.getStartupSeedStatus)();
+    if (seed.ready) {
+        res.json({ status: 'ok', startupSeed: { ready: true } });
+        return;
+    }
+    res.status(503).json({
+        status: 'degraded',
+        startupSeed: { ready: false, error: seed.error },
+    });
+});
 const PORT = 4000;
-void (async () => {
-    try {
-        await (0, summary_template_seed_1.ensureSystemSummaryTemplates)();
-        await (0, system_settings_1.ensureSystemSettingsSeeded)();
-        await (0, system_settings_1.applySettingsToEnv)();
-    }
-    catch (err) {
-        console.error('[Startup seed] failed:', err);
-    }
-})();
-server.listen(PORT, () => {
-    console.log(`HTTP server running at http://localhost:${PORT}`);
-    console.log(`Socket.io running at ws://localhost:${PORT}`);
-    const summaryProvider = (0, summary_llm_1.getSummaryProviderLabel)();
-    console.log(`Summary LLM provider: ${summaryProvider}`);
-    if (summaryProvider === "openai_compatible") {
-        console.log(`Summary LLM endpoint: ${(0, summary_llm_1.getResolvedChatCompletionsUrl)()}`);
-    }
+void (0, startup_seed_1.runStartupSeed)().finally(() => {
+    server.listen(PORT, () => {
+        const seed = (0, startup_seed_1.getStartupSeedStatus)();
+        console.log(`HTTP server running at http://localhost:${PORT}`);
+        console.log(`Socket.io running at ws://localhost:${PORT}`);
+        if (!seed.ready) {
+            console.error(`[Startup seed] service started in degraded mode: ${seed.error ?? 'unknown error'}`);
+        }
+        const summaryProvider = (0, summary_llm_1.getSummaryProviderLabel)();
+        console.log(`Summary LLM provider: ${summaryProvider}`);
+        if (summaryProvider === "openai_compatible") {
+            console.log(`Summary LLM endpoint: ${(0, summary_llm_1.getResolvedChatCompletionsUrl)()}`);
+        }
+    });
 });
 //# sourceMappingURL=index.js.map

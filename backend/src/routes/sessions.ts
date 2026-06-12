@@ -269,9 +269,7 @@ router.get("/:id", verifyUser, async (req: AuthenticatedRequest, res) => {
     }
 
     const matched =
-      transcript.summaries.find((s) => s.templateId === template.id) ??
-      transcript.summaries[0] ??
-      null;
+      transcript.summaries.find((s) => s.templateId === template.id) ?? null;
 
     res.json({
       id: transcript.id,

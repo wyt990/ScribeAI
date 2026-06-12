@@ -9,7 +9,7 @@ import { RecordingControls } from "@/components/recording-controls";
 import { useRecordingStore } from "@/lib/store";
 import { TranscriptFeed } from "@/components/transcript-feed";
 import { DraftRestoreBanner } from "@/components/draft-restore-banner";
-import { connectSocket, onTranscript, onProcessing, onCompleted, onSegmentResult, bufferSegmentResult } from '@/lib/socket';
+import { connectSocket, onTranscript, onSegmentResult, bufferSegmentResult } from '@/lib/socket';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { useDraftSync } from "@/hooks/use-draft-sync";
@@ -28,7 +28,6 @@ function DashboardContent() {
     addTranscriptLine,
     setStatus,
     audioMode,
-    setCurrentSessionId,
     setUserId,
     setTranscript,
     setDraftId,
@@ -141,21 +140,12 @@ function DashboardContent() {
       }
     });
 
-    const unsubscribeProcessing = onProcessing(() => setStatus('processing'));
-    const unsubscribeCompleted = onCompleted(() => {
-      setStatus('completed');
-      const sessionId = `session_${Date.now()}`;
-      setCurrentSessionId(sessionId);
-    });
-
     return () => {
       unsubscribeTranscript();
       unsubscribeSegmentResult();
-      unsubscribeProcessing();
-      unsubscribeCompleted();
       void flushDraft();
     };
-  }, [addTranscriptLine, setStatus, setCurrentSessionId, flushDraft]);
+  }, [addTranscriptLine, flushDraft]);
 
   const handleRestore = () => {
     if (!pendingRestore) return;

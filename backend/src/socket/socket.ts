@@ -65,57 +65,124 @@ export const createSocketServer = (httpServer: any) => {
 // ============================================================
 function handleDeepgram(socket: Socket) {
   const deepgram = createClient(process.env.DEEPGRAM_API_KEY!);
+  const MAX_DEEPGRAM_RECONNECT_ATTEMPTS = 5;
 
-  let deepgramLive = deepgram.listen.live({
-    model: "nova-2-general",
-    punctuate: true,
-  });
-
+  let deepgramLive: ReturnType<ReturnType<typeof createClient>["listen"]["live"]>;
   let isDeepgramOpen = false;
+  let suppressReconnect = false;
+  let shuttingDown = false;
+  let reconnectAttempts = 0;
+  let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   let currentUserId: string | null = null;
   let currentRecordingId: string | null = null;
   let recordingStartedAt: number | null = null;
   let transcriptEmitCount = 0;
 
-  deepgramLive.on(LiveTranscriptionEvents.Open, () => {
-    // console.log("[Deepgram] Connection opened for", socket.id);
-    isDeepgramOpen = true;
-    socket.emit("deepgram-ready");
-  });
-
-  deepgramLive.on(LiveTranscriptionEvents.Close, () => {
-    // console.log("[Deepgram] Connection closed for", socket.id);
-    isDeepgramOpen = false;
-  });
-
-  deepgramLive.on(LiveTranscriptionEvents.Error, (err) => {
-    console.error("[Deepgram] ERROR for", socket.id, err);
-    isDeepgramOpen = false;
-    writeOperationTrace({
-      userId: currentUserId,
-      category: "recording",
-      action: "stt.error",
-      status: "error",
-      target: currentRecordingId ?? undefined,
-      detail: {
-        provider: "deepgram",
-        error: err instanceof Error ? err.message : String(err),
-      },
-    });
-    socket.emit("deepgram-error", err);
-  });
-
-  deepgramLive.on(LiveTranscriptionEvents.Transcript, (response: any) => {
-    try {
-      const transcript = response.channel.alternatives[0]?.transcript;
-      if (transcript && transcript.trim() !== "") {
-        transcriptEmitCount += 1;
-        socket.emit("transcript", transcript);
-      }
-    } catch (err) {
-      console.error("Deepgram parse error:", err);
+  function clearReconnectTimer() {
+    if (reconnectTimer) {
+      clearTimeout(reconnectTimer);
+      reconnectTimer = null;
     }
-  });
+  }
+
+  function finishDeepgramLive(live: typeof deepgramLive) {
+    suppressReconnect = true;
+    try {
+      if (isDeepgramOpen) live.finish();
+    } catch {
+      /* ignore */
+    }
+    isDeepgramOpen = false;
+    suppressReconnect = false;
+  }
+
+  function scheduleReconnect(reason: string) {
+    if (shuttingDown || suppressReconnect || !currentRecordingId) return;
+    if (reconnectTimer) return;
+    if (reconnectAttempts >= MAX_DEEPGRAM_RECONNECT_ATTEMPTS) {
+      console.error(
+        `[Deepgram] max reconnect attempts reached for ${socket.id} (${reason})`
+      );
+      return;
+    }
+
+    reconnectAttempts += 1;
+    const delayMs = Math.min(500 * reconnectAttempts, 3000);
+    console.warn(
+      `[Deepgram] scheduling reconnect (${reason}) attempt ${reconnectAttempts} in ${delayMs}ms for ${socket.id}`
+    );
+
+    reconnectTimer = setTimeout(() => {
+      reconnectTimer = null;
+      try {
+        const previous = deepgramLive;
+        deepgramLive = createDeepgramConnection();
+        finishDeepgramLive(previous);
+      } catch (err) {
+        console.error(`[Deepgram] reconnect failed for ${socket.id}:`, err);
+        scheduleReconnect("reconnect-failed");
+      }
+    }, delayMs);
+  }
+
+  function bindDeepgramEvents(live: typeof deepgramLive) {
+    live.on(LiveTranscriptionEvents.Open, () => {
+      isDeepgramOpen = true;
+      reconnectAttempts = 0;
+      clearReconnectTimer();
+      socket.emit("deepgram-ready");
+    });
+
+    live.on(LiveTranscriptionEvents.Close, () => {
+      isDeepgramOpen = false;
+      if (!shuttingDown && !suppressReconnect && currentRecordingId) {
+        scheduleReconnect("close");
+      }
+    });
+
+    live.on(LiveTranscriptionEvents.Error, (err) => {
+      console.error("[Deepgram] ERROR for", socket.id, err);
+      isDeepgramOpen = false;
+      writeOperationTrace({
+        userId: currentUserId,
+        category: "recording",
+        action: "stt.error",
+        status: "error",
+        target: currentRecordingId ?? undefined,
+        detail: {
+          provider: "deepgram",
+          error: err instanceof Error ? err.message : String(err),
+        },
+      });
+      socket.emit("deepgram-error", err);
+      if (!shuttingDown && !suppressReconnect && currentRecordingId) {
+        scheduleReconnect("error");
+      }
+    });
+
+    live.on(LiveTranscriptionEvents.Transcript, (response: any) => {
+      try {
+        const transcript = response.channel.alternatives[0]?.transcript;
+        if (transcript && transcript.trim() !== "") {
+          transcriptEmitCount += 1;
+          socket.emit("transcript", transcript);
+        }
+      } catch (err) {
+        console.error("Deepgram parse error:", err);
+      }
+    });
+  }
+
+  function createDeepgramConnection() {
+    const live = deepgram.listen.live({
+      model: "nova-2-general",
+      punctuate: true,
+    });
+    bindDeepgramEvents(live);
+    return live;
+  }
+
+  deepgramLive = createDeepgramConnection();
 
   // Receive audio chunks
   socket.on("audio-chunk", async (blob: ArrayBuffer) => {
@@ -146,6 +213,8 @@ function handleDeepgram(socket: Socket) {
       socket.emit("socket-error", { code: "FORBIDDEN", message: "Invalid recording session" });
       return;
     }
+    clearReconnectTimer();
+    reconnectAttempts = 0;
     currentRecordingId = recordingId;
     currentUserId = authUserId;
     recordingStartedAt = Date.now();
@@ -161,14 +230,12 @@ function handleDeepgram(socket: Socket) {
     });
   });
 
-  socket.on("reset-recording", () => {
-    if (!assertSocketUser(socket, currentUserId ?? undefined)) return;
-  });
-
   socket.on("stop-recording", () => {
     if (!assertSocketUser(socket, currentUserId ?? undefined)) return;
+    clearReconnectTimer();
+    reconnectAttempts = 0;
     if (currentUserId && currentRecordingId) {
-      finalizeRecordingArchive(currentUserId, currentRecordingId);
+      finalizeRecordingArchive(currentUserId, currentRecordingId, "webm");
       writeOperationTrace({
         userId: currentUserId,
         category: "recording",
@@ -188,9 +255,9 @@ function handleDeepgram(socket: Socket) {
   });
 
   socket.on("disconnect", () => {
-    if (deepgramLive && isDeepgramOpen) {
-      deepgramLive.finish();
-    }
+    shuttingDown = true;
+    clearReconnectTimer();
+    finishDeepgramLive(deepgramLive);
   });
 
   attachRecordingInterruptHandlers(socket, () => ({
@@ -257,14 +324,18 @@ function handleOpenAIASR(socket: Socket) {
 
   // 原生持麦：每片独立 WAV（定时或静音分句），须逐片转写（不可 Buffer.concat）
   async function flushNativePendingChunks() {
-    const pending = accumulatedChunks.slice(lastFlushedChunkIndex);
+    const startIndex = lastFlushedChunkIndex;
+    const pending = accumulatedChunks.slice(startIndex);
     if (pending.length === 0) return;
 
-    for (const chunkBuf of pending) {
+    for (let i = 0; i < pending.length; i++) {
+      const chunkBuf = pending[i];
+      const chunkIndex = startIndex + i;
       const started = Date.now();
       const { mimeType, extension } = nativeChunkFormat(chunkBuf);
       try {
         const text = await transcribeAudioBuffer(chunkBuf, mimeType, extension);
+        lastFlushedChunkIndex = chunkIndex + 1;
         if (!text?.trim()) continue;
 
         writeOperationTrace({
@@ -296,10 +367,9 @@ function handleOpenAIASR(socket: Socket) {
             error: err instanceof Error ? err.message : String(err),
           },
         });
+        break;
       }
     }
-
-    lastFlushedChunkIndex = accumulatedChunks.length;
   }
 
   function scheduleNativeFlush() {
@@ -603,18 +673,6 @@ function handleOpenAIASR(socket: Socket) {
     }
   });
 
-  socket.on("reset-recording", () => {
-    if (!assertSocketUser(socket, currentUserId ?? undefined)) return;
-    resetSessionBuffers();
-    if (sliceTimer) {
-      clearInterval(sliceTimer);
-      sliceTimer = null;
-    }
-    if (safetyTimer) {
-      clearInterval(safetyTimer);
-      safetyTimer = null;
-    }
-  });
 
   socket.on("disconnect", () => {
     if (sliceTimer) {

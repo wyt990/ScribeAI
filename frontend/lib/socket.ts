@@ -180,18 +180,6 @@ export const onTranscript = (callback: (text: string) => void) => {
   return () => s.off('transcript', callback);
 };
 
-export const onProcessing = (callback: () => void) => {
-  const s = getSocket();
-  s.on('processing', callback);
-  return () => s.off('processing', callback);
-};
-
-export const onCompleted = (callback: () => void) => {
-  const s = getSocket();
-  s.on('completed', callback);
-  return () => s.off('completed', callback);
-};
-
 export const onSocketError = (
   callback: (payload: { code: string; message: string }) => void
 ) => {
