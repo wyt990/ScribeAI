@@ -7,6 +7,8 @@ export type RecordingMeta = {
   sizeBytes: number | null;
   finalizedAt: string | null;
   recordingId?: string | null;
+  segmentCount?: number;
+  masterStale?: boolean;
 };
 
 function authHeaders(): Record<string, string> {

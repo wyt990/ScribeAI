@@ -6,6 +6,24 @@ export function clearAuthSession(): void {
   disconnectSocket();
   localStorage.removeItem('token');
   localStorage.removeItem('user');
+  localStorage.removeItem('userRole');
+}
+
+/** 通知后端登出审计后清理本地登录态 */
+export async function logoutSession(): Promise<void> {
+  if (typeof window === 'undefined') return;
+  const token = localStorage.getItem('token');
+  if (token) {
+    try {
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    } catch {
+      // 登出审计失败不阻断本地清理
+    }
+  }
+  clearAuthSession();
 }
 
 /** 校验 token 是否仍有效 */

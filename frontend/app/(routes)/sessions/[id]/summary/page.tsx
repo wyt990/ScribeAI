@@ -25,6 +25,8 @@ import { SummaryMarkdown } from '@/components/summary-markdown';
 import { copyTextToClipboard } from '@/lib/copy-to-clipboard';
 import { useIsLoggedIn } from '@/hooks/use-is-logged-in';
 import { downloadSummaryExport } from '@/lib/summary-export';
+import { useAppDialog } from '@/hooks/use-app-dialog';
+import { localizeError } from '@/lib/localize-error';
 
 type PreviewData = {
   id: string;
@@ -37,6 +39,15 @@ type PreviewData = {
   summaryTypeLabel: string;
 };
 
+function formatShareExpiresIn(expiresIn: string): string {
+  const m = expiresIn.match(/^(\d+)([dhms])$/);
+  if (!m) return expiresIn;
+  const n = Number(m[1]);
+  const unit = m[2];
+  const labels: Record<string, string> = { d: '天', h: '小时', m: '分钟', s: '秒' };
+  return `${n} ${labels[unit] ?? unit}`;
+}
+
 function SummaryPreviewContent() {
   const params = useParams();
   const router = useRouter();
@@ -45,13 +56,16 @@ function SummaryPreviewContent() {
   const shareToken = searchParams.get('shareToken');
   const templateIdParam = searchParams.get('templateId');
   const summaryTypeParam = searchParams.get('summaryType');
+  const { alert, dialogUi } = useAppDialog();
 
   const [data, setData] = useState<PreviewData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [errorCode, setErrorCode] = useState<string | null>(null);
   const [exporting, setExporting] = useState<'docx' | 'pdf' | null>(null);
   const [copying, setCopying] = useState(false);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [shareExpiresIn, setShareExpiresIn] = useState<string | null>(null);
   const [shareUrlLoading, setShareUrlLoading] = useState(false);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const loggedIn = useIsLoggedIn();
@@ -59,6 +73,7 @@ function SummaryPreviewContent() {
   const loadPreview = useCallback(async () => {
     setLoading(true);
     setError(null);
+    setErrorCode(null);
     try {
       const qs = new URLSearchParams();
       if (templateIdParam) qs.set('templateId', templateIdParam);
@@ -78,8 +93,9 @@ function SummaryPreviewContent() {
         headers,
       });
       if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || '加载纪要失败');
+        const err = (await res.json().catch(() => ({}))) as { error?: string; code?: string };
+        setErrorCode(err.code ?? null);
+        throw new Error(localizeError(err.error || '加载纪要失败', err.code));
       }
       setData(await res.json());
     } catch (err) {
@@ -116,11 +132,11 @@ function SummaryPreviewContent() {
       }),
     });
     if (!res.ok) throw new Error('生成分享纪要链接失败');
-    const json = await res.json();
+    const json = (await res.json()) as { previewPath: string; expiresIn?: string };
+    if (json.expiresIn) setShareExpiresIn(json.expiresIn);
     return `${window.location.origin}${json.previewPath}` as string;
   }, [sessionId, shareToken, templateIdParam, summaryTypeParam, data?.templateId]);
 
-  // 进入页面后预取分享链接，避免点击时先 await fetch 导致移动端失去剪贴板写入权限
   useEffect(() => {
     if (shareToken || !data) return;
     let cancelled = false;
@@ -151,7 +167,7 @@ function SummaryPreviewContent() {
         token,
       });
     } catch (err) {
-      alert(err instanceof Error ? err.message : '导出失败');
+      await alert(localizeError(err instanceof Error ? err.message : '导出失败'));
     } finally {
       setExporting(null);
     }
@@ -175,14 +191,16 @@ function SummaryPreviewContent() {
 
       const copied = await copyTextToClipboard(fullUrl);
       if (copied) {
-        alert('预览链接已复制，可在电脑浏览器打开后下载 Word/PDF');
+        const expiryHint = shareExpiresIn
+          ? `链接有效期 ${formatShareExpiresIn(shareExpiresIn)}。`
+          : '';
+        await alert(`预览链接已复制，可在电脑浏览器打开后下载 Word/PDF。${expiryHint}`);
         return;
       }
 
-      // 移动端常见：异步后无法写入剪贴板，改为弹窗供长按复制
       setShareDialogOpen(true);
     } catch (err) {
-      alert(err instanceof Error ? err.message : '复制失败');
+      await alert(localizeError(err instanceof Error ? err.message : '复制失败'));
     } finally {
       setCopying(false);
     }
@@ -202,21 +220,29 @@ function SummaryPreviewContent() {
   }
 
   if (error || !data) {
+    const isShareExpired =
+      errorCode === 'SHARE_TOKEN_EXPIRED' ||
+      errorCode === 'SHARE_TOKEN_INVALID';
     return (
-      <div className="p-6 space-y-4">
+      <div className="p-6 space-y-4 max-w-lg">
         <p className="text-destructive">{error || '纪要不存在'}</p>
+        {isShareExpired && (
+          <p className="text-sm text-muted-foreground">
+            分享链接可能已过期或被撤销，请联系分享者重新生成链接。
+          </p>
+        )}
         {loggedIn && (
           <Button variant="outline" asChild>
             <Link href="/sessions">返回会议记录</Link>
           </Button>
         )}
+        {dialogUi}
       </div>
     );
   }
 
   return (
     <div className="summary-preview-page min-h-full bg-muted/30 print:bg-white">
-      {/* 工具栏 — 打印时隐藏 */}
       <div className="no-print sticky top-0 z-10 border-b bg-background/95 backdrop-blur">
         <div className="mx-auto flex max-w-4xl flex-wrap items-center gap-2 px-4 py-3">
           {loggedIn && (
@@ -275,6 +301,11 @@ function SummaryPreviewContent() {
               复制链接
             </Button>
           )}
+          {!shareToken && shareExpiresIn && (
+            <span className="text-xs text-muted-foreground w-full sm:w-auto">
+              分享链接有效期 {formatShareExpiresIn(shareExpiresIn)}
+            </span>
+          )}
         </div>
       </div>
 
@@ -284,6 +315,9 @@ function SummaryPreviewContent() {
             <DialogTitle>分享纪要链接</DialogTitle>
             <DialogDescription>
               当前浏览器无法自动复制，请长按下方链接手动复制。
+              {shareExpiresIn && (
+                <> 链接有效期 {formatShareExpiresIn(shareExpiresIn)}。</>
+              )}
             </DialogDescription>
           </DialogHeader>
           <div className="flex gap-2">
@@ -307,12 +341,13 @@ function SummaryPreviewContent() {
         </DialogContent>
       </Dialog>
 
-      {/* 文档主体 */}
       <div className="mx-auto max-w-4xl px-4 py-8 print:max-w-none print:px-0 print:py-0">
         <div className="rounded-lg border bg-card px-6 py-8 shadow-sm print:border-0 print:shadow-none print:rounded-none">
           <SummaryMarkdown content={data.summary} />
         </div>
       </div>
+
+      {dialogUi}
     </div>
   );
 }

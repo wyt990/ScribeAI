@@ -1,22 +1,17 @@
 import { create } from 'zustand';
 import { APP_CONFIG } from './app-config';
-import {
-  loadAudioSettings,
-  saveAudioSettings,
-  GAIN_DEFAULT,
-} from './audio-settings';
-import { GAIN_MIN, GAIN_MAX, GAIN_STEP } from '@/config/audio';
+import { clampGainValue, ENV_AUDIO_GAIN_CONFIG } from '@/lib/audio-gain-config';
+import { loadAudioSettings, saveAudioSettings } from './audio-settings';
 
 function clampGain(value: number): number {
-  const steps = Math.round(value / GAIN_STEP);
-  return Math.min(GAIN_MAX, Math.max(GAIN_MIN, steps * GAIN_STEP));
+  return clampGainValue(value);
 }
 
 export type RecordingStatus = 'idle' | 'recording' | 'paused' | 'processing' | 'completed';
 export type AudioMode = 'mic' | 'tab';
 
 const persistedAudio = typeof window !== 'undefined' ? loadAudioSettings() : {
-  audioGain: GAIN_DEFAULT,
+  audioGain: ENV_AUDIO_GAIN_CONFIG.default,
   autoGainEnabled: true,
   noiseSuppressionEnabled: true,
 };
@@ -113,7 +108,7 @@ export const useRecordingStore = create<RecordingState>((set) => ({
   setRecordingInterrupted: (interrupted) => set({ recordingInterrupted: interrupted }),
   setTranscriptionWarning: (warning) => set({ transcriptionWarning: warning }),
   setLastSegmentAgeSec: (sec) => set({ lastSegmentAgeSec: sec }),
-  clearDraft: () => set({ draftId: null, draftTitle: null }),
+  clearDraft: () => set({ draftId: null, draftTitle: null, recordingId: null }),
   reset: () => set({
     status: 'idle',
     transcript: [],

@@ -1,3 +1,5 @@
+import { localizeError } from './localize-error';
+
 export type SummaryGenerateResult = {
   summary: string;
   templateId: string;
@@ -17,7 +19,6 @@ export type GenerateSummaryFlowOptions = {
   /** 生成纪要时选用的组织身份 */
   orgId?: string | null;
   regenerate?: boolean;
-  confirmRegenerate?: boolean;
   navigateToPreview?: boolean;
   router?: { push: (url: string) => void };
   token?: string | null;
@@ -34,14 +35,6 @@ export function buildSummaryPreviewPath(
   templateId: string
 ): string {
   return `/sessions/${sessionId}/summary?templateId=${encodeURIComponent(templateId)}`;
-}
-
-export async function confirmSummaryRegenerate(
-  templateName: string
-): Promise<boolean> {
-  return confirm(
-    `确定重新生成「${templateName}」？将覆盖当前已保存的纪要。`
-  );
 }
 
 export async function generateSessionSummary(
@@ -72,8 +65,8 @@ export async function generateSessionSummary(
   });
 
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error((err as { error?: string }).error || '生成纪要失败');
+    const err = (await res.json().catch(() => ({}))) as { error?: string; code?: string };
+    throw new Error(localizeError(err.error || '生成纪要失败', err.code));
   }
 
   return res.json() as Promise<SummaryGenerateResult>;
@@ -82,12 +75,6 @@ export async function generateSessionSummary(
 export async function runGenerateSummaryFlow(
   options: GenerateSummaryFlowOptions
 ): Promise<SummaryGenerateResult | null> {
-  if (options.regenerate && options.confirmRegenerate !== false) {
-    const label = options.templateId ? '该模板' : '当前纪要';
-    const ok = await confirmSummaryRegenerate(label);
-    if (!ok) return null;
-  }
-
   const data = await generateSessionSummary(options.sessionId, {
     templateId: options.templateId,
     summaryType: options.summaryType,

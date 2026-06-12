@@ -24,6 +24,8 @@ import {
   type DraftStatus,
 } from '@/lib/draft-api';
 import { RecordingPanel } from '@/components/recording-panel';
+import { useAppDialog } from '@/hooks/use-app-dialog';
+import { localizeError } from '@/lib/localize-error';
 
 const STATUS_VARIANT: Record<DraftStatus, 'default' | 'secondary' | 'outline'> = {
   recording: 'default',
@@ -33,6 +35,7 @@ const STATUS_VARIANT: Record<DraftStatus, 'default' | 'secondary' | 'outline'> =
 
 export default function DraftsPage() {
   const router = useRouter();
+  const { confirm, alert, dialogUi } = useAppDialog();
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [loading, setLoading] = useState(true);
   const [promoteTarget, setPromoteTarget] = useState<Draft | null>(null);
@@ -56,13 +59,18 @@ export default function DraftsPage() {
   }, []);
 
   const handleDelete = async (id: string) => {
-    if (!confirm('确定删除此草稿？删除后无法恢复。')) return;
+    const ok = await confirm('确定删除此草稿？删除后无法恢复。', {
+      title: '删除草稿',
+      confirmLabel: '删除',
+      destructive: true,
+    });
+    if (!ok) return;
     try {
       await deleteDraft(id);
       setDrafts((prev) => prev.filter((d) => d.id !== id));
     } catch (err) {
       console.error(err);
-      alert('删除失败');
+      await alert(localizeError(err instanceof Error ? err.message : '删除失败'));
     }
   };
 
@@ -85,7 +93,7 @@ export default function DraftsPage() {
       router.push('/sessions');
     } catch (err) {
       console.error(err);
-      alert(err instanceof Error ? err.message : '保存失败');
+      await alert(localizeError(err instanceof Error ? err.message : '保存失败'));
     } finally {
       setPromoting(false);
     }
@@ -139,7 +147,11 @@ export default function DraftsPage() {
                       保存为正式会话
                     </Button>
                   )}
-                  <Button variant="outline" className="flex-1" onClick={() => handleDelete(draft.id)}>
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => void handleDelete(draft.id)}
+                  >
                     删除
                   </Button>
                 </div>
@@ -194,12 +206,14 @@ export default function DraftsPage() {
             <Button variant="outline" onClick={() => setPromoteTarget(null)}>
               取消
             </Button>
-            <Button onClick={handlePromote} disabled={promoting || !promoteTitle.trim()}>
+            <Button onClick={() => void handlePromote()} disabled={promoting || !promoteTitle.trim()}>
               {promoting ? '保存中...' : '保存'}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {dialogUi}
     </div>
   );
 }

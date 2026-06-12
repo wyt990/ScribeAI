@@ -1,6 +1,7 @@
 import express from 'express';
 import { prisma } from '../lib/prisma';
 import { verifyUser, AuthenticatedRequest } from '../middleware/authMiddleware';
+import { writeAuditLog } from '../lib/audit-log';
 import { generateSummary } from '../lib/summary-llm';
 import { buildSuggestSessionTitlePrompt } from '../prompts/suggest-session-title';
 import { getRecordingMeta, removeRecordingAudio } from '../lib/audio-archive';
@@ -8,7 +9,12 @@ import {
   cleanupOrphanRecordingArchivesForUser,
   releaseRecordingIfUnreferenced,
 } from '../lib/recording-orphan-cleanup';
-import { respondRecordingMeta, retranscribeRecording, streamRecording } from '../lib/recording-http';
+import {
+  RecordingInProgressError,
+  respondRecordingMeta,
+  retranscribeRecording,
+  streamRecording,
+} from '../lib/recording-http';
 import { getSttProviderLabel } from '../lib/asr-transcribe';
 import { writeOperationTrace } from '../lib/operation-trace';
 
@@ -262,6 +268,9 @@ router.post('/:id/retranscribe', verifyUser, async (req: AuthenticatedRequest, r
         error: err instanceof Error ? err.message : String(err),
       },
     });
+    if (err instanceof RecordingInProgressError) {
+      return res.status(409).json({ error: err.message });
+    }
     console.error('[Drafts] retranscribe', err);
     res.status(500).json({
       error: err instanceof Error ? err.message : 'Failed to retranscribe recording',
@@ -284,6 +293,12 @@ router.delete('/:id', verifyUser, async (req: AuthenticatedRequest, res) => {
     await prisma.draft.delete({ where: { id } });
     // recordingId 未落库或同草稿多次开录时，顺带清理该用户无引用目录
     await cleanupOrphanRecordingArchivesForUser(userId);
+    void writeAuditLog({
+      userId,
+      action: 'draft.delete',
+      target: id,
+      detail: draft.recordingId ? { recordingId: draft.recordingId } : undefined,
+    });
     res.json({ success: true });
   } catch (err) {
     console.error('[Drafts] delete error:', err);

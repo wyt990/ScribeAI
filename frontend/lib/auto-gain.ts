@@ -1,4 +1,4 @@
-import { GAIN_MAX, GAIN_MIN } from './audio-settings';
+import { getAudioGainConfig } from '@/lib/audio-gain-config';
 
 const TARGET_RMS = 0.16;
 const SILENCE_RMS = 0.004;
@@ -24,7 +24,8 @@ export function createAutoGainController(options: {
   const buffer = new Float32Array(inputAnalyser.fftSize);
 
   const applyGain = (next: number) => {
-    const clamped = Math.min(GAIN_MAX, Math.max(GAIN_MIN, next));
+    const { min, max } = getAudioGainConfig();
+    const clamped = Math.min(max, Math.max(min, next));
     if (Math.abs(clamped - currentGain) < 0.01) return;
     currentGain = clamped;
     gainNode.gain.setTargetAtTime(clamped, audioContext.currentTime, 0.08);
@@ -40,7 +41,8 @@ export function createAutoGainController(options: {
     const rms = Math.sqrt(sum / buffer.length);
     if (rms < SILENCE_RMS) return;
 
-    const desired = Math.min(GAIN_MAX, Math.max(GAIN_MIN, TARGET_RMS / rms));
+    const { min, max } = getAudioGainConfig();
+    const desired = Math.min(max, Math.max(min, TARGET_RMS / rms));
     applyGain(currentGain + (desired - currentGain) * SMOOTHING);
   };
 

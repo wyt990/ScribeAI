@@ -5,15 +5,13 @@ import { Mic, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DashboardNavLinks } from '@/components/dashboard-nav-links';
 import { ManagerSidebarLink } from '@/components/manager-sidebar-link';
+import { logoutSession } from '@/lib/auth-session';
 
 export function Sidebar() {
   const router = useRouter();
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    localStorage.removeItem('userRole');
-    router.push('/login');
+    void logoutSession().finally(() => router.push('/login'));
   };
 
   return (

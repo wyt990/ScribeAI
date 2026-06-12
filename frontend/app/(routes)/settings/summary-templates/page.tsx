@@ -12,9 +12,12 @@ import {
   setDefaultSummaryTemplate,
   type SummaryTemplateItem,
 } from '@/lib/summary-templates';
+import { useAppDialog } from '@/hooks/use-app-dialog';
+import { localizeError } from '@/lib/localize-error';
 
 export default function SummaryTemplatesPage() {
   const router = useRouter();
+  const { confirm, alert, dialogUi } = useAppDialog();
   const [templates, setTemplates] = useState<SummaryTemplateItem[]>([]);
   const [defaultId, setDefaultId] = useState('');
   const [loading, setLoading] = useState(true);
@@ -31,7 +34,7 @@ export default function SummaryTemplatesPage() {
     void reload()
       .catch((err) => {
         console.error(err);
-        setError(err instanceof Error ? err.message : '加载模板列表失败');
+        setError(localizeError(err instanceof Error ? err.message : '加载模板列表失败'));
       })
       .finally(() => setLoading(false));
   }, []);
@@ -41,7 +44,7 @@ export default function SummaryTemplatesPage() {
       const { template } = await forkSummaryTemplate(id);
       router.push(`/settings/summary-templates/${template.id}`);
     } catch (err) {
-      alert(err instanceof Error ? err.message : '复制失败');
+      await alert(localizeError(err instanceof Error ? err.message : '复制失败'));
     }
   };
 
@@ -50,18 +53,23 @@ export default function SummaryTemplatesPage() {
       await setDefaultSummaryTemplate(id);
       await reload();
     } catch (err) {
-      alert(err instanceof Error ? err.message : '设置失败');
+      await alert(localizeError(err instanceof Error ? err.message : '设置失败'));
     }
   };
 
   const handleDelete = async (t: SummaryTemplateItem) => {
     if (t.isSystem) return;
-    if (!confirm(`确定删除模板「${t.name}」？`)) return;
+    const ok = await confirm(`确定删除模板「${t.name}」？`, {
+      title: '删除模板',
+      confirmLabel: '删除',
+      destructive: true,
+    });
+    if (!ok) return;
     try {
       await deleteSummaryTemplate(t.id);
       await reload();
     } catch (err) {
-      alert(err instanceof Error ? err.message : '删除失败');
+      await alert(localizeError(err instanceof Error ? err.message : '删除失败'));
     }
   };
 
@@ -180,6 +188,8 @@ export default function SummaryTemplatesPage() {
           </CardContent>
         </Card>
       )}
+
+      {dialogUi}
     </div>
   );
 }

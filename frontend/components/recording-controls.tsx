@@ -18,7 +18,15 @@ import { isIOSDevice } from '@/lib/screen-wake';
 import { getPreferredCaptureMode, type NativeLevelPayload } from '@/lib/native-recording';
 
 /** VAD 状态指示器：显示一个小圆点 + 文字 */
-function VADBadge({ status, error }: { status: 'inactive' | 'loading' | 'ready' | 'error'; error?: string | null }) {
+function VADBadge({
+  status,
+  error,
+  loadProgress,
+}: {
+  status: 'inactive' | 'loading' | 'ready' | 'error';
+  error?: string | null;
+  loadProgress?: number | null;
+}) {
   const config = {
     inactive: { color: 'bg-gray-400', text: 'VAD 未启用', icon: MicOff },
     loading: { color: 'bg-yellow-400 animate-pulse', text: 'VAD 模型加载中...', icon: Loader },
@@ -31,8 +39,11 @@ function VADBadge({ status, error }: { status: 'inactive' | 'loading' | 'ready' 
     <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
       <Icon className="w-3.5 h-3.5 shrink-0" />
       <span className={`inline-block w-2 h-2 rounded-full ${color} shrink-0`} />
-      <div className="flex flex-col">
+      <div className="flex flex-col min-w-0">
         <span>{text}</span>
+        {status === 'loading' && loadProgress != null && (
+          <span className="text-[10px] tabular-nums">资源加载 {loadProgress}%</span>
+        )}
         {status === 'error' && error && (
           <span className="text-[10px] text-red-400 break-all">错误: {error}</span>
         )}
@@ -98,6 +109,7 @@ export function RecordingControls({ ensureDraft, flushDraft }: RecordingControls
     pauseRecording,
     resumeRecording,
     recoverRecording,
+    retryNativeDenoise,
     stopRecording,
     isReady,
     isConnecting,
@@ -105,6 +117,7 @@ export function RecordingControls({ ensureDraft, flushDraft }: RecordingControls
     vadStatus,
     vadError,
     vadLoading,
+    vadLoadProgress,
     audioLevel,
     isNativeCapture,
     nativeAudioStatus,
@@ -133,7 +146,7 @@ export function RecordingControls({ ensureDraft, flushDraft }: RecordingControls
           {isNativeShell ? (
             <span className="text-xs text-muted-foreground">原生分句 · 无需网页 VAD</span>
           ) : (
-            <VADBadge status={vadStatus} error={vadError} />
+            <VADBadge status={vadStatus} error={vadError} loadProgress={vadLoadProgress} />
           )}
         </div>
       </CardHeader>
@@ -185,7 +198,7 @@ export function RecordingControls({ ensureDraft, flushDraft }: RecordingControls
 
           {isPaused && !recordingInterrupted && (
             <>
-              <Button size="lg" className="flex-1" onClick={resumeRecording}>
+              <Button size="lg" className="flex-1" onClick={() => void resumeRecording()}>
                 <Play className="w-5 h-5 mr-2" />
                 恢复
               </Button>
@@ -214,13 +227,32 @@ export function RecordingControls({ ensureDraft, flushDraft }: RecordingControls
         {isRecording && <VolumeMeter level={audioLevel} />}
 
         {isRecording && isNativeCapture && nativeAudioStatus && (
-          <p className="text-[10px] text-muted-foreground mt-2 tabular-nums">
-            增益 {typeof nativeAudioStatus.gain === 'number' ? nativeAudioStatus.gain.toFixed(2) : '—'}
-            {' · '}
-            {nativeAudioStatus.autoGainEnabled ? '自动' : '手动'}
-            {' · '}
-            {formatNativeDenoiseStatus(nativeAudioStatus)}
-          </p>
+          <div className="mt-2 space-y-1">
+            <p className="text-[10px] text-muted-foreground tabular-nums">
+              增益 {typeof nativeAudioStatus.gain === 'number' ? nativeAudioStatus.gain.toFixed(2) : '—'}
+              {' · '}
+              {nativeAudioStatus.autoGainEnabled ? '自动' : '手动'}
+              {' · '}
+              {formatNativeDenoiseStatus(nativeAudioStatus)}
+            </p>
+            {nativeAudioStatus.noiseSuppressionEnabled &&
+              nativeAudioStatus.noiseSuppressionError && (
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className="text-[10px] text-amber-600 dark:text-amber-400">
+                    AI 降噪未生效：{nativeAudioStatus.noiseSuppressionError}
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-6 text-[10px] px-2"
+                    onClick={() => retryNativeDenoise()}
+                  >
+                    重试降噪
+                  </Button>
+                </div>
+              )}
+          </div>
         )}
 
         {isRecording && transcriptionWarning && (

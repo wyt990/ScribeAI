@@ -11,6 +11,7 @@ type SessionSearchResultsProps = {
   query: string;
   results: SessionSearchResult[];
   searching: boolean;
+  searchError?: string | null;
   onOpenSession: (id: string) => void;
   onOpenSummary?: (id: string, templateId?: string) => void;
 };
@@ -19,6 +20,7 @@ export function SessionSearchResults({
   query,
   results,
   searching,
+  searchError,
   onOpenSession,
 }: SessionSearchResultsProps) {
   if (!query.trim()) return null;
@@ -29,6 +31,12 @@ export function SessionSearchResults({
         <Spinner className="size-4" />
         搜索中…
       </div>
+    );
+  }
+
+  if (searchError) {
+    return (
+      <p className="text-center text-destructive py-12">{searchError}</p>
     );
   }
 

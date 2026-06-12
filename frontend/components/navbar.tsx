@@ -15,6 +15,7 @@ import {
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useRouter, usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { logoutSession } from '@/lib/auth-session';
 import {
   Sheet,
   SheetContent,
@@ -43,10 +44,7 @@ export function Navbar() {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    localStorage.removeItem('userRole');
-    router.push('/login');
+    void logoutSession().finally(() => router.push('/login'));
   };
 
   const getInitials = (name: string) => {

@@ -9,6 +9,12 @@ import java.lang.ref.WeakReference
 object NativeRecordingCoordinator {
     private var webViewRef: WeakReference<WebView>? = null
 
+    @Volatile
+    private var deliveryPaused = false
+
+    @Volatile
+    private var deliveryEpoch = 0
+
     fun attach(webView: WebView) {
         webViewRef = WeakReference(webView)
     }
@@ -17,22 +23,36 @@ object NativeRecordingCoordinator {
         webViewRef = null
     }
 
-    fun emitChunk(bytes: ByteArray) {
-        if (bytes.isEmpty()) return
+    /** 中断时暂停向 WebView 投递分片，并丢弃积压的 post 队列 */
+    fun pauseDelivery() {
+        deliveryPaused = true
+        deliveryEpoch += 1
+    }
+
+    /** 恢复投递；递增 epoch 使中断前已 post 的 JS 任务失效 */
+    fun resumeDelivery() {
+        deliveryEpoch += 1
+        deliveryPaused = false
+    }
+
+    fun emitChunk(bytes: ByteArray, seq: Long, timestampMs: Long, purpose: String? = null) {
+        if (bytes.isEmpty() || deliveryPaused) return
+        val epoch = deliveryEpoch
         val base64 = Base64.encodeToString(bytes, Base64.NO_WRAP)
         val quoted = JSONObject.quote(base64)
+        val purposeJson = if (purpose != null) JSONObject.quote(purpose) else "null"
         val script = """
             (function(){
               try {
                 if (typeof window.__scribeaiOnNativeChunk === 'function') {
-                  window.__scribeaiOnNativeChunk($quoted);
+                  window.__scribeaiOnNativeChunk($quoted, $seq, $timestampMs, $purposeJson);
                   return;
                 }
               } catch (e) {
                 console.error('[ScribeAINative] direct chunk failed', e);
               }
               try {
-                var detail = { base64: $quoted };
+                var detail = { base64: $quoted, seq: $seq, timestampMs: $timestampMs, purpose: $purposeJson };
                 window.dispatchEvent(new CustomEvent('scribeai-native-chunk', { detail: detail }));
               } catch (e2) {
                 console.error('[ScribeAINative] chunk event failed', e2);
@@ -41,6 +61,7 @@ object NativeRecordingCoordinator {
         """.trimIndent()
         val webView = webViewRef?.get() ?: return
         webView.post {
+            if (deliveryPaused || epoch != deliveryEpoch) return@post
             webView.evaluateJavascript(script, null)
         }
     }

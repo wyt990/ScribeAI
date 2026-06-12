@@ -1,9 +1,13 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { ManagerSettingsForm } from '@/components/manager-settings-form';
+import { ManagerObservabilityForm } from '@/components/manager-observability-form';
 import { Button } from '@/components/ui/button';
-import { managerApi } from '@/lib/manager-api';
+import { Spinner } from '@/components/ui/spinner';
+import { managerApi, type ManagerTraceRow } from '@/lib/manager-api';
+import { localizeError } from '@/lib/localize-error';
+
+const PAGE_SIZE = 20;
 
 type TraceSummary = {
   windowHours: number;
@@ -16,18 +20,6 @@ type TraceSummary = {
   avgSttSegmentMs: number | null;
   avgSummaryGenerateMs: number | null;
   avgSummaryCacheMs: number | null;
-};
-
-type TraceRow = {
-  id: string;
-  category: string;
-  action: string;
-  status: string;
-  durationMs: number | null;
-  target: string | null;
-  detail: Record<string, unknown> | null;
-  createdAt: string;
-  user: { id: string; name: string; email: string } | null;
 };
 
 const CATEGORIES = [
@@ -62,34 +54,69 @@ function detailPreview(detail: Record<string, unknown> | null): string {
 
 export default function ManagerObservabilityPage() {
   const [summary, setSummary] = useState<TraceSummary | null>(null);
-  const [traces, setTraces] = useState<TraceRow[]>([]);
+  const [traces, setTraces] = useState<ManagerTraceRow[]>([]);
   const [category, setCategory] = useState('');
   const [status, setStatus] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loadingSummary, setLoadingSummary] = useState(true);
+  const [loadingTraces, setLoadingTraces] = useState(true);
+  const [traceError, setTraceError] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const loadSummary = useCallback(async () => {
+    setLoadingSummary(true);
     try {
-      const [s, t] = await Promise.all([
-        managerApi.observability.summary(),
-        managerApi.observability.traces({
-          category: category || undefined,
-          status: status || undefined,
-          limit: 100,
-        }),
-      ]);
+      const s = await managerApi.observability.summary();
       setSummary(s);
-      setTraces(t.traces as TraceRow[]);
     } catch (err) {
       console.error(err);
     } finally {
-      setLoading(false);
+      setLoadingSummary(false);
     }
-  }, [category, status]);
+  }, []);
+
+  const loadTraces = useCallback(async () => {
+    setLoadingTraces(true);
+    setTraceError(null);
+    try {
+      const data = await managerApi.observability.traces({
+        page,
+        pageSize: PAGE_SIZE,
+        category: category || undefined,
+        status: status || undefined,
+      });
+      setTraces(data.traces);
+      setTotal(data.total);
+      setTotalPages(data.totalPages);
+      if (data.page !== page) setPage(data.page);
+    } catch (err) {
+      console.error(err);
+      setTraces([]);
+      setTraceError(localizeError(err instanceof Error ? err.message : '加载 trace 失败'));
+    } finally {
+      setLoadingTraces(false);
+    }
+  }, [page, category, status]);
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    void loadSummary();
+  }, [loadSummary]);
+
+  useEffect(() => {
+    void loadTraces();
+  }, [loadTraces]);
+
+  const handleFilterChange = (nextCategory: string, nextStatus: string) => {
+    setCategory(nextCategory);
+    setStatus(nextStatus);
+    setPage(1);
+  };
+
+  const refreshAll = () => {
+    void loadSummary();
+    void loadTraces();
+  };
 
   return (
     <div className="space-y-8">
@@ -100,7 +127,12 @@ export default function ManagerObservabilityPage() {
         </p>
       </div>
 
-      {summary && (
+      {loadingSummary && !summary ? (
+        <p className="text-sm text-muted-foreground inline-flex items-center gap-2">
+          <Spinner className="size-4" />
+          加载统计…
+        </p>
+      ) : summary ? (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard label="24h Trace 总数" value={String(summary.total24h)} />
           <StatCard label="24h 错误数" value={String(summary.errors24h)} highlight={summary.errors24h > 0} />
@@ -116,12 +148,12 @@ export default function ManagerObservabilityPage() {
           <StatCard label="纪要生成均耗时" value={formatMs(summary.avgSummaryGenerateMs)} />
           <StatCard label="纪要缓存命中" value={formatMs(summary.avgSummaryCacheMs)} />
         </div>
-      )}
+      ) : null}
 
       <section className="space-y-4">
         <h2 className="text-lg font-medium">配置</h2>
         <p className="text-sm text-muted-foreground">保存后立即生效（新 trace 按新配置写入）。</p>
-        <ManagerSettingsForm group="observability" />
+        <ManagerObservabilityForm />
       </section>
 
       <section className="space-y-4">
@@ -130,7 +162,7 @@ export default function ManagerObservabilityPage() {
           <select
             className="border rounded-md px-2 py-1 text-sm bg-background"
             value={category}
-            onChange={(e) => setCategory(e.target.value)}
+            onChange={(e) => handleFilterChange(e.target.value, status)}
           >
             {CATEGORIES.map((c) => (
               <option key={c.value} value={c.value}>{c.label}</option>
@@ -139,16 +171,27 @@ export default function ManagerObservabilityPage() {
           <select
             className="border rounded-md px-2 py-1 text-sm bg-background"
             value={status}
-            onChange={(e) => setStatus(e.target.value)}
+            onChange={(e) => handleFilterChange(category, e.target.value)}
           >
             {STATUSES.map((s) => (
               <option key={s.value} value={s.value}>{s.label}</option>
             ))}
           </select>
-          <Button variant="outline" size="sm" onClick={() => void load()} disabled={loading}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={refreshAll}
+            disabled={loadingSummary || loadingTraces}
+          >
             刷新
           </Button>
         </div>
+
+        {traceError && (
+          <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+            {traceError}
+          </div>
+        )}
 
         <div className="border rounded-lg overflow-x-auto">
           <table className="w-full text-sm">
@@ -165,13 +208,20 @@ export default function ManagerObservabilityPage() {
               </tr>
             </thead>
             <tbody>
-              {loading && traces.length === 0 ? (
+              {loadingTraces && traces.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="p-4 text-muted-foreground">加载中…</td>
+                  <td colSpan={8} className="p-8 text-center text-muted-foreground">
+                    <span className="inline-flex items-center gap-2">
+                      <Spinner className="size-4" />
+                      加载中…
+                    </span>
+                  </td>
                 </tr>
               ) : traces.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="p-4 text-muted-foreground">暂无 trace 记录</td>
+                  <td colSpan={8} className="p-8 text-center text-muted-foreground">
+                    暂无 trace 记录
+                  </td>
                 </tr>
               ) : (
                 traces.map((t) => (
@@ -187,7 +237,10 @@ export default function ManagerObservabilityPage() {
                     <td className="p-3 whitespace-nowrap">{formatMs(t.durationMs)}</td>
                     <td className="p-3">{t.user?.name ?? '—'}</td>
                     <td className="p-3 font-mono text-xs max-w-[120px] truncate">{t.target ?? '—'}</td>
-                    <td className="p-3 font-mono text-xs text-muted-foreground max-w-[200px] truncate" title={detailPreview(t.detail)}>
+                    <td
+                      className="p-3 font-mono text-xs text-muted-foreground max-w-[200px] truncate"
+                      title={detailPreview(t.detail)}
+                    >
                       {detailPreview(t.detail)}
                     </td>
                   </tr>
@@ -196,6 +249,33 @@ export default function ManagerObservabilityPage() {
             </tbody>
           </table>
         </div>
+
+        {!traceError && (
+          <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-muted-foreground">
+            <p>
+              共 {total} 条
+              {totalPages > 1 ? ` · 第 ${page} / ${totalPages} 页` : ''}
+            </p>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={loadingTraces || page <= 1}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+              >
+                上一页
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={loadingTraces || page >= totalPages}
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              >
+                下一页
+              </Button>
+            </div>
+          </div>
+        )}
       </section>
     </div>
   );

@@ -1,6 +1,5 @@
-// 音频增强相关配置
-// 可在 frontend/.env.local 中通过 NEXT_PUBLIC_AUDIO_GAIN_* 覆盖下列默认值；
-// 未设置或值无效时，自动使用本文件中的「代码兜底」常量。
+// 音频增强相关配置（.env.local 层）
+// 优先级：系统设置（/api/app-config）> NEXT_PUBLIC_AUDIO_GAIN_* > 本文件代码兜底
 
 /** 代码兜底：环境变量缺失或无效时使用 */
 const FALLBACK = {

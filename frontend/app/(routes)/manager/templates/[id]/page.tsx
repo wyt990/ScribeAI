@@ -7,10 +7,13 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { fetchSummaryTemplate } from '@/lib/summary-templates';
 import { managerApi } from '@/lib/manager-api';
+import { useAppDialog } from '@/hooks/use-app-dialog';
+import { localizeError } from '@/lib/localize-error';
 
 export default function ManagerTemplateSkillPage() {
   const params = useParams();
   const id = params.id as string;
+  const { alert, dialogUi } = useAppDialog();
   const [name, setName] = useState('');
   const [rulesMd, setRulesMd] = useState('');
   const [stepsMd, setStepsMd] = useState('');
@@ -30,9 +33,9 @@ export default function ManagerTemplateSkillPage() {
     setSaving(true);
     try {
       await managerApi.templates.updateSkill(id, { name, rulesMd, stepsMd, outputMd });
-      alert('已保存');
+      await alert('已保存', '保存成功');
     } catch (err) {
-      alert(err instanceof Error ? err.message : '保存失败');
+      await alert(localizeError(err instanceof Error ? err.message : '保存失败'));
     } finally {
       setSaving(false);
     }
@@ -57,6 +60,8 @@ export default function ManagerTemplateSkillPage() {
         <Textarea className="font-mono text-sm min-h-[200px]" value={outputMd} onChange={(e) => setOutputMd(e.target.value)} />
       </div>
       <Button onClick={() => void save()} disabled={saving}>{saving ? '保存中…' : '保存'}</Button>
+
+      {dialogUi}
     </div>
   );
 }

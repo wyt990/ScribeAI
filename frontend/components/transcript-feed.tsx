@@ -15,14 +15,18 @@ import { Badge } from "@/components/ui/badge";
 import { DashboardDraftActions } from "@/components/dashboard-draft-actions";
 
 export function TranscriptFeed() {
-  const { transcript, status, draftId, draftTitle, transcriptionWarning, lastSegmentAgeSec } = useRecordingStore();
+  const transcript = useRecordingStore((s) => s.transcript);
+  const status = useRecordingStore((s) => s.status);
+  const draftId = useRecordingStore((s) => s.draftId);
+  const draftTitle = useRecordingStore((s) => s.draftTitle);
+  const transcriptionWarning = useRecordingStore((s) => s.transcriptionWarning);
+  const lastSegmentAgeSec = useRecordingStore((s) => s.lastSegmentAgeSec);
   const recordingSeconds = useRecordingDuration();
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const bottomRef = useRef<HTMLSpanElement>(null);
 
+  // 新文字追加时自动滚到底部，确保录音/ASR 正常工作的可见反馈
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
+    bottomRef.current?.scrollIntoView({ behavior: 'auto' });
   }, [transcript]);
 
   const hasContent =
@@ -64,7 +68,7 @@ export function TranscriptFeed() {
               {transcriptionWarning}
             </p>
           )}
-          <ScrollArea className="h-full pr-3 md:pr-4 flex-1 min-h-0" ref={scrollRef}>
+          <ScrollArea className="h-full pr-3 md:pr-4 flex-1 min-h-0">
             {!hasContent ? (
               <div className="flex items-center justify-center min-h-[4rem] h-full text-muted-foreground">
                 <p className="text-center text-sm">
@@ -82,11 +86,11 @@ export function TranscriptFeed() {
                 </p>
               </div>
             )}
+            <span ref={bottomRef} className="block h-px" />
           </ScrollArea>
         </CardContent>
       </Card>
 
-      {/* 桌面端：按钮在转录卡片下方；移动端由 MobilePromoteBar 负责 */}
       <div className="hidden md:flex shrink-0 pt-2">
         <DashboardDraftActions className="w-full" />
       </div>

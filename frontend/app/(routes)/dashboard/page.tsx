@@ -9,7 +9,7 @@ import { RecordingControls } from "@/components/recording-controls";
 import { useRecordingStore } from "@/lib/store";
 import { TranscriptFeed } from "@/components/transcript-feed";
 import { DraftRestoreBanner } from "@/components/draft-restore-banner";
-import { connectSocket, onTranscript, onSegmentResult, bufferSegmentResult } from '@/lib/socket';
+import { connectSocket, onTranscript, onSegmentResult, onDeepgramError, bufferSegmentResult } from '@/lib/socket';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { useDraftSync } from "@/hooks/use-draft-sync";
@@ -17,15 +17,19 @@ import { fetchActiveDraft, fetchDraft, deleteDraft, type Draft } from "@/lib/dra
 import { Button } from "@/components/ui/button";
 import { clearAuthSession } from "@/lib/auth-session";
 import { navigateReplace } from "@/lib/navigation";
+import { useAppDialog } from "@/hooks/use-app-dialog";
+import { localizeError } from "@/lib/localize-error";
 
 function DashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { confirm, alert, dialogUi } = useAppDialog();
   const draftIdParam = searchParams.get('draftId');
 
   const {
     error,
     addTranscriptLine,
+    setError,
     setStatus,
     audioMode,
     setUserId,
@@ -140,12 +144,23 @@ function DashboardContent() {
       }
     });
 
+    const unsubscribeDeepgramError = onDeepgramError((payload) => {
+      const msg =
+        typeof payload === 'string'
+          ? payload
+          : payload instanceof Error
+            ? payload.message
+            : '转录服务异常，请检查网络或稍后重试';
+      setError(msg);
+    });
+
     return () => {
       unsubscribeTranscript();
       unsubscribeSegmentResult();
+      unsubscribeDeepgramError();
       void flushDraft();
     };
-  }, [addTranscriptLine, flushDraft]);
+  }, [addTranscriptLine, setError, flushDraft]);
 
   const handleRestore = () => {
     if (!pendingRestore) return;
@@ -155,7 +170,12 @@ function DashboardContent() {
 
   const handleDiscardDraft = async () => {
     if (!draftId) return;
-    if (!confirm('确定放弃当前草稿？内容将永久删除。')) return;
+    const ok = await confirm('确定放弃当前草稿？内容将永久删除。', {
+      title: '放弃草稿',
+      confirmLabel: '放弃',
+      destructive: true,
+    });
+    if (!ok) return;
     try {
       await flushDraft();
       await deleteDraft(draftId);
@@ -164,19 +184,24 @@ function DashboardContent() {
       setStatus('idle');
     } catch (err) {
       console.error(err);
-      alert('删除草稿失败');
+      await alert(localizeError(err instanceof Error ? err.message : '删除草稿失败'));
     }
   };
 
   const handleDiscardPendingRestore = async () => {
     if (!pendingRestore) return;
-    if (!confirm('确定放弃该草稿？内容将永久删除。')) return;
+    const ok = await confirm('确定放弃该草稿？内容将永久删除。', {
+      title: '放弃草稿',
+      confirmLabel: '放弃',
+      destructive: true,
+    });
+    if (!ok) return;
     try {
       await deleteDraft(pendingRestore.id);
       setPendingRestore(null);
     } catch (err) {
       console.error(err);
-      alert('删除草稿失败');
+      await alert(localizeError(err instanceof Error ? err.message : '删除草稿失败'));
     }
   };
 
@@ -240,6 +265,8 @@ function DashboardContent() {
           <TranscriptFeed />
         </div>
       </div>
+
+      {dialogUi}
     </div>
   );
 }

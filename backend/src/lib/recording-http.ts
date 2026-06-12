@@ -1,6 +1,10 @@
 import fs from 'fs';
 import type { Response } from 'express';
-import { getRecordingFilePath, getRecordingMeta } from './audio-archive';
+import {
+  ensureMasterRecording,
+  getRecordingMeta,
+  RecordingInProgressError,
+} from './audio-archive';
 import { transcribeRecordingFile } from './asr-transcribe';
 
 export function respondRecordingMeta(
@@ -9,7 +13,15 @@ export function respondRecordingMeta(
   recordingId: string | null | undefined
 ): void {
   if (!recordingId) {
-    res.json({ hasRecording: false, exists: false, finalized: false, sizeBytes: null, finalizedAt: null });
+    res.json({
+      hasRecording: false,
+      exists: false,
+      finalized: false,
+      sizeBytes: null,
+      finalizedAt: null,
+      segmentCount: 0,
+      masterStale: false,
+    });
     return;
   }
   const meta = getRecordingMeta(userId, recordingId);
@@ -29,19 +41,27 @@ export function streamRecording(
     res.status(404).json({ error: 'No recording linked' });
     return;
   }
-  const filePath = getRecordingFilePath(userId, recordingId);
-  if (!filePath) {
-    res.status(404).json({ error: 'Recording file not found' });
-    return;
-  }
 
-  const isWav = filePath.endsWith('.wav');
-  res.setHeader('Content-Type', isWav ? 'audio/wav' : 'audio/webm');
-  res.setHeader(
-    'Content-Disposition',
-    `inline; filename="recording-${recordingId}.${isWav ? 'wav' : 'webm'}"`
-  );
-  fs.createReadStream(filePath).pipe(res);
+  try {
+    const filePath = ensureMasterRecording(userId, recordingId);
+    const isWav = filePath.endsWith('.wav');
+    res.setHeader('Content-Type', isWav ? 'audio/wav' : 'audio/webm');
+    res.setHeader(
+      'Content-Disposition',
+      `inline; filename="recording-${recordingId}.${isWav ? 'wav' : 'webm'}"`
+    );
+    fs.createReadStream(filePath).pipe(res);
+  } catch (err) {
+    if (err instanceof RecordingInProgressError) {
+      res.status(409).json({ error: err.message });
+      return;
+    }
+    if (!res.headersSent) {
+      res.status(404).json({
+        error: err instanceof Error ? err.message : 'Recording file not found',
+      });
+    }
+  }
 }
 
 export async function retranscribeRecording(
@@ -51,11 +71,8 @@ export async function retranscribeRecording(
   if (!recordingId) {
     throw new Error('No recording linked');
   }
-  const filePath = getRecordingFilePath(userId, recordingId);
-  if (!filePath) {
-    throw new Error('Recording file not found');
-  }
 
+  const filePath = ensureMasterRecording(userId, recordingId);
   const started = Date.now();
   const fullText = await transcribeRecordingFile(filePath);
   if (!fullText.trim()) {
@@ -64,3 +81,5 @@ export async function retranscribeRecording(
 
   return { fullText: fullText.trim(), durationMs: Date.now() - started };
 }
+
+export { RecordingInProgressError };

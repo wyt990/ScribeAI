@@ -11,11 +11,12 @@ import java.nio.ByteOrder
 
 /**
  * 16kHz PCM 采音 + DTLN 降噪 + 软件增益。
- * 分片模式：定时 [TIMER] 或静音分句 [AUTO]（见 [NativeAudioSettings.chunkMode]）。
+ * - 定时 [TIMER] 分片：连续归档（与 chunkMode 无关，始终运行）
+ * - 静音分句 [AUTO]：仅用于实时 STT，不单独承担归档
  */
 class ChunkedPcmRecorder(
     private val context: Context,
-    private val onChunk: (ByteArray) -> Unit,
+    private val onChunk: (ByteArray, Long, Long, String?) -> Unit,
     private val onError: (String) -> Unit,
 ) {
     private val enhancer = NativeAudioEnhancer(context)
@@ -26,6 +27,9 @@ class ChunkedPcmRecorder(
     @Volatile
     private var running = false
 
+    @Volatile
+    private var capturePaused = false
+
     private var lastLevelEmitAt = 0L
     private val denoiseScratch = ShortArray(4096)
 
@@ -33,22 +37,84 @@ class ChunkedPcmRecorder(
     private var chunkOffset = 0
     private var lastAutoGainEnabled = NativeAudioSettings.autoGainEnabled
     private var speechSegmenter: NativeSpeechSegmenter? = null
+    private var archiveSeq = 0L
+    private var sttSeq = 0L
+    private var denoiseAutoRetried = false
+
+    @Volatile
+    private var shutdownKind = ShutdownKind.FULL
+
+    private enum class ShutdownKind {
+        FULL,
+        AUDIO_ONLY,
+    }
+
+    fun pauseCapture() {
+        capturePaused = true
+    }
+
+    fun resumeCapture() {
+        capturePaused = false
+    }
 
     fun start() {
         if (running) return
-        val chunkSeconds = NativeAudioSettings.chunkSeconds.coerceIn(1, 30)
-        chunkSamples = ShortArray(SAMPLE_RATE * chunkSeconds)
-        NativeGainProcessor.reset()
-        chunkOffset = 0
-        lastAutoGainEnabled = NativeAudioSettings.autoGainEnabled
-        speechSegmenter = if (NativeAudioSettings.chunkMode == NativeChunkMode.AUTO) {
-            createSpeechSegmenter()
+        beginCapture(resetSegmenter = true)
+    }
+
+    /** 错误恢复：重启采音线程并尽量保留分句器上下文 */
+    fun recoverCapture() {
+        if (running) {
+            shutdownKind = ShutdownKind.AUDIO_ONLY
+            haltCaptureThread()
+        }
+        shutdownKind = ShutdownKind.FULL
+        if (!running) {
+            beginCapture(resetSegmenter = false)
+        }
+    }
+
+    fun stop() {
+        shutdownKind = ShutdownKind.FULL
+        haltCaptureThread()
+    }
+
+    private fun beginCapture(resetSegmenter: Boolean) {
+        if (running) return
+        if (resetSegmenter) {
+            archiveSeq = 0L
+            sttSeq = 0L
+            denoiseAutoRetried = false
+            savedSegmenterSnapshot = null
+            speechSegmenter = if (NativeAudioSettings.chunkMode == NativeChunkMode.AUTO) {
+                createSpeechSegmenter()
+            } else {
+                null
+            }
         } else {
-            null
+            if (speechSegmenter == null && NativeAudioSettings.chunkMode == NativeChunkMode.AUTO) {
+                speechSegmenter = createSpeechSegmenter().also { segmenter ->
+                    savedSegmenterSnapshot?.let { snapshot ->
+                        segmenter.restore(snapshot)
+                        savedSegmenterSnapshot = null
+                    }
+                }
+            }
         }
 
+        capturePaused = false
+        val chunkSeconds = NativeAudioSettings.chunkSeconds.coerceIn(1, 30)
+        chunkSamples = ShortArray(SAMPLE_RATE * chunkSeconds)
+        if (resetSegmenter) {
+            NativeGainProcessor.reset()
+        }
+        chunkOffset = 0
+        lastAutoGainEnabled = NativeAudioSettings.autoGainEnabled
+
         if (NativeAudioSettings.noiseSuppressionEnabled) {
-            enhancer.prepare()
+            if (!enhancer.prepare()) {
+                enhancer.retryPrepare()
+            }
         }
 
         val sampleRate = SAMPLE_RATE
@@ -101,6 +167,20 @@ class ChunkedPcmRecorder(
         handler?.post { captureLoop(record, bufferSize) }
     }
 
+    private fun haltCaptureThread() {
+        if (!running && audioRecord == null && worker == null) return
+        running = false
+        val thread = worker
+        if (thread != null && thread.isAlive) {
+            try {
+                thread.join(5000)
+            } catch (_: InterruptedException) {
+                Thread.currentThread().interrupt()
+            }
+        }
+        releaseWorkerThread()
+    }
+
     fun updateEnhancement() {
         val nowAuto = NativeAudioSettings.autoGainEnabled
         if (nowAuto && !lastAutoGainEnabled) {
@@ -110,6 +190,11 @@ class ChunkedPcmRecorder(
         }
         lastAutoGainEnabled = nowAuto
         enhancer.updateEnhancement()
+    }
+
+    fun retryDenoise(): Boolean {
+        if (!NativeAudioSettings.noiseSuppressionEnabled) return false
+        return enhancer.retryPrepare()
     }
 
     fun enhancementStatus(): NativeEnhancementStatus {
@@ -129,20 +214,6 @@ class ChunkedPcmRecorder(
         )
     }
 
-    fun stop() {
-        if (!running && audioRecord == null && worker == null) return
-        running = false
-        val thread = worker
-        if (thread != null && thread.isAlive) {
-            try {
-                thread.join(5000)
-            } catch (_: InterruptedException) {
-                Thread.currentThread().interrupt()
-            }
-        }
-        releaseWorkerThread()
-    }
-
     private fun releaseWorkerThread() {
         worker?.quitSafely()
         worker = null
@@ -158,14 +229,14 @@ class ChunkedPcmRecorder(
             preSpeechPadMs = s.vadPreSpeechPadMs,
             speechRmsThreshold = s.vadSpeechRmsThreshold,
             maxSegmentMs = s.vadMaxSegmentMs,
-            onSegment = { samples -> emitChunk(samples, samples.size) },
+            onSegment = { samples -> emitSttChunk(samples, samples.size) },
         )
     }
 
     private fun captureLoop(record: AudioRecord, readBufferSize: Int) {
+        val timerOnlyMode = speechSegmenter == null
         try {
             val readBuf = ShortArray(readBufferSize / 2)
-            val useAutoSegments = speechSegmenter != null
 
             while (running) {
                 val read = try {
@@ -177,6 +248,8 @@ class ChunkedPcmRecorder(
 
                 if (read <= 0) continue
 
+                if (capturePaused) continue
+
                 NativeGainProcessor.tick(readBuf, read)
 
                 val scratch = if (read <= denoiseScratch.size) denoiseScratch else ShortArray(read)
@@ -184,6 +257,14 @@ class ChunkedPcmRecorder(
                 val gained = NativeGainProcessor.apply(scratch, read)
 
                 val now = System.currentTimeMillis()
+                if (
+                    !denoiseAutoRetried &&
+                    NativeAudioSettings.noiseSuppressionEnabled &&
+                    enhancer.isDenoiseFailed()
+                ) {
+                    denoiseAutoRetried = true
+                    enhancer.retryPrepare()
+                }
                 if (now - lastLevelEmitAt >= 60) {
                     lastLevelEmitAt = now
                     val status = enhancementStatus()
@@ -198,27 +279,46 @@ class ChunkedPcmRecorder(
                     )
                 }
 
-                if (useAutoSegments) {
-                    speechSegmenter?.process(gained, read)
-                } else {
-                    appendTimerChunk(gained, read)
-                }
+                // 连续定时归档（AUTO 与 TIMER 模式均运行）
+                appendTimerChunk(gained, read, timerOnlyMode)
+
+                // AUTO：额外按静音分句驱动实时 STT（purpose=stt，不写归档）
+                speechSegmenter?.process(gained, read)
             }
         } finally {
-            if (speechSegmenter != null) {
-                speechSegmenter?.flushPending()
-            } else if (chunkOffset > 0) {
-                emitChunk(chunkSamples, chunkOffset)
-                chunkOffset = 0
+            val segmenter = speechSegmenter
+            when (shutdownKind) {
+                ShutdownKind.AUDIO_ONLY -> {
+                    if (segmenter != null && segmenter.hasPendingState()) {
+                        savedSegmenterSnapshot = segmenter.snapshot()
+                    }
+                }
+                ShutdownKind.FULL -> {
+                    // 停止时务必 flush，避免唱歌/讲话滞留在缓冲中丢失
+                    segmenter?.flushPending()
+                    savedSegmenterSnapshot = null
+                    speechSegmenter = null
+                    if (chunkOffset > 0) {
+                        if (NativeAudioSettings.chunkMode == NativeChunkMode.TIMER) {
+                            emitCombinedChunk(chunkSamples, chunkOffset)
+                        } else {
+                            emitArchiveChunk(chunkSamples, chunkOffset)
+                        }
+                        chunkOffset = 0
+                    }
+                }
             }
-            speechSegmenter = null
-            releaseAudioRecord(record)
-            enhancer.release()
+            if (shutdownKind == ShutdownKind.FULL) {
+                releaseAudioRecord(record)
+                enhancer.release()
+            } else {
+                releaseAudioRecord(record)
+            }
             releaseWorkerThread()
         }
     }
 
-    private fun appendTimerChunk(gained: ShortArray, read: Int) {
+    private fun appendTimerChunk(gained: ShortArray, read: Int, timerOnlyMode: Boolean) {
         var srcIndex = 0
         while (srcIndex < read && running) {
             val toCopy = minOf(read - srcIndex, chunkSamples.size - chunkOffset)
@@ -227,7 +327,11 @@ class ChunkedPcmRecorder(
             srcIndex += toCopy
 
             if (chunkOffset >= chunkSamples.size) {
-                emitChunk(chunkSamples, chunkSamples.size)
+                if (timerOnlyMode) {
+                    emitCombinedChunk(chunkSamples, chunkSamples.size)
+                } else {
+                    emitArchiveChunk(chunkSamples, chunkSamples.size)
+                }
                 chunkOffset = 0
             }
         }
@@ -249,11 +353,33 @@ class ChunkedPcmRecorder(
         }
     }
 
-    private fun emitChunk(samples: ShortArray, count: Int) {
+    /** TIMER 模式：同一片既归档又 STT */
+    private fun emitCombinedChunk(samples: ShortArray, count: Int) {
         if (count <= 0) return
+        val wav = samplesToWav(samples, count)
+        archiveSeq += 1
+        onChunk(wav, archiveSeq, System.currentTimeMillis(), null)
+    }
+
+    /** AUTO 模式：定时片仅归档 */
+    private fun emitArchiveChunk(samples: ShortArray, count: Int) {
+        if (count <= 0) return
+        val wav = samplesToWav(samples, count)
+        archiveSeq += 1
+        onChunk(wav, archiveSeq, System.currentTimeMillis(), PURPOSE_ARCHIVE)
+    }
+
+    /** AUTO 模式：静音分句片仅 STT */
+    private fun emitSttChunk(samples: ShortArray, count: Int) {
+        if (count <= 0) return
+        val wav = samplesToWav(samples, count)
+        sttSeq += 1
+        onChunk(wav, sttSeq, System.currentTimeMillis(), PURPOSE_STT)
+    }
+
+    private fun samplesToWav(samples: ShortArray, count: Int): ByteArray {
         val pcmBytes = shortsToBytes(samples, count)
-        val wav = WavEncoder.pcm16ToWav(pcmBytes, SAMPLE_RATE)
-        onChunk(wav)
+        return WavEncoder.pcm16ToWav(pcmBytes, SAMPLE_RATE)
     }
 
     private fun shortsToBytes(samples: ShortArray, count: Int): ByteArray {
@@ -267,6 +393,11 @@ class ChunkedPcmRecorder(
     companion object {
         private const val SAMPLE_RATE = 16_000
         private const val DEFAULT_CHUNK_SECONDS = 3
+        const val PURPOSE_ARCHIVE = "archive"
+        const val PURPOSE_STT = "stt"
+
+        @Volatile
+        private var savedSegmenterSnapshot: NativeSpeechSegmenter.Snapshot? = null
     }
 }
 

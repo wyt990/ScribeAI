@@ -5,6 +5,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { prisma } from "../lib/prisma"; // Make sure prisma is exported from here
 import { verifyUser, AuthenticatedRequest } from '../middleware/authMiddleware';
+import { writeAuditLog, writeSecurityAuditLog } from '../lib/audit-log';
 const router = Router();
 
 /* ============================================================
@@ -25,6 +26,10 @@ router.post("/signup", async (req, res) => {
     });
 
     if (existing) {
+      void writeSecurityAuditLog({
+        action: "auth.signup_failed",
+        detail: { email, reason: "email_taken" },
+      });
       return res.status(400).json({ error: "该邮箱已被注册" });
     }
 
@@ -45,13 +50,19 @@ router.post("/signup", async (req, res) => {
       },
     });
 
+    void writeAuditLog({
+      userId: user.id,
+      action: "auth.signup",
+      target: user.id,
+      detail: { email: user.email, role: user.role },
+    });
+
     // Create JWT
     const token = jwt.sign(
       { id: user.id, email: user.email },
       process.env.JWT_SECRET as string,
       { expiresIn: "7d" }
     );
-    
 
     return res.status(201).json({
       token,
@@ -81,6 +92,10 @@ router.post("/login", async (req, res) => {
     });
 
     if (!user) {
+      void writeSecurityAuditLog({
+        action: "auth.login_failed",
+        detail: { email, reason: "user_not_found" },
+      });
       return res.status(400).json({ error: "邮箱或密码错误" });
     }
 
@@ -88,12 +103,28 @@ router.post("/login", async (req, res) => {
     const isValidPassword = await bcrypt.compare(password, user.password);
 
     if (!isValidPassword) {
+      void writeAuditLog({
+        userId: user.id,
+        action: "auth.login_failed",
+        detail: { reason: "invalid_password" },
+      });
       return res.status(400).json({ error: "邮箱或密码错误" });
     }
 
     if (!user.isActive) {
+      void writeAuditLog({
+        userId: user.id,
+        action: "auth.login_denied",
+        detail: { reason: "account_disabled" },
+      });
       return res.status(403).json({ error: "账号已禁用，请联系管理员" });
     }
+
+    void writeAuditLog({
+      userId: user.id,
+      action: "auth.login",
+      target: user.id,
+    });
 
     // Create JWT
     const token = jwt.sign(
@@ -101,7 +132,6 @@ router.post("/login", async (req, res) => {
       process.env.JWT_SECRET as string,
       { expiresIn: "7d" }
     );
-    
 
     return res.json({
       token,
@@ -122,6 +152,16 @@ interface JWTPayload {
 }
 
 
+
+router.post("/logout", verifyUser, async (req: AuthenticatedRequest, res) => {
+  const userId = req.user!.id;
+  void writeAuditLog({
+    userId,
+    action: "auth.logout",
+    target: userId,
+  });
+  return res.json({ success: true });
+});
 
 router.get("/me",verifyUser, async (req: AuthenticatedRequest, res) => {
 

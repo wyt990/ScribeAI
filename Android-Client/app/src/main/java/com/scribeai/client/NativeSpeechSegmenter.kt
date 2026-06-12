@@ -1,9 +1,10 @@
 package com.scribeai.client
 
+import kotlin.math.max
 import kotlin.math.sqrt
 
 /**
- * 能量 VAD：检测到静音宽限后输出一整句 PCM（与网页 Silero VAD 分句节奏接近）。
+ * 能量 VAD + 自适应噪声基线：检测到静音宽限后输出一整句 PCM。
  */
 class NativeSpeechSegmenter(
     private val sampleRate: Int,
@@ -14,6 +15,19 @@ class NativeSpeechSegmenter(
     private val maxSegmentMs: Int,
     private val onSegment: (ShortArray) -> Unit,
 ) {
+    data class Snapshot(
+        val prePadRing: ShortArray,
+        val prePadWrite: Int,
+        val prePadFilled: Int,
+        val segmentSamples: ShortArray,
+        val inSpeech: Boolean,
+        val trailingSilenceMs: Int,
+        val speechMs: Int,
+        val noiseFloorRms: Float,
+        val calibrated: Boolean,
+        val calibrationMs: Int,
+    )
+
     private val maxPrePadSamples = (sampleRate * preSpeechPadMs / 1000).coerceAtLeast(0)
     private val maxSegmentSamples = (sampleRate * maxSegmentMs / 1000).coerceAtLeast(sampleRate)
 
@@ -26,6 +40,43 @@ class NativeSpeechSegmenter(
     private var trailingSilenceMs = 0
     private var speechMs = 0
 
+    private var noiseFloorRms = 0.01f
+    private var calibrated = false
+    private var calibrationMs = 0
+
+    fun hasPendingState(): Boolean =
+        inSpeech || segment.isNotEmpty() || prePadFilled > 0
+
+    fun snapshot(): Snapshot = Snapshot(
+        prePadRing = prePadRing.copyOf(),
+        prePadWrite = prePadWrite,
+        prePadFilled = prePadFilled,
+        segmentSamples = segment.toShortArray(),
+        inSpeech = inSpeech,
+        trailingSilenceMs = trailingSilenceMs,
+        speechMs = speechMs,
+        noiseFloorRms = noiseFloorRms,
+        calibrated = calibrated,
+        calibrationMs = calibrationMs,
+    )
+
+    fun restore(state: Snapshot) {
+        val ringLen = prePadRing.size
+        if (state.prePadRing.size == ringLen) {
+            state.prePadRing.copyInto(prePadRing)
+        }
+        prePadWrite = state.prePadWrite.coerceIn(0, ringLen - 1)
+        prePadFilled = state.prePadFilled.coerceIn(0, ringLen)
+        segment.clear()
+        segment.addAll(state.segmentSamples.toList())
+        inSpeech = state.inSpeech
+        trailingSilenceMs = state.trailingSilenceMs
+        speechMs = state.speechMs
+        noiseFloorRms = state.noiseFloorRms
+        calibrated = state.calibrated
+        calibrationMs = state.calibrationMs
+    }
+
     fun reset() {
         segment.clear()
         inSpeech = false
@@ -33,13 +84,19 @@ class NativeSpeechSegmenter(
         speechMs = 0
         prePadWrite = 0
         prePadFilled = 0
+        noiseFloorRms = 0.01f
+        calibrated = false
+        calibrationMs = 0
     }
 
     fun process(samples: ShortArray, count: Int) {
         if (count <= 0) return
         val bufferMs = count * 1000.0 / sampleRate
         val rms = computeRms(samples, count)
-        val isSpeech = rms >= speechRmsThreshold
+        if (!inSpeech) {
+            updateNoiseFloor(rms, bufferMs.toInt())
+        }
+        val isSpeech = rms >= effectiveThreshold()
 
         pushPrePad(samples, count)
 
@@ -82,10 +139,45 @@ class NativeSpeechSegmenter(
         }
     }
 
+    private fun effectiveThreshold(): Float {
+        val adaptive = (noiseFloorRms * SPEECH_MARGIN).coerceIn(
+            MIN_ADAPTIVE_THRESHOLD,
+            MAX_ADAPTIVE_THRESHOLD,
+        )
+        val blended = max(speechRmsThreshold * 0.55f, adaptive)
+        return blended.coerceAtMost(speechRmsThreshold * 2.5f)
+    }
+
+    private fun updateNoiseFloor(rms: Float, bufferMs: Int) {
+        if (!calibrated) {
+            calibrationMs += bufferMs
+            noiseFloorRms = if (calibrationMs <= bufferMs) {
+                rms
+            } else {
+                noiseFloorRms * (1f - CALIBRATION_ALPHA) + rms * CALIBRATION_ALPHA
+            }
+            if (calibrationMs >= CALIBRATION_MS) {
+                calibrated = true
+            }
+            return
+        }
+        noiseFloorRms = noiseFloorRms * (1f - NOISE_ALPHA) + rms * NOISE_ALPHA
+    }
+
     private fun flushSegment() {
         if (segment.isEmpty()) return
         onSegment(segment.toShortArray())
-        reset()
+        resetSegmentOnly()
+    }
+
+    /** 输出分句后保留噪声基线校准结果 */
+    private fun resetSegmentOnly() {
+        segment.clear()
+        inSpeech = false
+        trailingSilenceMs = 0
+        speechMs = 0
+        prePadWrite = 0
+        prePadFilled = 0
     }
 
     private fun pushPrePad(samples: ShortArray, count: Int) {
@@ -118,5 +210,14 @@ class NativeSpeechSegmenter(
             sum += n * n
         }
         return sqrt(sum / count).toFloat()
+    }
+
+    companion object {
+        private const val NOISE_ALPHA = 0.015f
+        private const val CALIBRATION_ALPHA = 0.08f
+        private const val SPEECH_MARGIN = 2.8f
+        private const val MIN_ADAPTIVE_THRESHOLD = 0.006f
+        private const val MAX_ADAPTIVE_THRESHOLD = 0.12f
+        private const val CALIBRATION_MS = 800
     }
 }

@@ -36,6 +36,16 @@ class NativeAudioEnhancer(private val context: Context) {
         }
     }
 
+    /** 模型加载失败时重试（录音期间可多次调用） */
+    fun retryPrepare(): Boolean {
+        if (!NativeAudioSettings.noiseSuppressionEnabled) {
+            releaseDtln()
+            return false
+        }
+        if (dtln?.isReady == true) return true
+        return prepare()
+    }
+
     fun updateEnhancement() {
         if (!NativeAudioSettings.noiseSuppressionEnabled) {
             releaseDtln()

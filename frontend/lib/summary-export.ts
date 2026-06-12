@@ -1,3 +1,5 @@
+import { localizeError } from './localize-error';
+
 export function buildExportUrl(
   sessionId: string,
   format: 'docx' | 'pdf',
@@ -26,8 +28,8 @@ export async function downloadSummaryExport(
 
   const res = await fetch(url, { headers });
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error || '导出失败');
+    const err = (await res.json().catch(() => ({}))) as { error?: string; code?: string };
+    throw new Error(localizeError(err.error || '导出失败', err.code));
   }
 
   const blob = await res.blob();

@@ -14,6 +14,8 @@ import { Input } from '@/components/ui/input';
 import { promoteDraft } from '@/lib/draft-api';
 import { useRecordingStore } from '@/lib/store';
 import { useCanPromote } from '@/hooks/use-can-promote';
+import { useAppDialog } from '@/hooks/use-app-dialog';
+import { localizeError } from '@/lib/localize-error';
 
 type PromoteDraftButtonProps = {
   className?: string;
@@ -21,21 +23,27 @@ type PromoteDraftButtonProps = {
 
 export function PromoteDraftButton({ className }: PromoteDraftButtonProps) {
   const router = useRouter();
+  const { alert, dialogUi } = useAppDialog();
   const { canPromote } = useCanPromote();
   const { draftId, draftTitle, clearTranscript, clearDraft } = useRecordingStore();
 
   const [saving, setSaving] = useState(false);
   const [openTitleDialog, setOpenTitleDialog] = useState(false);
   const [title, setTitle] = useState('');
+  const [titleError, setTitleError] = useState('');
 
   const openSaveDialog = () => {
     setTitle(draftTitle?.startsWith('草稿') ? '' : draftTitle || '');
+    setTitleError('');
     setOpenTitleDialog(true);
   };
 
   const handlePromote = async () => {
     if (!draftId || !canPromote) return;
-    if (!title.trim()) return alert('请输入会话标题');
+    if (!title.trim()) {
+      setTitleError('请输入会话标题');
+      return;
+    }
 
     setSaving(true);
     try {
@@ -46,7 +54,7 @@ export function PromoteDraftButton({ className }: PromoteDraftButtonProps) {
       router.replace('/sessions');
     } catch (err) {
       console.error(err);
-      alert(err instanceof Error ? err.message : '保存失败');
+      await alert(localizeError(err instanceof Error ? err.message : '保存失败'));
     } finally {
       setSaving(false);
     }
@@ -71,19 +79,25 @@ export function PromoteDraftButton({ className }: PromoteDraftButtonProps) {
           <Input
             placeholder="例如：团队会议、机器学习讲座、讨论..."
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => {
+              setTitle(e.target.value);
+              if (titleError) setTitleError('');
+            }}
           />
+          {titleError && <p className="text-sm text-destructive">{titleError}</p>}
 
           <DialogFooter className="flex-row gap-2">
             <Button variant="outline" onClick={() => setOpenTitleDialog(false)}>
               取消
             </Button>
-            <Button onClick={handlePromote} disabled={saving}>
+            <Button onClick={() => void handlePromote()} disabled={saving}>
               {saving ? '保存中...' : '保存'}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {dialogUi}
     </>
   );
 }

@@ -17,11 +17,15 @@ import {
   updateSummaryTemplate,
   type SummaryTemplateDetail,
 } from '@/lib/summary-templates';
+import { SUMMARY_GENERATION_HINT } from '@/lib/summary-timing';
+import { useAppDialog } from '@/hooks/use-app-dialog';
+import { localizeError } from '@/lib/localize-error';
 
 export default function EditSummaryTemplatePage() {
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
+  const { alert, dialogUi } = useAppDialog();
 
   const [data, setData] = useState<SummaryTemplateDetail | null>(null);
   const [name, setName] = useState('');
@@ -47,19 +51,19 @@ export default function EditSummaryTemplatePage() {
 
   useEffect(() => {
     void load()
-      .catch((err) => {
+      .catch(async (err) => {
         console.error(err);
-        alert('加载模板失败');
+        await alert(localizeError(err instanceof Error ? err.message : '加载模板失败'));
       })
       .finally(() => setLoading(false));
-  }, [load]);
+  }, [load, alert]);
 
   const isReadonly = data?.template.isSystem ?? false;
   const isOwned = data && !data.template.isSystem;
 
   const handleSave = async () => {
     if (!isOwned) {
-      alert('系统模板不可直接编辑，请先「复制为我的模板」');
+      await alert('系统模板不可直接编辑，请先「复制为我的模板」');
       return;
     }
     setSaving(true);
@@ -72,9 +76,9 @@ export default function EditSummaryTemplatePage() {
         outputMd,
       });
       await load();
-      alert('已保存');
+      await alert('已保存', '保存成功');
     } catch (err) {
-      alert(err instanceof Error ? err.message : '保存失败');
+      await alert(localizeError(err instanceof Error ? err.message : '保存失败'));
     } finally {
       setSaving(false);
     }
@@ -85,7 +89,7 @@ export default function EditSummaryTemplatePage() {
       const { template } = await forkSummaryTemplate(id, `${name}（我的副本）`);
       router.push(`/settings/summary-templates/${template.id}`);
     } catch (err) {
-      alert(err instanceof Error ? err.message : '复制失败');
+      await alert(localizeError(err instanceof Error ? err.message : '复制失败'));
     }
   };
 
@@ -95,7 +99,7 @@ export default function EditSummaryTemplatePage() {
       const res = await previewSummaryTemplate(id, sampleText || undefined);
       setPreviewText(res.preview);
     } catch (err) {
-      alert(err instanceof Error ? err.message : '预览失败');
+      await alert(localizeError(err instanceof Error ? err.message : '预览失败'));
     } finally {
       setPreviewing(false);
     }
@@ -112,7 +116,7 @@ export default function EditSummaryTemplatePage() {
       a.click();
       URL.revokeObjectURL(url);
     } catch (err) {
-      alert(err instanceof Error ? err.message : '导出失败');
+      await alert(localizeError(err instanceof Error ? err.message : '导出失败'));
     }
   };
 
@@ -140,10 +144,19 @@ export default function EditSummaryTemplatePage() {
             });
         router.push(`/settings/summary-templates/${result.template.id}`);
       } catch (err) {
-        alert(err instanceof Error ? err.message : '导入失败');
+        await alert(localizeError(err instanceof Error ? err.message : '导入失败'));
       }
     };
     input.click();
+  };
+
+  const handleSubmitPublic = async () => {
+    try {
+      await submitTemplateForPublic(id);
+      await alert('已提交公共审核', '提交成功');
+    } catch (err) {
+      await alert(localizeError(err instanceof Error ? err.message : '提交失败'));
+    }
   };
 
   if (loading) return <div className="p-6 text-muted-foreground">加载中…</div>;
@@ -190,10 +203,7 @@ export default function EditSummaryTemplatePage() {
               设为默认
             </Button>
             {isOwned && (
-              <Button
-                variant="outline"
-                onClick={() => void submitTemplateForPublic(id).then(() => alert('已提交公共审核'))}
-              >
+              <Button variant="outline" onClick={() => void handleSubmitPublic()}>
                 申请公共共享
               </Button>
             )}
@@ -265,7 +275,7 @@ export default function EditSummaryTemplatePage() {
             placeholder="粘贴短样例转录，留空则用内置示例…"
           />
           <Button onClick={() => void handlePreview()} disabled={previewing}>
-            {previewing ? '生成预览中（约 1–3 分钟）…' : '生成预览'}
+            {previewing ? `生成预览中（${SUMMARY_GENERATION_HINT}）…` : '生成预览'}
           </Button>
           {previewText && (
             <pre className="text-sm whitespace-pre-wrap rounded border bg-muted/50 p-4 max-h-96 overflow-auto">
@@ -274,6 +284,8 @@ export default function EditSummaryTemplatePage() {
           )}
         </CardContent>
       </Card>
+
+      {dialogUi}
     </div>
   );
 }

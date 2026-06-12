@@ -17,14 +17,22 @@ interface ScribeAINativeBridge {
   setAudioEnhancement?(gain: number, autoGain: boolean, noiseSuppression: boolean): void;
   startRecording(recordingId: string, optionsJson?: string): void;
   stopRecording(): void;
+  pauseRecording?(): void;
+  resumeRecording?(): void;
   recoverRecording(): void;
+  retryNoiseSuppression?(): boolean;
 }
 
 declare global {
   interface Window {
     ScribeAINative?: ScribeAINativeBridge;
     /** 由 subscribeNativeRecording 注册；壳优先直调，避免 CustomEvent + JSON 包装 */
-    __scribeaiOnNativeChunk?: (base64: string) => void;
+    __scribeaiOnNativeChunk?: (
+      base64: string,
+      seq?: number,
+      timestampMs?: number,
+      purpose?: NativeChunkPurpose | null
+    ) => void;
   }
 }
 
@@ -74,6 +82,8 @@ export function nativeSyncAudioEnhancement(settings: NativeAudioSettings): void 
 
 export type NativeChunkMode = 'timer' | 'auto';
 
+export type NativeChunkPurpose = 'archive' | 'stt';
+
 export type NativeRecordingChunkOptions = {
   mode: NativeChunkMode;
   chunkSeconds: number;
@@ -112,9 +122,31 @@ export function nativeStopRecording(): void {
   window.ScribeAINative?.stopRecording();
 }
 
+export function nativePauseRecording(): void {
+  window.ScribeAINative?.pauseRecording?.();
+}
+
+export function nativeResumeRecording(): void {
+  window.ScribeAINative?.resumeRecording?.();
+}
+
 export function nativeRecoverRecording(): void {
   window.ScribeAINative?.recoverRecording();
 }
+
+export function nativeRetryNoiseSuppression(): boolean {
+  try {
+    return window.ScribeAINative?.retryNoiseSuppression?.() === true;
+  } catch {
+    return false;
+  }
+}
+
+export type NativeChunkMeta = {
+  seq: number;
+  timestampMs: number;
+  purpose?: NativeChunkPurpose;
+};
 
 export function base64ToArrayBuffer(base64: string): ArrayBuffer {
   const binary = atob(base64);
@@ -129,7 +161,7 @@ export function base64ToBlob(base64: string, mimeType = 'audio/wav'): Blob {
   return new Blob([base64ToArrayBuffer(base64)], { type: mimeType });
 }
 
-type ChunkHandler = (buf: ArrayBuffer) => void;
+type ChunkHandler = (buf: ArrayBuffer, meta?: NativeChunkMeta) => void;
 type StateHandler = (state: string, reason?: string) => void;
 export type NativeLevelPayload = {
   level: number;
@@ -143,10 +175,14 @@ export type NativeLevelPayload = {
 
 type LevelHandler = (payload: NativeLevelPayload) => void;
 
-function deliverNativeChunk(base64: string, onChunk: ChunkHandler): void {
+function deliverNativeChunk(
+  base64: string,
+  onChunk: ChunkHandler,
+  meta?: NativeChunkMeta
+): void {
   if (!base64) return;
   try {
-    onChunk(base64ToArrayBuffer(base64));
+    onChunk(base64ToArrayBuffer(base64), meta);
   } catch (err) {
     console.error('[native-recording] chunk decode failed', err);
   }
@@ -157,15 +193,43 @@ export function subscribeNativeRecording(
   onState: StateHandler,
   onLevel?: LevelHandler
 ): () => void {
-  const directHandler = (base64: string) => {
-    deliverNativeChunk(base64, onChunk);
+  const directHandler = (
+    base64: string,
+    seq?: number,
+    timestampMs?: number,
+    purpose?: NativeChunkPurpose | null
+  ) => {
+    const meta =
+      typeof seq === 'number' && typeof timestampMs === 'number'
+        ? {
+            seq,
+            timestampMs,
+            ...(purpose === 'archive' || purpose === 'stt' ? { purpose } : {}),
+          }
+        : undefined;
+    deliverNativeChunk(base64, onChunk, meta);
   };
   window.__scribeaiOnNativeChunk = directHandler;
 
   const chunkHandler = (e: Event) => {
-    const detail = (e as CustomEvent<{ base64?: string }>).detail;
+    const detail = (e as CustomEvent<{
+      base64?: string;
+      seq?: number;
+      timestampMs?: number;
+      purpose?: NativeChunkPurpose | null;
+    }>).detail;
     if (!detail?.base64) return;
-    deliverNativeChunk(detail.base64, onChunk);
+    const meta =
+      typeof detail.seq === 'number' && typeof detail.timestampMs === 'number'
+        ? {
+            seq: detail.seq,
+            timestampMs: detail.timestampMs,
+            ...(detail.purpose === 'archive' || detail.purpose === 'stt'
+              ? { purpose: detail.purpose }
+              : {}),
+          }
+        : undefined;
+    deliverNativeChunk(detail.base64, onChunk, meta);
   };
 
   const stateHandler = (e: Event) => {

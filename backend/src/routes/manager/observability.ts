@@ -52,12 +52,23 @@ router.get('/summary', async (_req, res) => {
   }
 });
 
-router.get('/traces', async (req, res) => {
-  try {
-    const limit = Math.min(200, Math.max(1, Number(req.query.limit) || 50));
-    const category = typeof req.query.category === 'string' ? req.query.category : undefined;
-    const status = typeof req.query.status === 'string' ? req.query.status : undefined;
+function parseTraceListQuery(query: Record<string, unknown>) {
+  const page = Math.max(1, Number(query.page) || 1);
+  const pageSize = Math.min(
+    Math.max(1, Number(query.pageSize) || Number(query.limit) || 20),
+    100
+  );
+  const category = typeof query.category === 'string' ? query.category : undefined;
+  const status = typeof query.status === 'string' ? query.status : undefined;
+  return { page, pageSize, category, status };
+}
 
+router.get('/traces', async (req, res) => {
+  const { page, pageSize, category, status } = parseTraceListQuery(
+    req.query as Record<string, unknown>
+  );
+
+  try {
     if (category && !CATEGORIES.includes(category as (typeof CATEGORIES)[number])) {
       return res.status(400).json({ error: 'Invalid category' });
     }
@@ -65,19 +76,33 @@ router.get('/traces', async (req, res) => {
       return res.status(400).json({ error: 'Invalid status' });
     }
 
+    const where = {
+      ...(category ? { category } : {}),
+      ...(status ? { status } : {}),
+    };
+
+    const total = await prisma.operationTrace.count({ where });
+    const totalPages = Math.max(1, Math.ceil(total / pageSize));
+    const effectivePage = total === 0 ? 1 : Math.min(page, totalPages);
+    const skip = (effectivePage - 1) * pageSize;
+
     const traces = await prisma.operationTrace.findMany({
-      where: {
-        ...(category ? { category } : {}),
-        ...(status ? { status } : {}),
-      },
+      where,
+      skip,
+      take: pageSize,
       orderBy: { createdAt: 'desc' },
-      take: limit,
       include: {
         user: { select: { id: true, name: true, email: true } },
       },
     });
 
-    res.json({ traces });
+    res.json({
+      traces,
+      total,
+      page: effectivePage,
+      pageSize,
+      totalPages,
+    });
   } catch (err) {
     console.error('[Manager/Observability] traces', err);
     res.status(500).json({ error: 'Failed to load traces' });

@@ -12,26 +12,31 @@ import {
   generateTemplateDraft,
   type TemplateDraft,
 } from '@/lib/summary-templates';
+import { useAppDialog } from '@/hooks/use-app-dialog';
+import { localizeError } from '@/lib/localize-error';
 
 export default function NewSummaryTemplatePage() {
   const router = useRouter();
+  const { alert, dialogUi } = useAppDialog();
   const [description, setDescription] = useState('');
   const [exampleMd, setExampleMd] = useState('');
   const [draft, setDraft] = useState<TemplateDraft | null>(null);
   const [generating, setGenerating] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState('');
 
   const handleGenerate = async () => {
     if (!description.trim() && !exampleMd.trim()) {
-      alert('请填写模板描述或粘贴范例纪要');
+      setFormError('请填写模板描述或粘贴范例纪要');
       return;
     }
+    setFormError('');
     setGenerating(true);
     try {
       const result = await generateTemplateDraft(description, exampleMd);
       setDraft(result);
     } catch (err) {
-      alert(err instanceof Error ? err.message : '生成失败');
+      await alert(localizeError(err instanceof Error ? err.message : '生成失败'));
     } finally {
       setGenerating(false);
     }
@@ -44,7 +49,7 @@ export default function NewSummaryTemplatePage() {
       const { template } = await createSummaryTemplate({ ...draft, setAsDefault: asDefault });
       router.push(`/settings/summary-templates/${template.id}`);
     } catch (err) {
-      alert(err instanceof Error ? err.message : '保存失败');
+      await alert(localizeError(err instanceof Error ? err.message : '保存失败'));
     } finally {
       setSaving(false);
     }
@@ -64,10 +69,14 @@ export default function NewSummaryTemplatePage() {
           <CardTitle className="text-base">描述需求</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
+          {formError && <p className="text-sm text-destructive">{formError}</p>}
           <Textarea
             placeholder="例如：教务处周例会，要有议题、决议、待办、责任处室…"
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={(e) => {
+              setDescription(e.target.value);
+              if (formError) setFormError('');
+            }}
             rows={4}
           />
           <Textarea
@@ -130,6 +139,8 @@ export default function NewSummaryTemplatePage() {
           </CardContent>
         </Card>
       )}
+
+      {dialogUi}
     </div>
   );
 }

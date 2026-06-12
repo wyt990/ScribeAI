@@ -46,13 +46,31 @@ class RecordingForegroundService : Service() {
                 stopSelf()
                 NativeRecordingCoordinator.emitState("idle")
             }
+            ACTION_PAUSE -> {
+                activeCapture?.pauseCapture()
+                NativeRecordingCoordinator.pauseDelivery()
+                NativeRecordingCoordinator.emitState("paused", "interrupted")
+            }
+            ACTION_RESUME -> {
+                NativeRecordingCoordinator.resumeDelivery()
+                activeCapture?.resumeCapture()
+                NativeRecordingCoordinator.emitState("recording", "resumed")
+            }
             ACTION_RECOVER -> {
-                stopCapture()
-                startCapture()
+                NativeRecordingCoordinator.resumeDelivery()
+                val recorder = activeCapture ?: capture
+                if (recorder != null) {
+                    recorder.recoverCapture()
+                } else {
+                    startCapture()
+                }
                 NativeRecordingCoordinator.emitState("recording", "recovered")
             }
         }
-        return START_NOT_STICKY
+        return when (intent?.action) {
+            ACTION_STOP -> START_NOT_STICKY
+            else -> START_STICKY
+        }
     }
 
     override fun onDestroy() {
@@ -64,7 +82,9 @@ class RecordingForegroundService : Service() {
         if (capture != null) return
         capture = ChunkedPcmRecorder(
             context = this,
-            onChunk = { bytes -> NativeRecordingCoordinator.emitChunk(bytes) },
+            onChunk = { bytes, seq, ts, purpose ->
+                NativeRecordingCoordinator.emitChunk(bytes, seq, ts, purpose)
+            },
             onError = { msg -> NativeRecordingCoordinator.emitError(msg) }
         ).also {
             activeCapture = it
@@ -77,23 +97,33 @@ class RecordingForegroundService : Service() {
         capture = null
         activeCapture = null
         activeRecordingId = null
+        NativeRecordingCoordinator.resumeDelivery()
     }
 
     private fun buildNotification(recordingId: String): Notification {
         createChannel()
-        val openIntent = PendingIntent.getActivity(
+        val openIntent = Intent(this, MainActivity::class.java).apply {
+            action = Intent.ACTION_MAIN
+            addCategory(Intent.CATEGORY_LAUNCHER)
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or
+                Intent.FLAG_ACTIVITY_SINGLE_TOP or
+                Intent.FLAG_ACTIVITY_CLEAR_TOP
+            putExtra(EXTRA_OPEN_FROM_NOTIFICATION, true)
+        }
+        val pendingIntent = PendingIntent.getActivity(
             this,
-            0,
-            Intent(this, MainActivity::class.java),
+            NOTIFICATION_ID,
+            openIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(getString(R.string.recording_notification_title))
             .setContentText(getString(R.string.recording_notification_text))
             .setSmallIcon(android.R.drawable.ic_btn_speak_now)
-            .setContentIntent(openIntent)
+            .setContentIntent(pendingIntent)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
+            .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .setSubText(recordingId.take(8))
             .build()
     }
@@ -103,14 +133,19 @@ class RecordingForegroundService : Service() {
         val channel = NotificationChannel(
             CHANNEL_ID,
             getString(R.string.recording_channel_name),
-            NotificationManager.IMPORTANCE_LOW
-        )
+            NotificationManager.IMPORTANCE_DEFAULT
+        ).apply {
+            description = getString(R.string.recording_notification_text)
+            setShowBadge(false)
+        }
         manager.createNotificationChannel(channel)
     }
 
     companion object {
         const val ACTION_START = "com.scribeai.client.action.START_RECORDING"
         const val ACTION_STOP = "com.scribeai.client.action.STOP_RECORDING"
+        const val ACTION_PAUSE = "com.scribeai.client.action.PAUSE_RECORDING"
+        const val ACTION_RESUME = "com.scribeai.client.action.RESUME_RECORDING"
         const val ACTION_RECOVER = "com.scribeai.client.action.RECOVER_RECORDING"
         const val EXTRA_RECORDING_ID = "recording_id"
 
@@ -128,5 +163,9 @@ class RecordingForegroundService : Service() {
         fun notifyEnhancementChanged() {
             activeCapture?.updateEnhancement()
         }
+
+        fun retryDenoise(): Boolean = activeCapture?.retryDenoise() == true
+
+        const val EXTRA_OPEN_FROM_NOTIFICATION = "open_from_notification"
     }
 }

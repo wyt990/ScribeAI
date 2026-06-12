@@ -1,6 +1,7 @@
 import express from 'express';
 import { prisma } from '../lib/prisma';
 import { verifyUser, AuthenticatedRequest } from '../middleware/authMiddleware';
+import { writeAuditLog } from '../lib/audit-log';
 import {
   verifyUserOrShareToken,
   SummaryAuthRequest,
@@ -22,7 +23,12 @@ import { parseSummaryType, DEFAULT_SUMMARY_TYPE } from '../prompts/build-summary
 import { writeOperationTrace } from '../lib/operation-trace';
 import { getRecordingMeta, removeRecordingAudio } from '../lib/audio-archive';
 import { cleanupOrphanRecordingArchivesForUser } from '../lib/recording-orphan-cleanup';
-import { respondRecordingMeta, retranscribeRecording, streamRecording } from '../lib/recording-http';
+import {
+  RecordingInProgressError,
+  respondRecordingMeta,
+  retranscribeRecording,
+  streamRecording,
+} from '../lib/recording-http';
 import { getSttProviderLabel } from '../lib/asr-transcribe';
 import { searchUserSessions } from '../lib/session-search';
 
@@ -226,6 +232,9 @@ router.post('/:id/retranscribe', verifyUser, async (req: AuthenticatedRequest, r
         error: err instanceof Error ? err.message : String(err),
       },
     });
+    if (err instanceof RecordingInProgressError) {
+      return res.status(409).json({ error: err.message });
+    }
     console.error('[Sessions] retranscribe', err);
     res.status(500).json({
       error: err instanceof Error ? err.message : 'Failed to retranscribe recording',
@@ -397,7 +406,15 @@ router.get(
       return res.send(buffer);
     } catch (err) {
       console.error("[SummaryExport]", err);
-      return res.status(500).json({ error: "Failed to export summary" });
+      const message = err instanceof Error ? err.message : "Failed to export summary";
+      const isFontError =
+        message.includes("PDF 字体") ||
+        message.includes("PDF font") ||
+        message.includes("Noto");
+      return res.status(500).json({
+        error: isFontError ? message : "Failed to export summary",
+        code: isFontError ? "PDF_FONT_MISSING" : "EXPORT_FAILED",
+      });
     }
   }
 );
@@ -652,6 +669,13 @@ router.delete("/:id", verifyUser, async (req: AuthenticatedRequest, res) => {
       removeRecordingAudio(transcript.userId, transcript.recordingId);
     }
     await cleanupOrphanRecordingArchivesForUser(transcript.userId);
+
+    void writeAuditLog({
+      userId,
+      action: 'transcript.delete',
+      target: id,
+      detail: transcript.recordingId ? { recordingId: transcript.recordingId } : undefined,
+    });
 
     res.json({ success: true });
   } catch (err) {

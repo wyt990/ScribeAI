@@ -22,6 +22,9 @@ import { TranscriptSearchPanel } from '@/components/transcript-search-panel';
 import { SessionSearchResults } from '@/components/session-search-results';
 import { searchSessions, type SessionSearchResult } from '@/lib/session-search-api';
 import { Input } from '@/components/ui/input';
+import { useAppDialog } from '@/hooks/use-app-dialog';
+import { localizeError } from '@/lib/localize-error';
+import { SUMMARY_GENERATION_HINT } from '@/lib/summary-timing';
 
 interface SessionListItem {
   id: string;
@@ -44,8 +47,10 @@ interface SessionDetail extends SessionListItem {
 
 export default function SessionsPage() {
   const router = useRouter();
+  const { confirm, alert, dialogUi } = useAppDialog();
   const [sessions, setSessions] = useState<SessionListItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [listError, setListError] = useState<string | null>(null);
   const [currentSession, setCurrentSession] = useState<SessionDetail | null>(null);
   const [openTranscript, setOpenTranscript] = useState(false);
   const [templateId, setTemplateId] = useState('');
@@ -69,6 +74,7 @@ export default function SessionsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<SessionSearchResult[]>([]);
   const [searching, setSearching] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
   const [searchMode, setSearchMode] = useState(false);
 
   const hasCachedSummary = (session: SessionListItem, tid: string) =>
@@ -96,13 +102,18 @@ export default function SessionsPage() {
     }
 
     setSearching(true);
+    setSearchError(null);
     setSearchMode(true);
     const timer = setTimeout(() => {
       void searchSessions(q)
-        .then((data) => setSearchResults(data.results))
+        .then((data) => {
+          setSearchResults(data.results);
+          setSearchError(null);
+        })
         .catch((err) => {
           console.error(err);
           setSearchResults([]);
+          setSearchError(localizeError(err instanceof Error ? err.message : '搜索失败'));
         })
         .finally(() => setSearching(false));
     }, 300);
@@ -117,10 +128,17 @@ export default function SessionsPage() {
         const res = await fetch('/api/sessions', {
           headers: { Authorization: `Bearer ${token}` },
         });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error((err as { error?: string }).error || '加载会议列表失败');
+        }
         const data = await res.json();
         setSessions(data);
+        setListError(null);
       } catch (err) {
         console.error(err);
+        setListError(localizeError(err instanceof Error ? err.message : '加载失败'));
+        setSessions([]);
       } finally {
         setLoading(false);
       }
@@ -168,7 +186,12 @@ export default function SessionsPage() {
   };
 
   const handleDelete = async (id: string, title: string) => {
-    if (!confirm(`确定删除会议「${title}」？此操作不可恢复。`)) return;
+    const ok = await confirm(`确定删除会议「${title}」？此操作不可恢复。`, {
+      title: '删除会议',
+      confirmLabel: '删除',
+      destructive: true,
+    });
+    if (!ok) return;
 
     const token = localStorage.getItem('token');
     try {
@@ -185,7 +208,7 @@ export default function SessionsPage() {
       }
     } catch (err) {
       console.error(err);
-      alert('删除会议失败');
+      await alert(localizeError(err instanceof Error ? err.message : '删除会议失败'));
     }
   };
 
@@ -209,7 +232,6 @@ export default function SessionsPage() {
         templateId: tid,
         orgId,
         regenerate,
-        confirmRegenerate: false,
         navigateToPreview: true,
         router,
       });
@@ -249,7 +271,7 @@ export default function SessionsPage() {
       );
     } catch (err) {
       console.error(err);
-      alert(err instanceof Error ? err.message : '生成纪要失败');
+      await alert(localizeError(err instanceof Error ? err.message : '生成纪要失败'));
     } finally {
       setLoadingSummary(false);
     }
@@ -276,7 +298,10 @@ export default function SessionsPage() {
 
     if (regenerate) {
       if (!templateId) return;
-      const ok = await confirm(`确定重新生成「${templateName}」？将覆盖当前已保存的纪要。`);
+      const ok = await confirm(`确定重新生成「${templateName}」？将覆盖当前已保存的纪要。`, {
+        title: '重新生成纪要',
+        confirmLabel: '重新生成',
+      });
       if (!ok) return;
       const preferredOrgId = currentSession.summaryOrgId ?? currentSession.orgId ?? null;
       await proceedWithOrgSelection(currentSession.id, templateId, true, preferredOrgId);
@@ -298,7 +323,7 @@ export default function SessionsPage() {
       await proceedWithOrgSelection(currentSession.id, resolved.templateId, false);
     } catch (err) {
       console.error(err);
-      alert('获取模板信息失败');
+      await alert(localizeError(err instanceof Error ? err.message : '获取模板信息失败'));
     }
   };
 
@@ -362,9 +387,22 @@ export default function SessionsPage() {
           query={searchQuery}
           results={searchResults}
           searching={searching}
+          searchError={searchError}
           onOpenSession={(id) => void openSession(id)}
         />
-      ) : sessions.length === 0 && !loading ? (
+      ) : loading ? (
+        <div className="flex items-center justify-center h-64 text-muted-foreground gap-2">
+          <Spinner className="size-5" />
+          <p>加载会议列表…</p>
+        </div>
+      ) : listError ? (
+        <div className="flex flex-col items-center justify-center h-64 gap-3 text-center">
+          <p className="text-destructive">{listError}</p>
+          <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
+            重新加载
+          </Button>
+        </div>
+      ) : sessions.length === 0 ? (
         <div className="flex items-center justify-center h-64 text-muted-foreground">
           <p className="text-lg">暂无会议记录</p>
         </div>
@@ -396,13 +434,6 @@ export default function SessionsPage() {
                 <div className="flex gap-2">
                   <Button
                     variant="outline"
-                    className="shrink-0 text-destructive hover:text-destructive"
-                    onClick={() => handleDelete(session.id, session.title)}
-                  >
-                    删除
-                  </Button>
-                  <Button
-                    variant="outline"
                     className="flex-1"
                     disabled={!session.hasSummary}
                     onClick={() => openSummaryFromCard(session)}
@@ -412,6 +443,13 @@ export default function SessionsPage() {
                   <Button className="flex-1" onClick={() => void openSession(session.id)}>
                     查看转录
                   </Button>
+                  <Button
+                    variant="outline"
+                    className="shrink-0 text-destructive hover:text-destructive"
+                    onClick={() => void handleDelete(session.id, session.title)}
+                  >
+                    删除
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -420,13 +458,7 @@ export default function SessionsPage() {
       )}
 
       {currentSession && (
-        <Dialog
-          open={openTranscript}
-          onOpenChange={(open) => {
-            if (!open && loadingSummary) return;
-            setOpenTranscript(open);
-          }}
-        >
+        <Dialog open={openTranscript} onOpenChange={setOpenTranscript}>
           <DialogContent className="p-6 w-[90vw] max-w-3xl">
             <DialogHeader>
               <DialogTitle>{currentSession.title}</DialogTitle>
@@ -455,7 +487,7 @@ export default function SessionsPage() {
               {loadingSummary && (
                 <div className="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-sm text-primary">
                   <Spinner className="size-4 shrink-0" />
-                  <span>正在生成纪要，约需 1–3 分钟，请稍候…</span>
+                  <span>正在生成纪要，{SUMMARY_GENERATION_HINT}，请稍候…</span>
                 </div>
               )}
 
@@ -474,7 +506,7 @@ export default function SessionsPage() {
                       onClick={() => void fetchSummary(true)}
                       disabled={loadingSummary}
                     >
-                      {loadingSummary ? '生成中（约 1–3 分钟）...' : '重新生成纪要'}
+                      {loadingSummary ? `生成中（${SUMMARY_GENERATION_HINT}）...` : '重新生成纪要'}
                     </Button>
                     <Button
                       onClick={() => goToSummaryPreview(currentSession.id, templateId)}
@@ -488,18 +520,18 @@ export default function SessionsPage() {
                     onClick={() => void fetchSummary()}
                     disabled={loadingSummary}
                   >
-                    {loadingSummary ? '生成中（约 1–3 分钟）...' : '生成纪要'}
+                    {loadingSummary ? `生成中（${SUMMARY_GENERATION_HINT}）...` : '生成纪要'}
                   </Button>
                 )}
+                <Button variant="outline" onClick={() => setOpenTranscript(false)}>
+                  关闭
+                </Button>
                 <Button
                   variant="outline"
                   className="text-destructive hover:text-destructive"
-                  onClick={() => handleDelete(currentSession.id, currentSession.title)}
+                  onClick={() => void handleDelete(currentSession.id, currentSession.title)}
                 >
                   删除
-                </Button>
-                <Button variant="outline" onClick={() => setOpenTranscript(false)}>
-                  关闭
                 </Button>
               </div>
             </div>
@@ -522,6 +554,8 @@ export default function SessionsPage() {
         onConfirm={(orgId) => void handleOrgConfirm(orgId)}
         onCancel={handleOrgCancel}
       />
+
+      {dialogUi}
     </div>
   );
 }

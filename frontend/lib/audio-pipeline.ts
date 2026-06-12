@@ -1,5 +1,5 @@
 import { createAutoGainController, type AutoGainController } from './auto-gain';
-import { GAIN_DEFAULT } from './audio-settings';
+import { getGainDefault } from './audio-settings';
 
 const RNNOISE_WORKLET_URL = '/rnnoise/NoiseSuppressorWorklet.js';
 export const RNNOISE_WORKLET_NAME = 'NoiseSuppressorWorklet';
@@ -189,5 +189,5 @@ export async function buildAudioPipeline(
 }
 
 export function getDefaultPipelineGain(): number {
-  return GAIN_DEFAULT;
+  return getGainDefault();
 }

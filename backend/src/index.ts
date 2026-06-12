@@ -23,6 +23,7 @@ import {
   getSummaryProviderLabel,
   getResolvedChatCompletionsUrl,
 } from "./lib/summary-llm";
+import { isFfmpegAvailable } from "./lib/audio-merge";
 
 try {
   validateSummaryConfig();
@@ -89,6 +90,11 @@ void runStartupSeed().finally(() => {
     console.log(`Summary LLM provider: ${summaryProvider}`);
     if (summaryProvider === "openai_compatible") {
       console.log(`Summary LLM endpoint: ${getResolvedChatCompletionsUrl()}`);
+    }
+    if (!isFfmpegAvailable()) {
+      console.warn(
+        "[AudioArchive] ffmpeg not found — browser WebM multi-segment merge will fail; install ffmpeg for full playback/ASR after resume"
+      );
     }
   });
 });

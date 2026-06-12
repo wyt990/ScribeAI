@@ -7,9 +7,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { managerApi } from '@/lib/manager-api';
+import { useAppDialog } from '@/hooks/use-app-dialog';
+import { localizeError } from '@/lib/localize-error';
 
 export default function ManagerNewUserPage() {
   const router = useRouter();
+  const { alert, dialogUi } = useAppDialog();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -23,7 +26,7 @@ export default function ManagerNewUserPage() {
       const { user } = await managerApi.users.create({ name, email, password, role }) as { user: { id: string } };
       router.push(`/manager/users/${user.id}`);
     } catch (err) {
-      alert(err instanceof Error ? err.message : '创建失败');
+      await alert(localizeError(err instanceof Error ? err.message : '创建失败'));
     } finally {
       setSaving(false);
     }
@@ -61,6 +64,8 @@ export default function ManagerNewUserPage() {
         </div>
         <Button type="submit" disabled={saving}>{saving ? '创建中…' : '创建'}</Button>
       </form>
+
+      {dialogUi}
     </div>
   );
 }

@@ -2,6 +2,7 @@ package com.scribeai.client
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
@@ -82,6 +83,8 @@ class MainActivity : AppCompatActivity() {
         ensureFreshWebCache()
         requestAppPermissions()
         webView.loadUrl("$HOME_URL/?rand=${System.currentTimeMillis()}")
+
+        handleRecordingNotificationIntent(intent)
 
         onBackPressedDispatcher.addCallback(
             this,
@@ -317,6 +320,32 @@ class MainActivity : AppCompatActivity() {
             if (toRequest.isNotEmpty()) {
                 permissionLauncher.launch(toRequest.toTypedArray())
             }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleRecordingNotificationIntent(intent)
+    }
+
+    private fun handleRecordingNotificationIntent(intent: android.content.Intent?) {
+        if (intent?.getBooleanExtra(RecordingForegroundService.EXTRA_OPEN_FROM_NOTIFICATION, false) != true) {
+            return
+        }
+        intent.removeExtra(RecordingForegroundService.EXTRA_OPEN_FROM_NOTIFICATION)
+        if (!::webView.isInitialized) return
+        webView.post {
+            webView.evaluateJavascript(
+                """
+                (function(){
+                  if (!location.pathname.startsWith('/dashboard')) {
+                    location.href = '/dashboard';
+                  }
+                })();
+                """.trimIndent(),
+                null
+            )
         }
     }
 

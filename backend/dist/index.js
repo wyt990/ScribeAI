@@ -23,6 +23,7 @@ const audio_cleanup_1 = require("./lib/audio-cleanup");
 const draft_cleanup_1 = require("./lib/draft-cleanup");
 const operation_trace_cleanup_1 = require("./lib/operation-trace-cleanup");
 const summary_llm_1 = require("./lib/summary-llm");
+const audio_merge_1 = require("./lib/audio-merge");
 try {
     (0, summary_llm_1.validateSummaryConfig)();
 }
@@ -78,6 +79,9 @@ void (0, startup_seed_1.runStartupSeed)().finally(() => {
         console.log(`Summary LLM provider: ${summaryProvider}`);
         if (summaryProvider === "openai_compatible") {
             console.log(`Summary LLM endpoint: ${(0, summary_llm_1.getResolvedChatCompletionsUrl)()}`);
+        }
+        if (!(0, audio_merge_1.isFfmpegAvailable)()) {
+            console.warn("[AudioArchive] ffmpeg not found — browser WebM multi-segment merge will fail; install ffmpeg for full playback/ASR after resume");
         }
     });
 });

@@ -15,6 +15,36 @@ import { writeOperationTrace } from "../lib/operation-trace";
 import { assertSocketUser } from "./socket-types";
 import { attachRecordingInterruptHandlers } from "./recording-trace-handlers";
 
+type NativeChunkPurpose = "archive" | "stt";
+
+type AudioChunkWire =
+  | ArrayBuffer
+  | {
+      chunk: ArrayBuffer | Buffer;
+      seq?: number;
+      timestampMs?: number;
+      purpose?: NativeChunkPurpose;
+    };
+
+function parseAudioChunkWire(data: AudioChunkWire): {
+  buffer: Buffer;
+  seq?: number;
+  timestampMs?: number;
+  purpose?: NativeChunkPurpose;
+} {
+  if (data instanceof ArrayBuffer) {
+    return { buffer: Buffer.from(data) };
+  }
+  if (data && typeof data === "object" && "chunk" in data) {
+    const chunk = data.chunk;
+    const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk as ArrayBuffer);
+    const purpose =
+      data.purpose === "archive" || data.purpose === "stt" ? data.purpose : undefined;
+    return { buffer, seq: data.seq, timestampMs: data.timestampMs, purpose };
+  }
+  return { buffer: Buffer.from(data as ArrayBuffer) };
+}
+
 const STT_PROVIDER = process.env.STT_PROVIDER || "deepgram";
 const SLICE_INTERVAL_MS = (parseInt(process.env.ASR_SLICE_INTERVAL || "5", 10)) * 1000;
 
@@ -185,12 +215,12 @@ function handleDeepgram(socket: Socket) {
   deepgramLive = createDeepgramConnection();
 
   // Receive audio chunks
-  socket.on("audio-chunk", async (blob: ArrayBuffer) => {
+  socket.on("audio-chunk", async (wire: AudioChunkWire) => {
     try {
       if (!assertSocketUser(socket, currentUserId ?? undefined) || !currentRecordingId) return;
       if (!isDeepgramOpen) return;
 
-      const buffer = Buffer.from(blob);
+      const { buffer, seq, timestampMs } = parseAudioChunkWire(wire);
       const arrayBuffer = buffer.buffer.slice(
         buffer.byteOffset,
         buffer.byteOffset + buffer.byteLength
@@ -200,7 +230,10 @@ function handleDeepgram(socket: Socket) {
 
       // Save chunk to hierarchical storage
       if (currentUserId && currentRecordingId) {
-        appendRecordingChunk(currentUserId, currentRecordingId, buffer);
+        appendRecordingChunk(currentUserId, currentRecordingId, buffer, "webm", {
+          seq,
+          timestampMs,
+        });
       }
     } catch (error) {
       console.error("Error processing audio chunk:", error);
@@ -219,8 +252,7 @@ function handleDeepgram(socket: Socket) {
     currentUserId = authUserId;
     recordingStartedAt = Date.now();
     transcriptEmitCount = 0;
-    const sessionDir = path.join(STORAGE_CONFIG.uploadsDir, authUserId, recordingId);
-    fs.mkdirSync(sessionDir, { recursive: true });
+    prepareRecordingArchive(authUserId, recordingId, "webm");
     writeOperationTrace({
       userId: authUserId,
       category: "recording",
@@ -298,6 +330,8 @@ function handleOpenAIASR(socket: Socket) {
   let vadSegmentCount = 0;
   let sessionCaptureMode: "native" | "web" = "web";
   let nativeFlushDebounce: ReturnType<typeof setTimeout> | null = null;
+  let recordingPaused = false;
+  const pausedSegmentQueue: Array<{ seq: number; audio: ArrayBuffer }> = [];
 
   const usesVadSegments = () => VAD_ENABLED && sessionCaptureMode !== "native";
   const usesTimerSlices = () => sessionCaptureMode === "native" || !VAD_ENABLED;
@@ -324,6 +358,7 @@ function handleOpenAIASR(socket: Socket) {
 
   // 原生持麦：每片独立 WAV（定时或静音分句），须逐片转写（不可 Buffer.concat）
   async function flushNativePendingChunks() {
+    if (recordingPaused) return;
     const startIndex = lastFlushedChunkIndex;
     const pending = accumulatedChunks.slice(startIndex);
     if (pending.length === 0) return;
@@ -370,9 +405,16 @@ function handleOpenAIASR(socket: Socket) {
         break;
       }
     }
+
+    // 已转写分片从内存队列移除，避免长时间原生录音 accumulatedChunks 无限增长
+    if (lastFlushedChunkIndex > 0) {
+      accumulatedChunks.splice(0, lastFlushedChunkIndex);
+      lastFlushedChunkIndex = 0;
+    }
   }
 
   function scheduleNativeFlush() {
+    if (recordingPaused) return;
     if (nativeFlushDebounce) clearTimeout(nativeFlushDebounce);
     nativeFlushDebounce = setTimeout(() => {
       nativeFlushDebounce = null;
@@ -380,10 +422,62 @@ function handleOpenAIASR(socket: Socket) {
     }, 600);
   }
 
+  async function transcribeVadSegment(seq: number, audio: ArrayBuffer) {
+    const started = Date.now();
+    try {
+      const text = await transcribeAudioBuffer(
+        Buffer.from(audio),
+        "audio/wav",
+        "wav"
+      );
+      if (text?.trim()) {
+        vadSegmentCount += 1;
+        writeOperationTrace({
+          userId: currentUserId,
+          category: "recording",
+          action: "stt.segment",
+          target: currentRecordingId ?? undefined,
+          durationMs: Date.now() - started,
+          detail: {
+            provider: "openai_asr",
+            seq,
+            mode: "vad_segment",
+            audioBytes: audio.byteLength,
+          },
+        });
+        socket.emit("segment-result", { seq, text: text.trim() });
+      }
+    } catch (err) {
+      console.error(`[OpenAI ASR] Segment ${seq} error for ${socket.id}:`, err);
+      writeOperationTrace({
+        userId: currentUserId,
+        category: "recording",
+        action: "stt.error",
+        status: "error",
+        target: currentRecordingId ?? undefined,
+        durationMs: Date.now() - started,
+        detail: {
+          provider: "openai_asr",
+          seq,
+          error: err instanceof Error ? err.message : String(err),
+        },
+      });
+      socket.emit("deepgram-error", `Segment ${seq} transcription failed`);
+    }
+  }
+
+  async function flushPausedSegmentQueue() {
+    const queue = pausedSegmentQueue.splice(0);
+    for (const item of queue) {
+      await transcribeVadSegment(item.seq, item.audio);
+    }
+  }
+
   // ---- Flush audio to ASR ----
   // VAD mode: transcribe only NEW chunks since last flush; emit full segment text.
   // Timer mode: transcribe all audio; emit length-based incremental delta.
   async function flushToASR(seq?: number) {
+    if (recordingPaused) return;
     if (accumulatedChunks.length === 0) return;
 
     if (sessionCaptureMode === "native") {
@@ -499,6 +593,8 @@ function handleOpenAIASR(socket: Socket) {
     currentUserId = authUserId;
     recordingStartedAt = Date.now();
     vadSegmentCount = 0;
+    recordingPaused = false;
+    pausedSegmentQueue.length = 0;
     const archiveFormat: RecordingArchiveFormat =
       sessionCaptureMode === "native" ? "wav" : "webm";
     prepareRecordingArchive(authUserId, recordingId, archiveFormat);
@@ -525,24 +621,31 @@ function handleOpenAIASR(socket: Socket) {
   });
 
   // ---- Receive audio chunks ----
-  socket.on("audio-chunk", async (blob: ArrayBuffer) => {
+  socket.on("audio-chunk", async (wire: AudioChunkWire) => {
     try {
       if (!assertSocketUser(socket, currentUserId ?? undefined) || !currentRecordingId) return;
-      const buffer = Buffer.from(blob);
-      accumulatedChunks.push(buffer);
+      const { buffer, seq, timestampMs, purpose } = parseAudioChunkWire(wire);
+      const archiveChunk = purpose !== "stt";
+      const sttChunk = purpose !== "archive";
 
-      // Save chunk to hierarchical storage
-      if (currentUserId && currentRecordingId) {
+      if (archiveChunk && currentUserId && currentRecordingId) {
         appendRecordingChunk(
           currentUserId,
           currentRecordingId,
           buffer,
-          sessionCaptureMode === "native" ? "wav" : "webm"
+          sessionCaptureMode === "native" ? "wav" : "webm",
+          { seq, timestampMs }
         );
       }
 
+      if (sttChunk) {
+        accumulatedChunks.push(buffer);
+      }
+
       if (sessionCaptureMode === "native") {
-        scheduleNativeFlush();
+        if (sttChunk) {
+          scheduleNativeFlush();
+        }
         return;
       }
 
@@ -567,52 +670,32 @@ function handleOpenAIASR(socket: Socket) {
     if (!assertSocketUser(socket, currentUserId ?? undefined) || !currentRecordingId) return;
 
     if (!audio || audio.byteLength === 0) {
-      // console.warn(`[VAD] segment-end seq=${seq} missing audio data, skipping`);
       return;
     }
 
-    // console.log(`[VAD] segment-end seq=${seq}, wav=${audio.byteLength}B`);
-    const started = Date.now();
-    try {
-      const text = await transcribeAudioBuffer(
-        Buffer.from(audio),
-        "audio/wav",
-        "wav"
-      );
-      if (text?.trim()) {
-        vadSegmentCount += 1;
-        writeOperationTrace({
-          userId: currentUserId,
-          category: "recording",
-          action: "stt.segment",
-          target: currentRecordingId ?? undefined,
-          durationMs: Date.now() - started,
-          detail: {
-            provider: "openai_asr",
-            seq,
-            mode: "vad_segment",
-            audioBytes: audio.byteLength,
-          },
-        });
-        socket.emit("segment-result", { seq, text: text.trim() });
-        // console.log(`[ASR] segment seq=${seq}: "${text.trim().slice(0, 60)}..."`);
-      }
-    } catch (err) {
-      console.error(`[OpenAI ASR] Segment ${seq} error for ${socket.id}:`, err);
-      writeOperationTrace({
-        userId: currentUserId,
-        category: "recording",
-        action: "stt.error",
-        status: "error",
-        target: currentRecordingId ?? undefined,
-        durationMs: Date.now() - started,
-        detail: {
-          provider: "openai_asr",
-          seq,
-          error: err instanceof Error ? err.message : String(err),
-        },
-      });
-      socket.emit("deepgram-error", `Segment ${seq} transcription failed`);
+    if (recordingPaused) {
+      pausedSegmentQueue.push({ seq, audio: audio.slice(0) });
+      return;
+    }
+
+    await transcribeVadSegment(seq, audio);
+  });
+
+  socket.on(
+    "recording-interrupted",
+  () => {
+    recordingPaused = true;
+    if (nativeFlushDebounce) {
+      clearTimeout(nativeFlushDebounce);
+      nativeFlushDebounce = null;
+    }
+  });
+
+  socket.on("recording-recovered", () => {
+    recordingPaused = false;
+    void flushPausedSegmentQueue();
+    if (sessionCaptureMode === "native") {
+      scheduleNativeFlush();
     }
   });
 
@@ -633,6 +716,8 @@ function handleOpenAIASR(socket: Socket) {
       clearTimeout(nativeFlushDebounce);
       nativeFlushDebounce = null;
     }
+    recordingPaused = false;
+    pausedSegmentQueue.length = 0;
 
     // Native: flush remaining chunks. Web timer-slice: final full-buffer flush.
     if (sessionCaptureMode === "native") {

@@ -26,6 +26,47 @@ export type ManagerUser = {
   _count?: { transcripts: number; drafts: number; summaries?: number };
 };
 
+export type ManagerUserListParams = {
+  page?: number;
+  pageSize?: number;
+  q?: string;
+};
+
+export type ManagerUserListResult = {
+  users: ManagerUser[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+};
+
+export type ManagerTraceListParams = {
+  page?: number;
+  pageSize?: number;
+  category?: string;
+  status?: string;
+};
+
+export type ManagerTraceRow = {
+  id: string;
+  category: string;
+  action: string;
+  status: string;
+  durationMs: number | null;
+  target: string | null;
+  detail: Record<string, unknown> | null;
+  createdAt: string;
+  user: { id: string; name: string; email: string } | null;
+};
+
+export type ManagerTraceListResult = {
+  traces: ManagerTraceRow[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+};
+
 export type ManagerSettingItem = {
   key: string;
   label: string;
@@ -38,7 +79,14 @@ export type ManagerSettingItem = {
 export const managerApi = {
   stats: () => managerFetch<Record<string, unknown>>('/stats'),
   users: {
-    list: () => managerFetch<{ users: ManagerUser[] }>('/users'),
+    list: (params?: ManagerUserListParams) => {
+      const qs = new URLSearchParams();
+      if (params?.page) qs.set('page', String(params.page));
+      if (params?.pageSize) qs.set('pageSize', String(params.pageSize));
+      if (params?.q?.trim()) qs.set('q', params.q.trim());
+      const query = qs.toString();
+      return managerFetch<ManagerUserListResult>(`/users${query ? `?${query}` : ''}`);
+    },
     get: (id: string) => managerFetch<{ user: ManagerUser }>(`/users/${id}`),
     create: (body: { name: string; email: string; password: string; role?: string }) =>
       managerFetch('/users', { method: 'POST', body: JSON.stringify(body) }),
@@ -86,13 +134,16 @@ export const managerApi = {
         avgSummaryGenerateMs: number | null;
         avgSummaryCacheMs: number | null;
       }>('/observability/summary'),
-    traces: (params?: { category?: string; status?: string; limit?: number }) => {
+    traces: (params?: ManagerTraceListParams) => {
       const qs = new URLSearchParams();
+      if (params?.page) qs.set('page', String(params.page));
+      if (params?.pageSize) qs.set('pageSize', String(params.pageSize));
       if (params?.category) qs.set('category', params.category);
       if (params?.status) qs.set('status', params.status);
-      if (params?.limit) qs.set('limit', String(params.limit));
-      const q = qs.toString();
-      return managerFetch<{ traces: unknown[] }>(`/observability/traces${q ? `?${q}` : ''}`);
+      const query = qs.toString();
+      return managerFetch<ManagerTraceListResult>(
+        `/observability/traces${query ? `?${query}` : ''}`
+      );
     },
   },
 };

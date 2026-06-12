@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -31,13 +31,14 @@ export function TemplateSelectModal({
 }: TemplateSelectModalProps) {
   const [selectedId, setSelectedId] = useState(defaultTemplateId);
 
-  // 每次打开时重置为默认选项
-  if (!open && selectedId !== defaultTemplateId) {
-    // 将在下次 open=true 时由 Dialog 内部状态管理重置
-  }
+  useEffect(() => {
+    if (open) {
+      setSelectedId(defaultTemplateId);
+    }
+  }, [open, defaultTemplateId]);
 
   return (
-    <Dialog open={open} onOpenChange={(open) => { if (!open) onCancel(); }}>
+    <Dialog open={open} onOpenChange={(next) => { if (!next) onCancel(); }}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>选择纪要模板</DialogTitle>

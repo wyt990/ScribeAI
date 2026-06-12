@@ -30,6 +30,49 @@ function parseChunkMode(value: string): 'timer' | 'auto' {
   return 'auto';
 }
 
+/** 代码兜底（与 frontend/config/audio.ts 一致） */
+const AUDIO_GAIN_FALLBACK = { min: 0, max: 3, step: 0.2, default: 1 } as const;
+
+function resolveAudioGainConfig() {
+  const min = parseSettingFloat(
+    getSettingValue('mobile.audio_gain_min'),
+    AUDIO_GAIN_FALLBACK.min,
+    0,
+    10
+  );
+  const max = parseSettingFloat(
+    getSettingValue('mobile.audio_gain_max'),
+    AUDIO_GAIN_FALLBACK.max,
+    0.1,
+    10
+  );
+  const step = parseSettingFloat(
+    getSettingValue('mobile.audio_gain_step'),
+    AUDIO_GAIN_FALLBACK.step,
+    0.01,
+    1
+  );
+  const defaultGain = parseSettingFloat(
+    getSettingValue('mobile.audio_gain_default'),
+    AUDIO_GAIN_FALLBACK.default,
+    0,
+    10
+  );
+  const resolvedMin = Math.min(min, max);
+  const resolvedMax = Math.max(min, max);
+  const resolvedStep = Math.max(0.01, step);
+  const resolvedDefault = Math.min(
+    resolvedMax,
+    Math.max(resolvedMin, defaultGain)
+  );
+  return {
+    min: resolvedMin,
+    max: resolvedMax,
+    step: resolvedStep,
+    default: resolvedDefault,
+  };
+}
+
 /** 客户端 UI 配置（公开，无需登录） */
 router.get('/', (_req, res) => {
   const seed = getStartupSeedStatus();
@@ -44,6 +87,7 @@ router.get('/', (_req, res) => {
       error: seed.error,
     },
     showAudioEnhancementPanel: parseSettingBool(raw, true),
+    audioGain: resolveAudioGainConfig(),
     nativeChunkMode: parseChunkMode(modeRaw),
     nativeChunkSeconds: parseSettingInt(chunkRaw, 3, 1, 30),
     nativeVad: {

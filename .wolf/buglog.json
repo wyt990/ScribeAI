@@ -1073,6 +1073,70 @@
       "related_bugs": [],
       "occurrences": 1,
       "last_seen": "2026-06-11T00:27:26.157Z"
+    },
+    {
+      "id": "bug-068",
+      "timestamp": "2026-06-12T06:41:21.754Z",
+      "error_message": "Incorrect value in code",
+      "file": "frontend/app/(routes)/manager/settings/observability/page.tsx",
+      "root_cause": "Had '@/components/manager-settings-form'",
+      "fix": "Changed to '@/components/manager-observability-form'",
+      "tags": [
+        "auto-detected",
+        "wrong-value",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-12T06:41:21.754Z"
+    },
+    {
+      "id": "bug-069",
+      "timestamp": "2026-06-12T06:41:26.497Z",
+      "error_message": "Wrong reference: ManagerSettingsForm should be ManagerObservabilityForm",
+      "file": "frontend/app/(routes)/manager/settings/observability/page.tsx",
+      "root_cause": "Used \"ManagerSettingsForm\" instead of \"ManagerObservabilityForm\"",
+      "fix": "Changed ManagerSettingsForm → ManagerObservabilityForm",
+      "tags": [
+        "auto-detected",
+        "wrong-reference",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-12T06:41:26.497Z"
+    },
+    {
+      "id": "bug-070",
+      "timestamp": "2026-06-12T08:13:04.846Z",
+      "error_message": "Null/undefined access in ",
+      "file": "frontend/components/transcript-feed.tsx",
+      "root_cause": "Property access on potentially null/undefined value",
+      "fix": "Added null safety (optional chaining or null check)",
+      "tags": [
+        "auto-detected",
+        "null-safety",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-12T08:13:04.846Z"
+    },
+    {
+      "id": "bug-071",
+      "timestamp": "2026-06-12T08:13:14.760Z",
+      "error_message": "CSS fix: md",
+      "file": "frontend/components/transcript-feed.tsx",
+      "root_cause": "md: pr-4 flex-1 min-h-0\" ref={scrollRef → pr-4 flex-1 min-h-0\">",
+      "fix": "Changed md: pr-4 flex-1 min-h-0\" ref={scrollRef → pr-4 flex-1 min-h-0\">",
+      "tags": [
+        "auto-detected",
+        "style-fix",
+        "tsx"
+      ],
+      "related_bugs": [],
+      "occurrences": 1,
+      "last_seen": "2026-06-12T08:13:14.760Z"
     }
   ]
 }

@@ -11,6 +11,9 @@ import { resolveSummaryTemplate } from '@/lib/resolve-summary-template';
 import { TemplateSelectModal } from '@/components/template-select-modal';
 import { OrgIdentityModal, promptOrgIdentityIfNeeded } from '@/components/org-identity-modal';
 import type { SummaryTemplateItem } from '@/lib/summary-templates';
+import { useAppDialog } from '@/hooks/use-app-dialog';
+import { localizeError } from '@/lib/localize-error';
+import { SUMMARY_GENERATION_HINT } from '@/lib/summary-timing';
 
 type GenerateMeetingSummaryButtonProps = {
   className?: string;
@@ -22,6 +25,7 @@ export function GenerateMeetingSummaryButton({
   templateId: externalTemplateId,
 }: GenerateMeetingSummaryButtonProps) {
   const router = useRouter();
+  const { alert, dialogUi } = useAppDialog();
   const { flushDraft } = useDraftSync();
   const { canPromote } = useCanPromote();
   const { draftId, clearTranscript, clearDraft } = useRecordingStore();
@@ -51,7 +55,7 @@ export function GenerateMeetingSummaryButton({
       clearDraft();
     } catch (err) {
       console.error(err);
-      alert(err instanceof Error ? err.message : '生成会议纪要失败');
+      await alert(localizeError(err instanceof Error ? err.message : '生成会议纪要失败'));
     } finally {
       setLoading(false);
     }
@@ -89,7 +93,7 @@ export function GenerateMeetingSummaryButton({
       await proceedWithOrgSelection(resolved.templateId);
     } catch (err) {
       console.error(err);
-      alert('获取模板信息失败');
+      await alert(localizeError(err instanceof Error ? err.message : '获取模板信息失败'));
     }
   };
 
@@ -119,7 +123,7 @@ export function GenerateMeetingSummaryButton({
         onClick={() => void handleClick()}
         disabled={!canPromote || loading}
       >
-        {loading ? '生成中（约 1–3 分钟）...' : '生成会议纪要'}
+        {loading ? `生成中（${SUMMARY_GENERATION_HINT}）...` : '生成会议纪要'}
       </Button>
 
       <TemplateSelectModal
@@ -136,6 +140,8 @@ export function GenerateMeetingSummaryButton({
         onConfirm={(orgId) => void handleOrgConfirm(orgId)}
         onCancel={handleOrgCancel}
       />
+
+      {dialogUi}
     </>
   );
 }

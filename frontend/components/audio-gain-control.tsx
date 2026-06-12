@@ -1,18 +1,19 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useRecordingStore } from '@/lib/store';
-import {
-  GAIN_MAX,
-  GAIN_MIN,
-  GAIN_STEP,
-  formatGainLabel,
-} from '@/lib/audio-settings';
+import { formatGainLabel } from '@/lib/audio-settings';
 import { useAppConfig } from '@/hooks/use-app-config';
-import { getPreferredCaptureMode } from '@/lib/native-recording';
+import {
+  getPreferredCaptureMode,
+  nativeRetryNoiseSuppression,
+  type NativeLevelPayload,
+} from '@/lib/native-recording';
 import { cn } from '@/lib/utils';
 
 type AudioGainControlProps = {
@@ -20,7 +21,7 @@ type AudioGainControlProps = {
 };
 
 export function AudioGainControl({ disabled = false }: AudioGainControlProps) {
-  const { showAudioEnhancementPanel } = useAppConfig();
+  const { showAudioEnhancementPanel, audioGain: gainConfig } = useAppConfig();
   const {
     status,
     audioMode,
@@ -30,13 +31,40 @@ export function AudioGainControl({ disabled = false }: AudioGainControlProps) {
     setAudioGain,
     setAutoGainEnabled,
     setNoiseSuppressionEnabled,
+    setTranscriptionWarning,
   } = useRecordingStore();
 
   const isRecording = status === 'recording' || status === 'paused';
   const isNativeShell = getPreferredCaptureMode() === 'native';
   const controlsDisabled = disabled || (isRecording && !isNativeShell);
-  /** 自动增益时滑条只作指示，避免 disabled 导致拇指不随电平移动 */
   const gainSliderReadOnly = autoGainEnabled;
+
+  const [nativeLevelStatus, setNativeLevelStatus] = useState<NativeLevelPayload | null>(null);
+
+  useEffect(() => {
+    if (!isNativeShell) return;
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<NativeLevelPayload>).detail;
+      if (detail) setNativeLevelStatus(detail);
+    };
+    window.addEventListener('scribeai-native-level', handler);
+    return () => window.removeEventListener('scribeai-native-level', handler);
+  }, [isNativeShell]);
+
+  const handleRetryDenoise = () => {
+    const ok = nativeRetryNoiseSuppression();
+    if (!ok) {
+      setTranscriptionWarning('DTLN 降噪重试失败，请检查模型文件是否已打包进 APK');
+    } else {
+      setTranscriptionWarning(null);
+    }
+  };
+
+  const showDtlmFailure =
+    isNativeShell &&
+    noiseSuppressionEnabled &&
+    nativeLevelStatus?.noiseSuppressionError &&
+    !nativeLevelStatus.noiseSuppressionActive;
 
   if (!showAudioEnhancementPanel) {
     return null;
@@ -75,9 +103,9 @@ export function AudioGainControl({ disabled = false }: AudioGainControlProps) {
             </span>
           </div>
           <Slider
-            min={GAIN_MIN}
-            max={GAIN_MAX}
-            step={GAIN_STEP}
+            min={gainConfig.min}
+            max={gainConfig.max}
+            step={gainConfig.step}
             value={[audioGain]}
             onValueChange={gainSliderReadOnly ? undefined : ([v]) => setAudioGain(v)}
             disabled={controlsDisabled}
@@ -112,6 +140,23 @@ export function AudioGainControl({ disabled = false }: AudioGainControlProps) {
             disabled={controlsDisabled}
           />
         </div>
+
+        {showDtlmFailure && (
+          <div className="flex items-start gap-2 flex-wrap rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2">
+            <p className="text-xs text-amber-700 dark:text-amber-400 flex-1 min-w-0">
+              AI 降噪未生效：{nativeLevelStatus!.noiseSuppressionError}
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-7 text-xs shrink-0"
+              onClick={handleRetryDenoise}
+            >
+              重试降噪
+            </Button>
+          </div>
+        )}
 
         {isRecording && !isNativeShell && (
           <p className="text-xs text-muted-foreground">

@@ -31,8 +31,11 @@ import {
   type UserOrg,
   type CreateOrgInput,
 } from '@/lib/user-orgs';
+import { useAppDialog } from '@/hooks/use-app-dialog';
+import { localizeError } from '@/lib/localize-error';
 
 export default function ProfilePage() {
+  const { alert, dialogUi } = useAppDialog();
   const [profile, setProfile] = useState<any>(null);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -61,6 +64,7 @@ export default function ProfilePage() {
     setAsDefault: false,
   });
   const [orgSaving, setOrgSaving] = useState(false);
+  const [orgFormError, setOrgFormError] = useState('');
 
   // 删除确认
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
@@ -175,6 +179,7 @@ export default function ProfilePage() {
     setOrgDialogMode('create');
     setEditOrgId(null);
     setOrgForm({ name: '', industry: '', description: '', jobTitle: '', responsibilities: '', setAsDefault: false });
+    setOrgFormError('');
     setOrgDialogOpen(true);
   };
 
@@ -189,16 +194,18 @@ export default function ProfilePage() {
       responsibilities: org.responsibilities || '',
       setAsDefault: org.isDefault,
     });
+    setOrgFormError('');
     setOrgDialogOpen(true);
   };
 
   const handleOrgSave = async () => {
     if (orgDialogMode === 'create' && !orgForm.name.trim()) {
-      alert('请输入单位名称');
+      setOrgFormError('请输入单位名称');
       return;
     }
 
     setOrgSaving(true);
+    setOrgFormError('');
     try {
       if (orgDialogMode === 'create') {
         await createUserOrg(orgForm);
@@ -212,7 +219,7 @@ export default function ProfilePage() {
       setOrgDialogOpen(false);
       await loadOrgs();
     } catch (err) {
-      alert(err instanceof Error ? err.message : '操作失败');
+      await alert(localizeError(err instanceof Error ? err.message : '操作失败'));
     } finally {
       setOrgSaving(false);
     }
@@ -225,7 +232,7 @@ export default function ProfilePage() {
       setDeleteConfirm(null);
       await loadOrgs();
     } catch (err) {
-      alert(err instanceof Error ? err.message : '删除失败');
+      await alert(localizeError(err instanceof Error ? err.message : '删除失败'));
     } finally {
       setDeleteSaving(false);
     }
@@ -452,6 +459,9 @@ export default function ProfilePage() {
           </DialogHeader>
 
           <div className="space-y-4 py-2">
+            {orgFormError && (
+              <p className="text-sm text-destructive">{orgFormError}</p>
+            )}
             {orgDialogMode === 'create' && (
               <>
                 <div className="space-y-2">
@@ -561,6 +571,8 @@ export default function ProfilePage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {dialogUi}
     </div>
   );
 }

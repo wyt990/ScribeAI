@@ -63,6 +63,26 @@ class ScribeAINativeBridge(private val activity: MainActivity) {
     }
 
     @JavascriptInterface
+    fun pauseRecording() {
+        activity.runOnUiThread {
+            val intent = android.content.Intent(activity, RecordingForegroundService::class.java).apply {
+                action = RecordingForegroundService.ACTION_PAUSE
+            }
+            activity.startService(intent)
+        }
+    }
+
+    @JavascriptInterface
+    fun resumeRecording() {
+        activity.runOnUiThread {
+            val intent = android.content.Intent(activity, RecordingForegroundService::class.java).apply {
+                action = RecordingForegroundService.ACTION_RESUME
+            }
+            activity.startService(intent)
+        }
+    }
+
+    @JavascriptInterface
     fun recoverRecording() {
         activity.runOnUiThread {
             val intent = android.content.Intent(activity, RecordingForegroundService::class.java).apply {
@@ -70,6 +90,11 @@ class ScribeAINativeBridge(private val activity: MainActivity) {
             }
             activity.startService(intent)
         }
+    }
+
+    @JavascriptInterface
+    fun retryNoiseSuppression(): Boolean {
+        return RecordingForegroundService.retryDenoise()
     }
 
     private fun applyRecordingOptions(optionsStr: String) {

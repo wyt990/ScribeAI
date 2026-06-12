@@ -6,6 +6,8 @@ import { marked } from "marked";
 const DEFAULT_FONT_CANDIDATES = [
   process.env.PDF_FONT_PATH,
   path.join(__dirname, "../../assets/fonts/NotoSansSC-Regular.otf"),
+  path.join(process.cwd(), "backend/assets/fonts/NotoSansSC-Regular.otf"),
+  path.join(process.cwd(), "assets/fonts/NotoSansSC-Regular.otf"),
 ].filter(Boolean) as string[];
 
 function isUsableFontFile(filePath: string): boolean {
@@ -17,7 +19,7 @@ function isUsableFontFile(filePath: string): boolean {
   }
 }
 
-function resolvePdfFont(): string {
+function resolvePdfBodyFont(): string {
   for (const candidate of DEFAULT_FONT_CANDIDATES) {
     if (isUsableFontFile(candidate)) return candidate;
   }
@@ -26,12 +28,26 @@ function resolvePdfFont(): string {
   );
 }
 
+function resolvePdfBoldFont(bodyFontPath: string): string {
+  const dir = path.dirname(bodyFontPath);
+  const boldCandidates = [
+    process.env.PDF_FONT_BOLD_PATH,
+    path.join(dir, "NotoSansSC-Bold.otf"),
+    path.join(dir, "NotoSansCJK-Bold.otf"),
+  ].filter(Boolean) as string[];
+  for (const candidate of boldCandidates) {
+    if (isUsableFontFile(candidate)) return candidate;
+  }
+  return bodyFontPath;
+}
+
 function writeLine(
   doc: InstanceType<typeof PDFDocument>,
   text: string,
   opts?: { fontSize?: number; bold?: boolean; gap?: number }
 ) {
   const fontSize = opts?.fontSize ?? 11;
+  doc.font(opts?.bold ? "Bold" : "Body");
   doc.fontSize(fontSize).text(text, { lineGap: opts?.gap ?? 4 });
   doc.moveDown(0.3);
 }
@@ -40,7 +56,8 @@ export async function markdownToPdfBuffer(
   markdown: string,
   meta: { title: string; createdAt: Date }
 ): Promise<Buffer> {
-  const fontPath = resolvePdfFont();
+  const bodyFontPath = resolvePdfBodyFont();
+  const boldFontPath = resolvePdfBoldFont(bodyFontPath);
   const tokens = marked.lexer(markdown, { gfm: true });
 
   return new Promise((resolve, reject) => {
@@ -50,11 +67,11 @@ export async function markdownToPdfBuffer(
     doc.on("end", () => resolve(Buffer.concat(chunks)));
     doc.on("error", reject);
 
-    doc.registerFont("Body", fontPath);
-    doc.registerFont("Bold", fontPath);
+    doc.registerFont("Body", bodyFontPath);
+    doc.registerFont("Bold", boldFontPath);
     doc.font("Body");
 
-    writeLine(doc, meta.title, { fontSize: 18, gap: 6 });
+    writeLine(doc, meta.title, { fontSize: 18, gap: 6, bold: true });
     writeLine(
       doc,
       `生成时间：${meta.createdAt.toLocaleString("zh-CN")}`,
@@ -76,6 +93,7 @@ export async function markdownToPdfBuffer(
           writeLine(doc, token.text, {
             fontSize: sizes[token.depth] ?? 12,
             gap: 5,
+            bold: true,
           });
           break;
         }

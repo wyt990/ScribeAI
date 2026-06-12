@@ -37,7 +37,15 @@ export async function verifyUserOrShareToken(
       return next();
     } catch (err) {
       console.error("[SummaryShare] token error:", err);
-      return res.status(401).json({ error: "Invalid or expired share token" });
+      const expired =
+        err instanceof Error &&
+        (err.name === "TokenExpiredError" || err.message.includes("expired"));
+      return res.status(401).json({
+        error: expired
+          ? "分享链接已过期，请联系分享者重新生成链接"
+          : "分享链接无效，请检查是否复制完整",
+        code: expired ? "SHARE_TOKEN_EXPIRED" : "SHARE_TOKEN_INVALID",
+      });
     }
   }
 

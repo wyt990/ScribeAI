@@ -7,11 +7,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { managerApi, type ManagerUser } from '@/lib/manager-api';
+import { useAppDialog } from '@/hooks/use-app-dialog';
+import { localizeError } from '@/lib/localize-error';
 
 export default function ManagerUserDetailPage() {
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
+  const { alert, dialogUi } = useAppDialog();
   const [user, setUser] = useState<ManagerUser | null>(null);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -19,6 +22,7 @@ export default function ManagerUserDetailPage() {
   const [isActive, setIsActive] = useState(true);
   const [newPassword, setNewPassword] = useState('');
   const [confirmDelete, setConfirmDelete] = useState('');
+  const [deleteError, setDeleteError] = useState('');
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -35,32 +39,39 @@ export default function ManagerUserDetailPage() {
     setSaving(true);
     try {
       await managerApi.users.update(id, { name, email, role, isActive });
-      alert('已保存');
+      await alert('已保存', '保存成功');
     } catch (err) {
-      alert(err instanceof Error ? err.message : '保存失败');
+      await alert(localizeError(err instanceof Error ? err.message : '保存失败'));
     } finally {
       setSaving(false);
     }
   };
 
   const resetPassword = async () => {
-    if (newPassword.length < 6) return alert('密码至少 6 位');
+    if (newPassword.length < 6) {
+      await alert('密码至少 6 位');
+      return;
+    }
     try {
       await managerApi.users.resetPassword(id, newPassword);
       setNewPassword('');
-      alert('密码已重置');
+      await alert('密码已重置', '重置成功');
     } catch (err) {
-      alert(err instanceof Error ? err.message : '重置失败');
+      await alert(localizeError(err instanceof Error ? err.message : '重置失败'));
     }
   };
 
   const remove = async () => {
-    if (confirmDelete !== user?.email) return alert('请输入用户邮箱以确认删除');
+    if (confirmDelete !== user?.email) {
+      setDeleteError('请输入用户邮箱以确认删除');
+      return;
+    }
+    setDeleteError('');
     try {
       await managerApi.users.delete(id);
       router.push('/manager/users');
     } catch (err) {
-      alert(err instanceof Error ? err.message : '删除失败');
+      await alert(localizeError(err instanceof Error ? err.message : '删除失败'));
     }
   };
 
@@ -118,9 +129,18 @@ export default function ManagerUserDetailPage() {
       <section className="space-y-3 border border-destructive/30 rounded-lg p-4">
         <h2 className="font-medium text-destructive">删除用户</h2>
         <p className="text-sm text-muted-foreground">输入邮箱 <strong>{user.email}</strong> 以确认</p>
-        <Input value={confirmDelete} onChange={(e) => setConfirmDelete(e.target.value)} />
+        <Input
+          value={confirmDelete}
+          onChange={(e) => {
+            setConfirmDelete(e.target.value);
+            if (deleteError) setDeleteError('');
+          }}
+        />
+        {deleteError && <p className="text-sm text-destructive">{deleteError}</p>}
         <Button variant="destructive" onClick={() => void remove()}>永久删除</Button>
       </section>
+
+      {dialogUi}
     </div>
   );
 }

@@ -11,6 +11,8 @@ import {
   type RecordingMeta,
   type RecordingScope,
 } from '@/lib/recording-api';
+import { useAppDialog } from '@/hooks/use-app-dialog';
+import { localizeError } from '@/lib/localize-error';
 
 type RecordingPanelProps = {
   scope: RecordingScope;
@@ -20,6 +22,7 @@ type RecordingPanelProps = {
 };
 
 export function RecordingPanel({ scope, id, manager, onRetranscribed }: RecordingPanelProps) {
+  const { confirm, alert, dialogUi } = useAppDialog();
   const [meta, setMeta] = useState<RecordingMeta | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -41,7 +44,9 @@ export function RecordingPanel({ scope, id, manager, onRetranscribed }: Recordin
         if (!cancelled) setMeta(m);
       })
       .catch((err) => {
-        if (!cancelled) setError(err instanceof Error ? err.message : '加载失败');
+        if (!cancelled) {
+          setError(localizeError(err instanceof Error ? err.message : '加载失败'));
+        }
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -70,7 +75,7 @@ export function RecordingPanel({ scope, id, manager, onRetranscribed }: Recordin
       const url = await loadRecordingBlobUrl(scope, id, manager);
       setAudioUrl(url);
     } catch (err) {
-      setError(err instanceof Error ? err.message : '试听加载失败');
+      setError(localizeError(err instanceof Error ? err.message : '试听加载失败'));
     } finally {
       setLoadingAudio(false);
     }
@@ -78,22 +83,20 @@ export function RecordingPanel({ scope, id, manager, onRetranscribed }: Recordin
 
   const handleRetranscribe = async () => {
     const label = scope === 'sessions' ? '正式会话' : '草稿';
-    if (
-      !confirm(
-        `将使用当前 STT 配置对归档录音重新转写，并覆盖${label}中的转录文本。是否继续？`
-      )
-    ) {
-      return;
-    }
+    const ok = await confirm(
+      `将使用当前 STT 配置对归档录音重新转写，并覆盖${label}中的转录文本。是否继续？`,
+      { title: '重新转写', confirmLabel: '开始转写' }
+    );
+    if (!ok) return;
 
     setRetranscribing(true);
     setError('');
     try {
       const result = await retranscribeRecording(scope, id, manager);
       onRetranscribed?.(result.fullText);
-      alert(`重跑 ASR 完成（耗时 ${Math.round(result.durationMs / 1000)} 秒）`);
+      await alert(`重跑 ASR 完成（耗时 ${Math.round(result.durationMs / 1000)} 秒）`, '转写完成');
     } catch (err) {
-      setError(err instanceof Error ? err.message : '重跑 ASR 失败');
+      setError(localizeError(err instanceof Error ? err.message : '重跑 ASR 失败'));
     } finally {
       setRetranscribing(false);
     }
@@ -117,7 +120,8 @@ export function RecordingPanel({ scope, id, manager, onRetranscribed }: Recordin
         <p className="text-sm font-medium">归档录音</p>
         <span className="text-xs text-muted-foreground">
           {formatRecordingSize(meta.sizeBytes)}
-          {meta.finalized ? ' · 已完成' : ' · 未完成'}
+          {meta.finalized ? ' · 已完成' : ' · 录音进行中'}
+          {(meta.segmentCount ?? 0) > 1 ? ` · ${meta.segmentCount} 段` : ''}
         </span>
       </div>
 
@@ -127,12 +131,18 @@ export function RecordingPanel({ scope, id, manager, onRetranscribed }: Recordin
         </p>
       )}
 
+      {!meta.finalized && (
+        <p className="text-xs text-muted-foreground">
+          请先停止录音后再试听或重跑 ASR。
+        </p>
+      )}
+
       <div className="flex flex-wrap gap-2">
         <Button
           type="button"
           variant="outline"
           size="sm"
-          disabled={loadingAudio}
+          disabled={loadingAudio || !meta.finalized}
           onClick={() => void handleLoadAudio()}
         >
           {loadingAudio ? (
@@ -150,7 +160,7 @@ export function RecordingPanel({ scope, id, manager, onRetranscribed }: Recordin
           type="button"
           variant="secondary"
           size="sm"
-          disabled={retranscribing}
+          disabled={retranscribing || !meta.finalized}
           onClick={() => void handleRetranscribe()}
         >
           {retranscribing ? (
@@ -171,6 +181,8 @@ export function RecordingPanel({ scope, id, manager, onRetranscribed }: Recordin
       )}
 
       {error && <p className="text-sm text-destructive">{error}</p>}
+
+      {dialogUi}
     </div>
   );
 }

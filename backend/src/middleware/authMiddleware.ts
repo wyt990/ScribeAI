@@ -1,9 +1,18 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { prisma } from "../lib/prisma";
+import { writeSecurityAuditLog } from "../lib/audit-log";
 
 export interface AuthenticatedRequest extends Request {
   user?: { id: string; email?: string };
+}
+
+function authRequestMeta(req: Request) {
+  return {
+    path: req.path,
+    method: req.method,
+    ip: req.ip,
+  };
 }
 
 async function authenticateToken(
@@ -12,24 +21,55 @@ async function authenticateToken(
   token: string | undefined
 ) {
   if (!token) {
+    void writeSecurityAuditLog({
+      action: "auth.denied",
+      detail: { reason: "token_missing", ...authRequestMeta(req) },
+    });
     res.status(401).json({ error: "Token missing" });
     return false;
   }
 
   const secret = process.env.JWT_SECRET!;
-  const decoded = jwt.verify(token, secret) as { id: string; email?: string };
+  let decoded: { id: string; email?: string };
+  try {
+    decoded = jwt.verify(token, secret) as { id: string; email?: string };
+  } catch {
+    void writeSecurityAuditLog({
+      action: "auth.denied",
+      detail: { reason: "token_invalid", ...authRequestMeta(req) },
+    });
+    res.status(401).json({ error: "Unauthorized" });
+    return false;
+  }
 
   if (!decoded.id) {
+    void writeSecurityAuditLog({
+      action: "auth.denied",
+      detail: { reason: "invalid_token_payload", ...authRequestMeta(req) },
+    });
     res.status(401).json({ error: "Invalid token payload" });
     return false;
   }
 
   const user = await prisma.user.findUnique({ where: { id: decoded.id } });
   if (!user) {
+    void writeSecurityAuditLog({
+      action: "auth.denied",
+      detail: {
+        reason: "user_not_found",
+        attemptedUserId: decoded.id,
+        ...authRequestMeta(req),
+      },
+    });
     res.status(401).json({ error: "User not found" });
     return false;
   }
   if (!user.isActive) {
+    void writeSecurityAuditLog({
+      userId: user.id,
+      action: "auth.denied",
+      detail: { reason: "account_disabled", ...authRequestMeta(req) },
+    });
     res.status(403).json({ error: "Account disabled" });
     return false;
   }
@@ -46,6 +86,13 @@ export const verifyUser = async (
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      void writeSecurityAuditLog({
+        action: "auth.denied",
+        detail: {
+          reason: "authorization_header_missing",
+          ...authRequestMeta(req),
+        },
+      });
       return res.status(401).json({ error: "Authorization header missing or malformed" });
     }
 
@@ -73,6 +120,10 @@ export const verifyUserBearerOrQuery = async (
     const token = headerToken || queryToken;
 
     if (!token) {
+      void writeSecurityAuditLog({
+        action: "auth.denied",
+        detail: { reason: "authorization_required", ...authRequestMeta(req) },
+      });
       return res.status(401).json({ error: "Authorization required" });
     }
 

@@ -9,21 +9,56 @@ import { removeUserRecordingDir } from '../../lib/audio-archive';
 const router = Router();
 router.use(requireManager);
 
-router.get('/', async (_req, res) => {
+const USER_LIST_SELECT = {
+  id: true,
+  name: true,
+  email: true,
+  role: true,
+  isActive: true,
+  createdAt: true,
+  _count: { select: { transcripts: true, drafts: true } },
+} as const;
+
+function parseUserListQuery(query: Record<string, unknown>) {
+  const page = Math.max(1, Number(query.page) || 1);
+  const pageSize = Math.min(Math.max(1, Number(query.pageSize) || 20), 100);
+  const q = typeof query.q === 'string' ? query.q.trim() : '';
+  return { page, pageSize, q };
+}
+
+router.get('/', async (req, res) => {
+  const { page, pageSize, q } = parseUserListQuery(req.query as Record<string, unknown>);
+
   try {
+    const where = q
+      ? {
+          OR: [
+            { name: { contains: q } },
+            { email: { contains: q } },
+          ],
+        }
+      : undefined;
+
+    const total = await prisma.user.count({ where });
+    const totalPages = Math.max(1, Math.ceil(total / pageSize));
+    const effectivePage = total === 0 ? 1 : Math.min(page, totalPages);
+    const skip = (effectivePage - 1) * pageSize;
+
     const users = await prisma.user.findMany({
+      where,
+      skip,
+      take: pageSize,
       orderBy: { createdAt: 'desc' },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        isActive: true,
-        createdAt: true,
-        _count: { select: { transcripts: true, drafts: true } },
-      },
+      select: USER_LIST_SELECT,
     });
-    res.json({ users });
+
+    res.json({
+      users,
+      total,
+      page: effectivePage,
+      pageSize,
+      totalPages,
+    });
   } catch (err) {
     console.error('[Manager/Users] list', err);
     res.status(500).json({ error: 'Failed to list users' });

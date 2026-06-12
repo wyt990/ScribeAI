@@ -5,7 +5,12 @@ import { requireManager } from '../../middleware/managerMiddleware';
 import { writeAuditLog } from '../../lib/audit-log';
 import { getRecordingMeta, removeRecordingAudio } from '../../lib/audio-archive';
 import { cleanupOrphanRecordingArchivesForUser } from '../../lib/recording-orphan-cleanup';
-import { respondRecordingMeta, retranscribeRecording, streamRecording } from '../../lib/recording-http';
+import {
+  RecordingInProgressError,
+  respondRecordingMeta,
+  retranscribeRecording,
+  streamRecording,
+} from '../../lib/recording-http';
 import { getSttProviderLabel } from '../../lib/asr-transcribe';
 
 const router = Router();
@@ -176,6 +181,9 @@ router.post('/transcripts/:id/retranscribe', async (req: AuthenticatedRequest, r
 
     res.json({ success: true, fullText, durationMs });
   } catch (err) {
+    if (err instanceof RecordingInProgressError) {
+      return res.status(409).json({ error: err.message });
+    }
     console.error('[Manager/Content] transcript retranscribe', err);
     res.status(500).json({
       error: err instanceof Error ? err.message : 'Failed to retranscribe recording',
@@ -234,6 +242,9 @@ router.post('/drafts/:id/retranscribe', async (req: AuthenticatedRequest, res) =
 
     res.json({ success: true, fullText, durationMs });
   } catch (err) {
+    if (err instanceof RecordingInProgressError) {
+      return res.status(409).json({ error: err.message });
+    }
     console.error('[Manager/Content] draft retranscribe', err);
     res.status(500).json({
       error: err instanceof Error ? err.message : 'Failed to retranscribe recording',

@@ -1,6 +1,8 @@
 // /lib/app-config.ts
 // 应用配置，通过环境变量或默认值控制
 
+import { ENV_AUDIO_GAIN_CONFIG, type AudioGainConfig } from '@/lib/audio-gain-config';
+
 export const APP_CONFIG = {
   /** 是否显示音频源选择器（麦克风/标签页切换） */
   showAudioSource: process.env.NEXT_PUBLIC_SHOW_AUDIO_SOURCE !== 'false',
@@ -10,6 +12,8 @@ export const APP_CONFIG = {
    */
   showAudioEnhancementPanel:
     process.env.NEXT_PUBLIC_SHOW_AUDIO_ENHANCEMENT_PANEL !== 'false',
+  /** 音频增益滑条参数（.env.local NEXT_PUBLIC_AUDIO_GAIN_*，可被 /api/app-config 覆盖） */
+  audioGain: ENV_AUDIO_GAIN_CONFIG,
   /** 安卓壳内分片：timer=定时节，auto=静音后分句 */
   nativeChunkMode:
     (process.env.NEXT_PUBLIC_NATIVE_CHUNK_MODE === 'timer' ? 'timer' : 'auto') as 'timer' | 'auto',
@@ -39,8 +43,11 @@ export type NativeVadConfig = {
   maxSegmentMs: number;
 };
 
+export type { AudioGainConfig };
+
 export type ClientAppConfig = {
   showAudioEnhancementPanel: boolean;
+  audioGain: AudioGainConfig;
   nativeChunkMode: NativeChunkMode;
   nativeChunkSeconds: number;
   nativeVad: NativeVadConfig;
